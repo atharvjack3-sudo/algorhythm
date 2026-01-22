@@ -1,0 +1,9 @@
+6
+2
+h2o na
+4
+2 h2o na nacl 3
+1 nacl hcl 2
+2 na hcl naoh 4
+1 naoh final 5
+final 12
