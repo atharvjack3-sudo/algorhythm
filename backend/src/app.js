@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import './cron.js';
+//import './cron.js';
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
