@@ -115,7 +115,7 @@ router.get("/leaderboard", async (req, res) => {
     const [rows] = await db.execute("SELECT username, global_rank, total_solved FROM users JOIN user_stats on users.id = user_stats.user_id ORDER BY user_stats.global_rank ASC LIMIT 100"); 
     res.json(rows);
   } catch (err) {
-    res.status(500).json({error: "Failed to fetch leaderboard"});
+    res.status(500).json({error: err.message});
   }
 })
 
