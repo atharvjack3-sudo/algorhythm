@@ -20,3 +20,15 @@ export const db = mysql.createPool({
 
   dateStrings: true
 });
+
+(async () => {
+  try {
+    console.log("Checking database connection...");
+    const [rows] = await db.query("SELECT 1");
+    console.log("Database connected successfully");
+  } catch (err) {
+    console.error("Database connection failed");
+    console.error(err.code, err.message);
+  }
+})();
+
