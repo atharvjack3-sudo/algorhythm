@@ -174,6 +174,10 @@ router.get("/users/:id/performance", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 
 export default router;
 
