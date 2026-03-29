@@ -1,153 +1,9 @@
 import express from "express";
 import fs from "fs/promises";
 import path from "path";
-import { db } from "../config/db.js"; // your mysql2 promise pool
+import { db } from "../config/db.js"; // your pg pool
 
 const router = express.Router();
-
-/**
- * POST /api/problems
- * Open route (admin protection later)
- */
-// router.post("/add-problem", async (req, res) => {
-//   const {
-//     title,
-//     difficulty,
-//     statement,
-//     constraints,
-//     input_format,
-//     output_format,
-//     editorial,
-//     topics,
-//     sample_testcase,
-//   } = req.body;
-
-//   // ------------------ Validation ------------------
-//   if (
-//     !title ||
-//     !difficulty ||
-//     !statement ||
-//     !input_format ||
-//     !output_format ||
-//     !Array.isArray(topics) ||
-//     topics.length === 0 ||
-//     !sample_testcase?.input ||
-//     !sample_testcase?.output
-//   ) {
-//     return res.status(400).json({ error: "Invalid payload format" });
-//   }
-
-//   const conn = await db.getConnection();
-
-//   try {
-//     await conn.beginTransaction();
-
-//     // 1️⃣ Insert problem
-//     const [problemRes] = await conn.execute(
-//       `INSERT INTO problems (title, difficulty)
-//        VALUES (?, ?)`,
-//       [title, difficulty]
-//     );
-//     const problemId = problemRes.insertId;
-
-//     // 2️⃣ Insert problem content
-//     await conn.execute(
-//       `INSERT INTO problem_content
-//        (problem_id, statement, constraints, input_format, output_format, editorial)
-//        VALUES (?, ?, ?, ?, ?, ?)`,
-//       [
-//         problemId,
-//         statement,
-//         constraints ?? null,
-//         input_format,
-//         output_format,
-//         editorial ?? null,
-//       ]
-//     );
-
-//     // 3️⃣ Insert initial stats
-//     await conn.execute(
-//       `INSERT INTO problem_stats
-//        (problem_id, total_submissions, total_accepted, acceptance_rate)
-//        VALUES (?, 0, 0, NULL)`,
-//       [problemId]
-//     );
-
-//     // 4️⃣ Ensure topics exist
-//     for (const topic of topics) {
-//       await conn.execute(
-//         `INSERT IGNORE INTO topics (name) VALUES (?)`,
-//         [topic]
-//       );
-//     }
-
-//     // 5️⃣ Map problem ↔ topics
-//     await conn.execute(
-//       `INSERT INTO problem_topics (problem_id, topic_id)
-//        SELECT ?, id FROM topics
-//        WHERE name IN (${topics.map(() => "?").join(",")})`,
-//       [problemId, ...topics]
-//     );
-
-//     // 6️⃣ Write sample testcase to filesystem
-//     const testcaseDir = path.join(
-//       process.cwd(),
-//       "testcases",
-//       `problem_${problemId}`
-//     );
-
-//     await fs.mkdir(testcaseDir, { recursive: true });
-
-//     const inputFile = path.join(testcaseDir, "input1.txt");
-//     const outputFile = path.join(testcaseDir, "output1.txt");
-
-//     await fs.writeFile(inputFile, sample_testcase.input);
-//     await fs.writeFile(outputFile, sample_testcase.output);
-
-//     // 7️⃣ Insert testcase path
-//     await conn.execute(
-//       `INSERT INTO problem_testcases
-//        (problem_id, input_path, output_path, is_sample)
-//        VALUES (?, ?, ?, TRUE)`,
-//       [
-//         problemId,
-//         `/testcases/problem_${problemId}/input1.txt`,
-//         `/testcases/problem_${problemId}/output1.txt`,
-//       ]
-//     );
-//     const columnMap = {
-//       easy: "easy_problems",
-//       medium: "medium_problems",
-//       hard: "hard_problems",
-//     };
-
-//     const key = difficulty.toLowerCase();
-//     const column = columnMap[key];
-
-//     if (!column) {
-//       throw new Error("Invalid difficulty");
-//     }
-
-//     await conn.execute(`
-//       UPDATE platform_stats
-//       SET ${column} = ${column} + 1
-//     `);
-
-
-//     await conn.commit();
-
-//     res.status(201).json({
-//       message: "Problem created successfully",
-//       problem_id: problemId,
-//     });
-//   } catch (err) {
-//     await conn.rollback();
-//     console.error("Problem insertion failed:", err);
-//     res.status(500).json({ error: "Failed to create problem" });
-//   } finally {
-//     conn.release();
-//   }
-// });
 
 router.post("/add-problem", async (req, res) => {
   const {
@@ -204,24 +60,24 @@ router.post("/add-problem", async (req, res) => {
   samples = samples.filter(validateTC);
   hidden = hidden.filter(validateTC);
 
-  const conn = await db.getConnection();
+  const conn = await db.connect();
 
   try {
-    await conn.beginTransaction();
+    await conn.query('BEGIN');
 
-    //  Insert problem
-    const [problemRes] = await conn.execute(
+    //  Insert problem (Postgres uses RETURNING id)
+    const { rows: problemRes } = await conn.query(
       `INSERT INTO problems (title, difficulty)
-       VALUES (?, ?)`,
+       VALUES ($1, $2) RETURNING id`,
       [title, difficulty]
     );
-    const problemId = problemRes.insertId;
+    const problemId = problemRes[0].id;
 
     //  Insert problem content
-    await conn.execute(
+    await conn.query(
       `INSERT INTO problem_content
        (problem_id, statement, constraints, input_format, output_format, editorial)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         problemId,
         statement,
@@ -233,26 +89,28 @@ router.post("/add-problem", async (req, res) => {
     );
 
     //  Insert initial stats
-    await conn.execute(
+    await conn.query(
       `INSERT INTO problem_stats
        (problem_id, total_submissions, total_accepted, acceptance_rate)
-       VALUES (?, 0, 0, NULL)`,
+       VALUES ($1, 0, 0, NULL)`,
       [problemId]
     );
 
-    //  Ensure topics exist
+    //  Ensure topics exist (Postgres uses ON CONFLICT DO NOTHING)
     for (const topic of topics) {
-      await conn.execute(
-        `INSERT IGNORE INTO topics (name) VALUES (?)`,
+      await conn.query(
+        `INSERT INTO topics (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
         [topic]
       );
     }
 
     //  Map problem ↔ topics
-    await conn.execute(
+    // dynamically generate $2, $3, etc. for the IN clause
+    const topicPlaceholders = topics.map((_, i) => `$${i + 2}`).join(",");
+    await conn.query(
       `INSERT INTO problem_topics (problem_id, topic_id)
-       SELECT ?, id FROM topics
-       WHERE name IN (${topics.map(() => "?").join(",")})`,
+       SELECT $1, id FROM topics
+       WHERE name IN (${topicPlaceholders})`,
       [problemId, ...topics]
     );
 
@@ -273,15 +131,15 @@ router.post("/add-problem", async (req, res) => {
       await fs.writeFile(inputPath, tc.input);
       await fs.writeFile(outputPath, tc.output);
 
-      await conn.execute(
+      await conn.query(
         `INSERT INTO problem_testcases
          (problem_id, input_path, output_path, is_sample)
-         VALUES (?, ?, ?, ?)`,
+         VALUES ($1, $2, $3, $4)`,
         [
           problemId,
           `/testcases/problem_${problemId}/input${tcIndex}.txt`,
           `/testcases/problem_${problemId}/output${tcIndex}.txt`,
-          isSample,
+          isSample ? 1 : 0, // Converting boolean to SMALLINT mapped 1/0
         ]
       );
 
@@ -306,12 +164,12 @@ router.post("/add-problem", async (req, res) => {
     const column = columnMap[difficulty.toLowerCase()];
     if (!column) throw new Error("Invalid difficulty");
 
-    await conn.execute(`
+    await conn.query(`
       UPDATE platform_stats
       SET ${column} = ${column} + 1
     `);
 
-    await conn.commit();
+    await conn.query('COMMIT');
 
     res.status(201).json({
       message: "Problem created successfully",
@@ -320,7 +178,7 @@ router.post("/add-problem", async (req, res) => {
       hidden_added: hidden.length,
     });
   } catch (err) {
-    await conn.rollback();
+    await conn.query('ROLLBACK');
     console.error("Problem insertion failed:", err);
     res.status(500).json({ error: "Failed to create problem" });
   } finally {
@@ -338,7 +196,7 @@ router.get("/problems/:problemId", async (req, res) => {
 
   try {
     //  Fetch problem core + content + stats
-    const [[problem]] = await db.execute(
+    const { rows: problemRows } = await db.query(
       `
       SELECT
         p.id,
@@ -357,22 +215,24 @@ router.get("/problems/:problemId", async (req, res) => {
       FROM problems p
       JOIN problem_content pc ON pc.problem_id = p.id
       JOIN problem_stats ps ON ps.problem_id = p.id
-      WHERE p.id = ?
+      WHERE p.id = $1
       `,
       [problemId]
     );
+
+    const problem = problemRows[0];
 
     if (!problem) {
       return res.status(404).json({ error: "Problem not found" });
     }
 
     //  Fetch topics
-    const [topicRows] = await db.execute(
+    const { rows: topicRows } = await db.query(
       `
       SELECT t.name
       FROM problem_topics pt
       JOIN topics t ON t.id = pt.topic_id
-      WHERE pt.problem_id = ?
+      WHERE pt.problem_id = $1
       `,
       [problemId]
     );
@@ -380,11 +240,11 @@ router.get("/problems/:problemId", async (req, res) => {
     const topics = topicRows.map((t) => t.name);
 
     //  Fetch sample testcases (paths)
-    const [sampleRows] = await db.execute(
+    const { rows: sampleRows } = await db.query(
       `
       SELECT input_path, output_path
       FROM problem_testcases
-      WHERE problem_id = ? AND is_sample = TRUE
+      WHERE problem_id = $1 AND is_sample = 1
       `,
       [problemId]
     );
@@ -451,22 +311,24 @@ router.get("/problem-list", async (req, res) => {
 
     let whereClauses = [];
     let params = [];
+    let pIdx = 1; // Tracks parameter positioning ($1, $2, etc.)
 
-    //  Search filter
+    //  Search filter (Postgres uses ILIKE for case-insensitive LIKE)
     if (search) {
-      whereClauses.push("p.title LIKE ?");
+      whereClauses.push(`p.title ILIKE $${pIdx++}`);
       params.push(`%${search}%`);
     }
 
     //  Tag filter (AND)
     if (tags.length > 0) {
+      const tagPlaceholders = tags.map(() => `$${pIdx++}`).join(",");
       whereClauses.push(`
         p.id IN (
           SELECT pt.problem_id
           FROM problem_topics pt
-          WHERE pt.topic_id IN (${tags.map(() => "?").join(",")})
+          WHERE pt.topic_id IN (${tagPlaceholders})
           GROUP BY pt.problem_id
-          HAVING COUNT(DISTINCT pt.topic_id) = ?
+          HAVING COUNT(DISTINCT pt.topic_id) = $${pIdx++}
         )
       `);
       params.push(...tags, tags.length);
@@ -474,8 +336,9 @@ router.get("/problem-list", async (req, res) => {
 
     //  Difficulty filter (OR for difficulty)
     if (difficulties.length > 0) {
+      const diffPlaceholders = difficulties.map(() => `$${pIdx++}`).join(",");
       whereClauses.push(
-        `LOWER(p.difficulty) IN (${difficulties.map(() => "?").join(",")})`
+        `LOWER(p.difficulty) IN (${diffPlaceholders})`
       );
       params.push(...difficulties);
     }
@@ -485,7 +348,9 @@ router.get("/problem-list", async (req, res) => {
         ? `WHERE ${whereClauses.join(" AND ")}`
         : "";
 
-    const [rows] = await db.query(
+    // Postgres requires explicit LIMIT and OFFSET parameters
+    const mainParams = [...params, limit, offset];
+    const { rows } = await db.query(
       `
       SELECT 
         p.id,
@@ -497,19 +362,22 @@ router.get("/problem-list", async (req, res) => {
         ON ps.problem_id = p.id
       ${whereClause}
       ORDER BY p.id ASC
-      LIMIT ?, ?
+      LIMIT $${pIdx++} OFFSET $${pIdx++}
       `,
-      [...params, offset, limit]
+      mainParams
     );
 
-    const [[{ total }]] = await db.query(
+    const { rows: countRows } = await db.query(
       `
       SELECT COUNT(*) AS total
       FROM problems p
       ${whereClause}
       `,
-      params
+      params // Excludes limit and offset
     );
+    
+    // Postgres COUNT() returns a string (bigint), so we parse it
+    const total = parseInt(countRows[0].total, 10); 
 
     res.json({ problems: rows, total, page, limit });
   } catch (err) {
@@ -521,7 +389,7 @@ router.get("/problem-list", async (req, res) => {
 
 router.get("/topics", async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `
       SELECT id, name
       FROM topics
@@ -535,8 +403,5 @@ router.get("/topics", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
-
 
 export default router;

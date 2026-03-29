@@ -23,17 +23,19 @@ router.post(
         });
       }
 
-      const [result] = await db.query(
+      // Postgres uses RETURNING id instead of result.insertId
+      const { rows } = await db.query(
         `
         INSERT INTO problem_discussions
           (problem_id, user_id, title, body)
-        VALUES (?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
         `,
         [problemId, userId, title.trim(), body]
       );
 
       res.status(201).json({
-        id: result.insertId,
+        id: rows[0].id,
         problemId,
         title,
         body
@@ -55,7 +57,7 @@ router.get(
     try {
       const { problemId } = req.params;
 
-      const [rows] = await db.query(
+      const { rows } = await db.query(
         `
         SELECT
           d.id,
@@ -67,7 +69,7 @@ router.get(
           u.username
         FROM problem_discussions d
         JOIN users u ON u.id = d.user_id
-        WHERE d.problem_id = ?
+        WHERE d.problem_id = $1
           AND d.is_deleted = FALSE
         ORDER BY d.is_pinned DESC, d.created_at DESC
         `,
@@ -97,12 +99,12 @@ router.get(
         `
         UPDATE problem_discussions
         SET views = views + 1
-        WHERE id = ?
+        WHERE id = $1
         `,
         [discussionId]
       );
 
-      const [[discussion]] = await db.query(
+      const { rows } = await db.query(
         `
         SELECT
           d.id,
@@ -115,10 +117,12 @@ router.get(
           u.username
         FROM problem_discussions d
         JOIN users u ON u.id = d.user_id
-        WHERE d.id = ? AND d.is_deleted = FALSE
+        WHERE d.id = $1 AND d.is_deleted = FALSE
         `,
         [discussionId]
       );
+      
+      const discussion = rows[0];
 
       if (!discussion) {
         return res.status(404).json({ error: "Discussion not found" });
@@ -131,6 +135,5 @@ router.get(
     }
   }
 );
-
 
 export default router;

@@ -5,7 +5,6 @@ import path from "path";
 import { db } from "../config/db.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { analyzeWithAI } from "../utils/google.js";
-// import { getTodayPOTD } from "../utils/potdCache.js";
 import { updateRating } from "../utils/helper.js";
 
 const router = express.Router();
@@ -30,7 +29,6 @@ function difficultyToRating(difficulty) {
       return 1000; // safe fallback
   }
 }
-
 
 function mapVerdict(status) {
   switch (status) {
@@ -60,14 +58,11 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Invalid submission data" });
   }
 
-  const conn = await db.getConnection();
+  const conn = await db.connect();
 
   try {
-    /* =======================
-        Fetch testcases
-    ======================= */
-    const [testcases] = await conn.execute(
-      `SELECT * FROM problem_testcases WHERE problem_id = ? ORDER BY id`,
+    const { rows: testcases } = await conn.query(
+      `SELECT * FROM problem_testcases WHERE problem_id = $1 ORDER BY id`,
       [problemId]
     );
 
@@ -80,11 +75,11 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     const sampleResults = [];
     let hiddenCount = 0;
 
-    /* =======================
-        Judge execution
-    ======================= */
     let maxRuntimeMs = 0;
     let maxMemoryKb = 0;
+    
+    // ENCODE SOURCE CODE
+    const codeBase64 = Buffer.from(code).toString("base64");
 
     for (let i = 0; i < testcases.length; i++) {
       const tc = testcases[i];
@@ -98,21 +93,19 @@ router.post("/submissions", authMiddleware, async (req, res) => {
         path.join(process.cwd(), tc.output_path),
         "utf-8"
       );
+      
+      // ENCODE INPUT
+      const inputBase64 = Buffer.from(input).toString("base64");
 
       const judgeRes = await axios.post(
         JUDGE0_URL,
         {
-          source_code: code,
+          source_code: codeBase64,
           language_id: LANGUAGE_MAP[language],
-          stdin: input,
+          stdin: inputBase64,
           cpu_time_limit: 2,
           memory_limit: 128000,
         },
-        // {
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   }
-        // },
         {
           headers: {
             "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
@@ -122,15 +115,9 @@ router.post("/submissions", authMiddleware, async (req, res) => {
       );
 
       const judgeStatus = judgeRes.data.status.description;
-      // Runtime (seconds → ms)
-      const runtimeMs = Math.round(
-        parseFloat(judgeRes.data.time || "0") * 1000
-      );
-
-      // Memory (already in KB)
+      const runtimeMs = Math.round(parseFloat(judgeRes.data.time || "0") * 1000);
       const memoryKb = judgeRes.data.memory || 0;
 
-      // Track worst case
       maxRuntimeMs = Math.max(maxRuntimeMs, runtimeMs);
       maxMemoryKb = Math.max(maxMemoryKb, memoryKb);
 
@@ -138,7 +125,10 @@ router.post("/submissions", authMiddleware, async (req, res) => {
       let passed = false;
 
       if (judgeStatus === "Accepted") {
-        const actual = (judgeRes.data.stdout || "").trim();
+        // DECODE OUTPUT
+        const stdoutBase64 = judgeRes.data.stdout || "";
+        const actual = stdoutBase64 ? Buffer.from(stdoutBase64, "base64").toString("utf-8").trim() : "";
+        
         const expected = expectedOutput.trim();
         passed = actual === expected;
         verdict = passed ? "AC" : "WA";
@@ -167,229 +157,159 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     /* =======================
         DB TRANSACTION
     ======================= */
-    await conn.beginTransaction();
+    await conn.query('BEGIN');
 
-    /* ---- submissions table ---- */
-    await conn.execute(
-      `INSERT INTO submissions (user_id, problem_id, language, verdict, runtime_ms, memory_kb, code) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        userId,
-        problemId,
-        language,
-        finalVerdict,
-        maxRuntimeMs,
-        maxMemoryKb,
-        code
-      ]
+    await conn.query(
+      `INSERT INTO submissions (user_id, problem_id, language, verdict, runtime_ms, memory_kb, code) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [userId, problemId, language, finalVerdict, maxRuntimeMs, maxMemoryKb, code]
     );
 
-
-    /* ---- user_stats: total submissions (ALWAYS) ---- */
-    await conn.execute(
-      `
-      UPDATE user_stats
-      SET total_submissions = total_submissions + 1
-      WHERE user_id = ?
-      `,
+    await conn.query(
+      `UPDATE user_stats SET total_submissions = total_submissions + 1 WHERE user_id = $1`,
       [userId]
     );
 
-    /* ---- user_stats: successful submissions (ONLY AC) ---- */
     if (finalVerdict === "AC") {
-      await conn.execute(
-        `
-        UPDATE user_stats
-        SET successful_submissions = successful_submissions + 1
-        WHERE user_id = ?
-        `,
+      await conn.query(
+        `UPDATE user_stats SET successful_submissions = successful_submissions + 1 WHERE user_id = $1`,
         [userId]
       );
     }
 
-    /* ---- user_stats: acceptance rate ---- */
-    await conn.execute(
+    await conn.query(
       `
       UPDATE user_stats
-      SET acceptance_rate =
-        CASE
-          WHEN total_submissions = 0 THEN NULL
-          ELSE (successful_submissions / total_submissions) * 100
-        END
-      WHERE user_id = ?
+      SET acceptance_rate = CASE WHEN total_submissions = 0 THEN NULL ELSE (successful_submissions::DECIMAL / total_submissions) * 100 END
+      WHERE user_id = $1
       `,
       [userId]
     );
 
-    /* ---- problem_stats ---- */
-    await conn.execute(
+    await conn.query(
       `
       UPDATE problem_stats
-      SET total_submissions = total_submissions + 1,
-          total_accepted = total_accepted + ?
-      WHERE problem_id = ?
+      SET total_submissions = total_submissions + 1, total_accepted = total_accepted + $1
+      WHERE problem_id = $2
       `,
       [finalVerdict === "AC" ? 1 : 0, problemId]
     );
 
-    await conn.execute(
+    await conn.query(
       `
       UPDATE problem_stats
-      SET acceptance_rate =
-        CASE
-          WHEN total_submissions = 0 THEN NULL
-          ELSE (total_accepted / total_submissions) * 100
-        END
-      WHERE problem_id = ?
+      SET acceptance_rate = CASE WHEN total_submissions = 0 THEN NULL ELSE (total_accepted::DECIMAL / total_submissions) * 100 END
+      WHERE problem_id = $1
       `,
       [problemId]
     );
 
-    /* ---- unique solve logic ---- */
-    const [[statusRow]] = await conn.execute(
-      `
-      SELECT status FROM user_problem_status
-      WHERE user_id = ? AND problem_id = ?
-      `,
+    const { rows: statusRows } = await conn.query(
+      `SELECT status FROM user_problem_status WHERE user_id = $1 AND problem_id = $2`,
       [userId, problemId]
     );
+    const statusRow = statusRows[0];
 
     if (finalVerdict === "AC" && (!statusRow || statusRow.status !== "solved")) {
-      const [[problem]] = await conn.execute(
-        `SELECT difficulty FROM problems WHERE id = ?`,
+      const { rows: problemRows } = await conn.query(
+        `SELECT difficulty FROM problems WHERE id = $1`,
         [problemId]
       );
-
+      const problem = problemRows[0];
       const diffCol = `${problem.difficulty}_solved`;
 
-      await conn.execute(
-        `
-        UPDATE user_stats
-        SET total_solved = total_solved + 1,
-            ${diffCol} = ${diffCol} + 1
-        WHERE user_id = ?
-        `,
+      await conn.query(
+        `UPDATE user_stats SET total_solved = total_solved + 1, ${diffCol} = ${diffCol} + 1 WHERE user_id = $1`,
         [userId]
       );
 
-      await conn.execute(
+      await conn.query(
         `
-        INSERT INTO user_problem_status
-        (user_id, problem_id, status, solved_at)
-        VALUES (?, ?, 'solved', NOW())
-        ON DUPLICATE KEY UPDATE status = 'solved', solved_at = NOW()
+        INSERT INTO user_problem_status (user_id, problem_id, status, solved_at)
+        VALUES ($1, $2, 'solved', NOW())
+        ON CONFLICT (user_id, problem_id) DO UPDATE SET status = 'solved', solved_at = NOW()
         `,
         [userId, problemId]
       );
     }
-    await conn.query(`CALL recompute_global_ranks()`);
-//  Streak update: any AC maintains streak
-if (finalVerdict === "AC") {
- // console.log("adding details");
-  await conn.execute(
-    `
-    UPDATE user_stats
-    SET
-      current_streak =
-        CASE
-          WHEN last_active_date = CURDATE() THEN current_streak
-          WHEN last_active_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
-            THEN current_streak + 1
-          ELSE 1
-        END,
-      longest_streak =
-        GREATEST(
-          longest_streak,
-          CASE
-            WHEN last_active_date = CURDATE() THEN current_streak
-            WHEN last_active_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
-              THEN current_streak + 1
-            ELSE 1
-          END
-        ),
-      last_active_date = CURDATE()
-    WHERE user_id = ?
-    `,
-    [userId]
-  );
-}
 
-/* =======================
-   TOPIC ELO UPDATE
-======================= */
+    await conn.query(
+      `
+      UPDATE user_stats u
+      SET global_rank = r.new_rank
+      FROM (
+        SELECT user_id, DENSE_RANK() OVER (ORDER BY total_solved DESC, acceptance_rate DESC NULLS LAST, user_id ASC) AS new_rank
+        FROM user_stats
+      ) r 
+      WHERE r.user_id = u.user_id
+      `
+    );
 
-const [topicRows] = await conn.execute(
-  `SELECT topic_id FROM problem_topics WHERE problem_id = ?`,
-  [problemId]
-);
+    if (finalVerdict === "AC") {
+      await conn.query(
+        `
+        UPDATE user_stats
+        SET
+          current_streak = CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END,
+          longest_streak = GREATEST(longest_streak, CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END),
+          last_active_date = CURRENT_DATE
+        WHERE user_id = $1
+        `,
+        [userId]
+      );
+    }
 
-const numTopics = topicRows.length;
-const solved = finalVerdict === "AC";
+    const { rows: topicRows } = await conn.query(
+      `SELECT topic_id FROM problem_topics WHERE problem_id = $1`,
+      [problemId]
+    );
 
-for (const row of topicRows) {
-  const topicId = row.topic_id;
+    const numTopics = topicRows.length;
+    const solved = finalVerdict === "AC";
 
-  // Lazy insert
-  await conn.execute(
-    `
-    INSERT INTO user_topic_rating (user_id, topic_id)
-    VALUES (?, ?)
-    ON DUPLICATE KEY UPDATE user_id = user_id
-    `,
-    [userId, topicId]
-  );
+    for (const row of topicRows) {
+      const topicId = row.topic_id;
 
-  // Fetch current state
-  const [[utr]] = await conn.execute(
-    `
-    SELECT rating, attempts
-    FROM user_topic_rating
-    WHERE user_id = ? AND topic_id = ?
-    `,
-    [userId, topicId]
-  );
-  const [[problem]] = await conn.execute(
-        `SELECT difficulty FROM problems WHERE id = ?`,
+      await conn.query(
+        `INSERT INTO user_topic_rating (user_id, topic_id) VALUES ($1, $2) ON CONFLICT (user_id, topic_id) DO NOTHING`,
+        [userId, topicId]
+      );
+
+      const { rows: utrRows } = await conn.query(
+        `SELECT rating, attempts FROM user_topic_rating WHERE user_id = $1 AND topic_id = $2`,
+        [userId, topicId]
+      );
+      const utr = utrRows[0];
+
+      const { rows: probRows } = await conn.query(
+        `SELECT difficulty FROM problems WHERE id = $1`,
         [problemId]
       );
-  const newRating = updateRating(
-    utr.rating,
-    difficultyToRating(problem.difficulty),
-    utr.attempts,
-    solved,
-    numTopics
-  );
+      const problem = probRows[0];
 
-  // Persist update
-  await conn.execute(
-    `
-    UPDATE user_topic_rating
-    SET
-      rating = ?,
-      attempts = attempts + 1,
-      solves = solves + ?
-    WHERE user_id = ? AND topic_id = ?
-    `,
-    [newRating, solved ? 1 : 0, userId, topicId]
-  );
-}
+      const newRating = updateRating(
+        utr.rating, difficultyToRating(problem.difficulty), utr.attempts, solved, numTopics
+      );
 
+      await conn.query(
+        `
+        UPDATE user_topic_rating
+        SET rating = $1, attempts = attempts + 1, solves = solves + $2
+        WHERE user_id = $3 AND topic_id = $4
+        `,
+        [newRating, solved ? 1 : 0, userId, topicId]
+      );
+    }
 
-    await conn.commit();
+    await conn.query('COMMIT');
 
-    /* =======================
-        Response
-    ======================= */
     res.json({
       verdict: finalVerdict,
       samples: sampleResults,
-      hidden_failed:
-        hiddenFailedIndex !== null
-          ? `Hidden testcase #${hiddenFailedIndex}`
-          : null,
+      hidden_failed: hiddenFailedIndex !== null ? `Hidden testcase #${hiddenFailedIndex}` : null,
     });
   } catch (err) {
-    await conn.rollback();
-    console.error(err);
+    await conn.query('ROLLBACK');
+    console.error("Judge0 Error:", err.response?.data || err.message);
     res.status(500).json({ error: "Submission failed" });
   } finally {
     conn.release();
@@ -405,16 +325,15 @@ router.get("/submissions/:problemId", authMiddleware, async (req, res) => {
   const { problemId } = req.params;
 
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT id, verdict, language, submitted_at, code
       FROM submissions
-      WHERE user_id = ? AND problem_id = ?
+      WHERE user_id = $1 AND problem_id = $2
       ORDER BY submitted_at DESC
       `,
       [userId, problemId]
     );
-
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -430,14 +349,8 @@ router.post("/run", authMiddleware, async (req, res) => {
   }
 
   try {
-    //  Fetch sample testcases ONLY
-    const [samples] = await db.execute(
-      `
-      SELECT id, input_path, output_path
-      FROM problem_testcases
-      WHERE problem_id = ? AND is_sample = 1
-      ORDER BY id
-      `,
+    const { rows: samples } = await db.query(
+      `SELECT id, input_path, output_path FROM problem_testcases WHERE problem_id = $1 AND is_sample = 1 ORDER BY id`,
       [problemId]
     );
 
@@ -446,8 +359,10 @@ router.post("/run", authMiddleware, async (req, res) => {
     }
 
     const results = [];
+    
+    // ENCODE SOURCE CODE
+    const codeBase64 = Buffer.from(code).toString("base64");
 
-    //  Run each sample testcase
     for (let i = 0; i < samples.length; i++) {
       const tc = samples[i];
 
@@ -455,6 +370,9 @@ router.post("/run", authMiddleware, async (req, res) => {
         path.join(process.cwd(), tc.input_path),
         "utf-8"
       );
+      
+      // ENCODE INPUT
+      const inputBase64 = Buffer.from(input).toString("base64");
 
       const expected = await fs.readFile(
         path.join(process.cwd(), tc.output_path),
@@ -464,24 +382,26 @@ router.post("/run", authMiddleware, async (req, res) => {
       const judgeRes = await axios.post(
         JUDGE0_URL,
         {
-          source_code: code,
+          source_code: codeBase64,
           language_id: LANGUAGE_MAP[language],
-          stdin: input,
+          stdin: inputBase64,
         },
-          {
-            headers: {
-              "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
-              "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-            },
-          }
+        {
+          headers: {
+            "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+          },
+        }
       );
 
       const status = judgeRes.data.status.description;
-      const stdout = (judgeRes.data.stdout || "").trim();
+      
+      // DECODE OUTPUT
+      const stdoutBase64 = judgeRes.data.stdout || "";
+      const stdout = stdoutBase64 ? Buffer.from(stdoutBase64, "base64").toString("utf-8").trim() : "";
+      
       const expectedTrimmed = expected.trim();
-
-      const passed =
-        status === "Accepted" && stdout === expectedTrimmed;
+      const passed = status === "Accepted" && stdout === expectedTrimmed;
 
       results.push({
         sample: i + 1,
@@ -491,11 +411,10 @@ router.post("/run", authMiddleware, async (req, res) => {
       });
     }
 
-    //  Send results (NO DB WRITE)
     res.json({ samples: results });
 
   } catch (err) {
-    console.error(err);
+    console.error("Judge0 Error:", err.response?.data || err.message);
     res.status(500).json({ error: "Run failed" });
   }
 });
@@ -505,51 +424,28 @@ router.get("/submissions/analyze/:subId", authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    //  Validate submission
-    const [[submission]] = await db.execute(
-      `
-      SELECT id, code
-      FROM submissions
-      WHERE id = ? AND user_id = ? AND verdict = 'AC'
-      `,
+    const { rows: subRows } = await db.query(
+      `SELECT id, code FROM submissions WHERE id = $1 AND user_id = $2 AND verdict = 'AC'`,
       [subId, userId]
     );
+    const submission = subRows[0];
 
     if (!submission) {
-      return res.status(403).json({
-        error: "Submission not found or not eligible"
-      });
+      return res.status(403).json({ error: "Submission not found or not eligible" });
     }
 
-    //  Check cache
-    const [rows] = await db.execute(
-      `
-      SELECT time_complexity, space_complexity
-      FROM submission_complexity
-      WHERE submission_id = ?
-      `,
+    const { rows } = await db.query(
+      `SELECT time_complexity, space_complexity FROM submission_complexity WHERE submission_id = $1`,
       [subId]
     );
 
-    if (rows.length > 0) {
-      return res.json(rows[0]);
-    }
+    if (rows.length > 0) return res.json(rows[0]);
 
-    //  Call Gemini
     const aiResult = await analyzeWithAI(submission.code);
 
-    //  Cache result
-    await db.execute(
-      `
-      INSERT INTO submission_complexity
-        (submission_id, time_complexity, space_complexity)
-      VALUES (?, ?, ?)
-      `,
-      [
-        subId,
-        aiResult.time_complexity,
-        aiResult.space_complexity
-      ]
+    await db.query(
+      `INSERT INTO submission_complexity (submission_id, time_complexity, space_complexity) VALUES ($1, $2, $3)`,
+      [subId, aiResult.time_complexity, aiResult.space_complexity]
     );
 
     return res.json(aiResult);
@@ -559,7 +455,5 @@ router.get("/submissions/analyze/:subId", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to analyze complexity" });
   }
 });
-
-
 
 export default router;

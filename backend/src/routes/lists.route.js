@@ -8,7 +8,7 @@ router.get("/lists", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id; 
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `
       SELECT
         ul.id,
@@ -26,7 +26,7 @@ router.get("/lists", authMiddleware, async (req, res) => {
       LEFT JOIN user_problem_status ups
         ON ups.problem_id = ulp.problem_id
         AND ups.user_id = ul.user_id
-      WHERE ul.user_id = ?
+      WHERE ul.user_id = $1
       GROUP BY ul.id
       ORDER BY ul.created_at DESC
       `,
@@ -49,22 +49,25 @@ router.post("/lists", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Name and color are required" });
     }
 
-    const [result] = await db.query(
+    // Postgres uses RETURNING id to get the generated ID
+    const { rows } = await db.query(
       `
       INSERT INTO user_lists (user_id, name, description, color)
-      VALUES (?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id
       `,
       [userId, name, description || null, color]
     );
 
     res.status(201).json({
-      id: result.insertId,
+      id: rows[0].id,
       name,
       description,
       color
     });
   } catch (err) {
-    if (err.code === "ER_DUP_ENTRY") {
+    // 23505 is the Postgres code for unique violation
+    if (err.code === "23505") {
       return res.status(409).json({
         error: "You already have a list with this name"
       });
@@ -80,19 +83,19 @@ router.put("/lists/:listId", authMiddleware, async (req, res) => {
     const { listId } = req.params;
     const { name, description, color } = req.body;
 
-    const [result] = await db.query(
+    const { rowCount } = await db.query(
       `
       UPDATE user_lists
       SET
-        name = COALESCE(?, name),
-        description = COALESCE(?, description),
-        color = COALESCE(?, color)
-      WHERE id = ? AND user_id = ?
+        name = COALESCE($1, name),
+        description = COALESCE($2, description),
+        color = COALESCE($3, color)
+      WHERE id = $4 AND user_id = $5
       `,
       [name, description, color, listId, userId]
     );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return res.status(404).json({ error: "List not found" });
     }
 
@@ -108,15 +111,15 @@ router.delete("/lists/:listId", authMiddleware, async (req, res) => {
     const userId = req.user.id;
     const { listId } = req.params;
 
-    const [result] = await db.query(
+    const { rowCount } = await db.query(
       `
       DELETE FROM user_lists
-      WHERE id = ? AND user_id = ?
+      WHERE id = $1 AND user_id = $2
       `,
       [listId, userId]
     );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return res.status(404).json({ error: "List not found" });
     }
 
@@ -133,20 +136,21 @@ router.get("/lists/:listId/problems", authMiddleware, async (req, res) => {
     const { listId } = req.params;
 
     // ensure list belongs to user
-    const [[list]] = await db.query(
+    const { rows: listRows } = await db.query(
       `
       SELECT id
       FROM user_lists
-      WHERE id = ? AND user_id = ?
+      WHERE id = $1 AND user_id = $2
       `,
       [listId, userId]
     );
+    const list = listRows[0];
 
     if (!list) {
       return res.status(404).json({ error: "List not found" });
     }
 
-    const [rows] = await db.query(
+    const { rows } = await db.query(
       `
       SELECT
         p.id,
@@ -158,8 +162,8 @@ router.get("/lists/:listId/problems", authMiddleware, async (req, res) => {
         ON p.id = ulp.problem_id
       LEFT JOIN user_problem_status ups
         ON ups.problem_id = p.id
-        AND ups.user_id = ?
-      WHERE ulp.list_id = ?
+        AND ups.user_id = $1
+      WHERE ulp.list_id = $2
       ORDER BY p.id ASC
       `,
       [userId, listId]
@@ -181,28 +185,29 @@ router.delete(
       const { listId, problemId } = req.params;
 
       // ensure list belongs to user
-      const [[list]] = await db.query(
+      const { rows: listRows } = await db.query(
         `
         SELECT id
         FROM user_lists
-        WHERE id = ? AND user_id = ?
+        WHERE id = $1 AND user_id = $2
         `,
         [listId, userId]
       );
+      const list = listRows[0];
 
       if (!list) {
         return res.status(404).json({ error: "List not found" });
       }
 
-      const [result] = await db.query(
+      const { rowCount } = await db.query(
         `
         DELETE FROM user_list_problems
-        WHERE list_id = ? AND problem_id = ?
+        WHERE list_id = $1 AND problem_id = $2
         `,
         [listId, problemId]
       );
 
-      if (result.affectedRows === 0) {
+      if (rowCount === 0) {
         return res.status(404).json({
           error: "Problem not found in list",
         });
@@ -227,23 +232,26 @@ router.post("/lists/:listId/problems", authMiddleware, async (req, res) => {
     }
 
     // verify list ownership
-    const [[list]] = await db.query(
+    const { rows: listRows } = await db.query(
       `
       SELECT id
       FROM user_lists
-      WHERE id = ? AND user_id = ?
+      WHERE id = $1 AND user_id = $2
       `,
       [listId, userId]
     );
+    const list = listRows[0];
 
     if (!list) {
       return res.status(404).json({ error: "List not found" });
     }
 
+    // ON CONFLICT DO NOTHING replaces INSERT IGNORE
     await db.query(
       `
-      INSERT IGNORE INTO user_list_problems (list_id, problem_id)
-      VALUES (?, ?)
+      INSERT INTO user_list_problems (list_id, problem_id)
+      VALUES ($1, $2)
+      ON CONFLICT (list_id, problem_id) DO NOTHING
       `,
       [listId, problemId]
     );
@@ -254,6 +262,5 @@ router.post("/lists/:listId/problems", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 export default router;
