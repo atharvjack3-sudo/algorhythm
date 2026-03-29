@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import './cron.js';
+//import './cron.js';
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -20,7 +20,7 @@ const app = express();
 
 
 app.use(cors({
-  origin: [process.env.FRONTEND_URL],
+  origin: "https://algorhythm-xi.vercel.app",
   credentials: true,
 }));
 app.use(express.json());
