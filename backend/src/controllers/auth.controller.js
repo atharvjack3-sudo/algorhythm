@@ -57,7 +57,8 @@ export async function signup(req, res) {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "none",
+      secure: true,
       path: "/api/auth/refresh",
       maxAge: SEVEN_DAYS_MS,
     });
@@ -113,7 +114,8 @@ export async function login(req, res) {
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "none",
+    secure: true,
     path: "/api/auth/refresh",
     maxAge: SEVEN_DAYS_MS,
   });
