@@ -4,11 +4,11 @@ import { db } from "./config/db.js";
 import { finalizeContest } from "./jobs/contestFinalize.job.js";
 
 cron.schedule("*/5 * * * *", async () => {
-  const [contests] = await db.execute(
+  const { rows: contests } = await db.query(
     `
     SELECT id
     FROM contests
-    WHERE end_time < DATE_SUB(NOW(), INTERVAL 2 MINUTE) -- 2 min buffer
+    WHERE end_time < NOW() - INTERVAL '2 minutes' -- 2 min buffer
       AND id NOT IN (SELECT DISTINCT contest_id FROM contest_results)
     LIMIT 10 -- Process in small batches
     `

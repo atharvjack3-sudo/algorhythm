@@ -7,12 +7,12 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-
 async function assertContestRunning(conn, contestId) {
-  const [[contest]] = await conn.execute(
-    `SELECT start_time, end_time FROM contests WHERE id = ?`,
+  const { rows } = await conn.query(
+    `SELECT start_time, end_time FROM contests WHERE id = $1`,
     [contestId]
   );
+  const contest = rows[0];
 
   if (!contest) {
     const err = new Error("Contest not found");
@@ -101,30 +101,32 @@ router.post("/contests", authMiddleware, async (req, res) => {
       .json({ error: "End time must be after start time" });
   }
 
-  const conn = await db.getConnection();
+  const conn = await db.connect();
 
   try {
-    await conn.beginTransaction();
+    await conn.query('BEGIN');
 
     /* ---------- create contest ---------- */
-    const [contestResult] = await conn.execute(
+    // Postgres requires RETURNING id to get the inserted row's ID
+    const { rows: contestResult } = await conn.query(
       `
       INSERT INTO contests
         (name, start_time, end_time, duration_minutes)
-      VALUES (?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id
       `,
       [name, start, end, duration_minutes]
     );
 
-    const contestId = contestResult.insertId;
+    const contestId = contestResult[0].id;
 
     /* ---------- attach problems ---------- */
     for (let i = 0; i < problems.length; i++) {
-      await conn.execute(
+      await conn.query(
         `
         INSERT INTO contest_problems
           (contest_id, problem_id, problem_index)
-        VALUES (?, ?, ?)
+        VALUES ($1, $2, $3)
         `,
         [
           contestId,
@@ -134,14 +136,14 @@ router.post("/contests", authMiddleware, async (req, res) => {
       );
     }
 
-    await conn.commit();
+    await conn.query('COMMIT');
 
     res.json({
       success: true,
       contest_id: contestId,
     });
   } catch (err) {
-    await conn.rollback();
+    await conn.query('ROLLBACK');
     console.error(err);
     res.status(500).json({ error: "Failed to create contest" });
   } finally {
@@ -159,7 +161,7 @@ router.get("/contests", async (req, res) => {
   else condition = "start_time <= NOW() AND end_time >= NOW()";
 
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT
         c.id,
@@ -190,20 +192,21 @@ router.get("/contests/:contestId", async (req, res) => {
   const { contestId } = req.params;
 
   try {
-    const [[contest]] = await db.execute(
-      `SELECT * FROM contests WHERE id = ?`,
+    const { rows: contestRows } = await db.query(
+      `SELECT * FROM contests WHERE id = $1`,
       [contestId]
     );
+    const contest = contestRows[0];
 
     if (!contest) {
       return res.status(404).json({ error: "Contest not found" });
     }
 
-    const [problems] = await db.execute(
+    const { rows: problems } = await db.query(
       `
       SELECT problem_id, problem_index, difficulty
       FROM contest_problems
-      WHERE contest_id = ?
+      WHERE contest_id = $1
       ORDER BY problem_index
       `,
       [contestId]
@@ -224,7 +227,7 @@ router.get(
     const { contestId } = req.params;
 
     try {
-      const [rows] = await db.execute(
+      const { rows } = await db.query(
         `
         SELECT
           problem_id,
@@ -232,7 +235,7 @@ router.get(
           submitted_at,
           execution_time
         FROM contest_submissions
-        WHERE contest_id = ? AND user_id = ?
+        WHERE contest_id = $1 AND user_id = $2
         ORDER BY submitted_at DESC
         `,
         [contestId, userId]
@@ -251,16 +254,16 @@ router.get(
   "/contests/:contestId/problems",
   authMiddleware,
   async (req, res) => {
-   // console.log("hi");
     const userId = req.user.id;
     const { contestId } = req.params;
 
     try {
       //  Contest check
-      const [[contest]] = await db.execute(
-        `SELECT start_time, end_time FROM contests WHERE id = ?`,
+      const { rows: contestRows } = await db.query(
+        `SELECT start_time, end_time FROM contests WHERE id = $1`,
         [contestId]
       );
+      const contest = contestRows[0];
 
       if (!contest) {
         return res.status(404).json({ error: "Contest not found" });
@@ -276,25 +279,26 @@ router.get(
         return res.status(403).json({ error: "Contest not active" });
       }
 
-      const [[registered]] = await db.execute(
+      const { rows: registeredRows } = await db.query(
         `
         SELECT 1
         FROM contest_scores
-        WHERE contest_id = ? AND user_id = ?
+        WHERE contest_id = $1 AND user_id = $2
         `,
         [contestId, userId]
       );
+      const registered = registeredRows[0];
 
       if (!registered) {
         return res.status(403).json({ error: "Not registered" });
       }
 
       //  Fetch problems
-      const [rows] = await db.execute(
+      const { rows } = await db.query(
         `
         SELECT problem_id, problem_index, difficulty
         FROM contest_problems
-        WHERE contest_id = ?
+        WHERE contest_id = $1
         ORDER BY problem_index
         `,
         [contestId]
@@ -316,10 +320,11 @@ router.get(
 
     try {
       //  Contest existence
-      const [[contest]] = await db.execute(
-        `SELECT start_time, end_time FROM contests WHERE id = ?`,
+      const { rows: contestRows } = await db.query(
+        `SELECT start_time, end_time FROM contests WHERE id = $1`,
         [contestId]
       );
+      const contest = contestRows[0];
 
       if (!contest) {
         return res.status(404).json({ error: "Contest not found" });
@@ -336,7 +341,7 @@ router.get(
       }
 
       //  Fetch problems (public after end)
-      const [problems] = await db.execute(
+      const { rows: problems } = await db.query(
   `
   SELECT
     p.id        AS problem_id,
@@ -345,7 +350,7 @@ router.get(
     p.difficulty
   FROM contest_problems cp
   JOIN problems p ON p.id = cp.problem_id
-  WHERE cp.contest_id = ?
+  WHERE cp.contest_id = $1
   ORDER BY cp.problem_index
   `,
   [contestId]
@@ -353,7 +358,7 @@ router.get(
 
 
       //  Fetch final leaderboard ONLY from contest_results
-      const [leaderboard] = await db.execute(
+      const { rows: leaderboard } = await db.query(
         `
         SELECT
   u.id AS user_id,
@@ -362,7 +367,7 @@ router.get(
   cr.penalty
 FROM contest_results cr
 JOIN users u ON u.id = cr.user_id
-WHERE cr.contest_id = ?
+WHERE cr.contest_id = $1
 ORDER BY cr.solved_count DESC, cr.penalty ASC
 
         `,
@@ -382,8 +387,6 @@ ORDER BY cr.solved_count DESC, cr.penalty ASC
 );
 
 
-
-
 /* ============================================================
    POST /api/contests/:contestId/register
 ============================================================ */
@@ -394,33 +397,35 @@ router.post(
     const userId = req.user.id;
     const { contestId } = req.params;
 
-    const conn = await db.getConnection();
+    const conn = await db.connect();
     try {
-      await conn.beginTransaction();
+      await conn.query('BEGIN');
 
-      await conn.execute(
+      await conn.query(
         `
-        INSERT IGNORE INTO contest_scores (contest_id, user_id)
-        VALUES (?, ?)
+        INSERT INTO contest_scores (contest_id, user_id)
+        VALUES ($1, $2)
+        ON CONFLICT (contest_id, user_id) DO NOTHING
         `,
         [contestId, userId]
       );
 
-      await conn.execute(
+      await conn.query(
         `
-        INSERT IGNORE INTO contest_problem_status
+        INSERT INTO contest_problem_status
         (contest_id, user_id, problem_id)
-        SELECT ?, ?, problem_id
+        SELECT $1, $2, problem_id
         FROM contest_problems
-        WHERE contest_id = ?
+        WHERE contest_id = $3
+        ON CONFLICT (contest_id, user_id, problem_id) DO NOTHING
         `,
         [contestId, userId, contestId]
       );
 
-      await conn.commit();
+      await conn.query('COMMIT');
       res.json({ success: true });
     } catch (err) {
-      await conn.rollback();
+      await conn.query('ROLLBACK');
       console.error(err);
       res.status(500).json({ error: "Contest registration failed" });
     } finally {
@@ -435,10 +440,11 @@ router.post(
 router.get("/contests/:contestId/leaderboard", async (req, res) => {
   const { contestId } = req.params;
 
-  const [[contest]] = await db.execute(
-    `SELECT end_time FROM contests WHERE id = ?`,
+  const { rows: contestRows } = await db.query(
+    `SELECT end_time FROM contests WHERE id = $1`,
     [contestId]
   );
+  const contest = contestRows[0];
 
   const now = new Date();
 
@@ -447,11 +453,11 @@ router.get("/contests/:contestId/leaderboard", async (req, res) => {
       ? "contest_results"
       : "contest_scores";
 
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `
     SELECT user_id, solved_count, penalty
     FROM ${table}
-    WHERE contest_id = ?
+    WHERE contest_id = $1
     ORDER BY solved_count DESC, penalty ASC
     `,
     [contestId]
@@ -476,16 +482,17 @@ router.post(
       return res.status(400).json({ error: "Invalid submission data" });
     }
 
-    const conn = await db.getConnection();
+    const conn = await db.connect();
 
     try {
       /* =======================
-          Contest validation
+         Contest validation
       ======================= */
-      const [[contest]] = await conn.execute(
-        `SELECT start_time, end_time FROM contests WHERE id = ?`,
+      const { rows: contestRows } = await conn.query(
+        `SELECT start_time, end_time FROM contests WHERE id = $1`,
         [contestId]
       );
+      const contest = contestRows[0];
 
       if (!contest) {
         return res.status(404).json({ error: "Contest not found" });
@@ -499,34 +506,36 @@ router.post(
       }
 
       /* =======================
-          Registration check
+         Registration check
       ======================= */
-      const [[registered]] = await conn.execute(
-        `SELECT 1 FROM contest_scores WHERE contest_id = ? AND user_id = ?`,
+      const { rows: registeredRows } = await conn.query(
+        `SELECT 1 FROM contest_scores WHERE contest_id = $1 AND user_id = $2`,
         [contestId, userId]
       );
+      const registered = registeredRows[0];
 
       if (!registered) {
         return res.status(403).json({ error: "Not registered for contest" });
       }
 
       /* =======================
-          Problem check
+         Problem check
       ======================= */
-      const [[belongs]] = await conn.execute(
-        `SELECT 1 FROM contest_problems WHERE contest_id = ? AND problem_id = ?`,
+      const { rows: belongsRows } = await conn.query(
+        `SELECT 1 FROM contest_problems WHERE contest_id = $1 AND problem_id = $2`,
         [contestId, problemId]
       );
+      const belongs = belongsRows[0];
 
       if (!belongs) {
         return res.status(400).json({ error: "Problem not part of contest" });
       }
 
       /* =======================
-          Fetch testcases
+         Fetch testcases
       ======================= */
-      const [testcases] = await conn.execute(
-        `SELECT * FROM problem_testcases WHERE problem_id = ? ORDER BY id`,
+      const { rows: testcases } = await conn.query(
+        `SELECT * FROM problem_testcases WHERE problem_id = $1 ORDER BY id`,
         [problemId]
       );
 
@@ -535,7 +544,7 @@ router.post(
       }
 
       /* =======================
-          Judge execution
+         Judge execution
       ======================= */
       let finalVerdict = "AC";
       let allPassed = true;
@@ -614,28 +623,29 @@ router.post(
       }
 
       /* =======================
-          Contest DB updates
+         Contest DB updates
       ======================= */
-      await conn.beginTransaction();
+      await conn.query('BEGIN');
 
-      await conn.execute(
+      await conn.query(
         `
         INSERT INTO contest_submissions
           (contest_id, user_id, problem_id, verdict, submitted_at, execution_time)
-        VALUES (?, ?, ?, ?, NOW(), ?)
+        VALUES ($1, $2, $3, $4, NOW(), $5)
         `,
         [contestId, userId, problemId, finalVerdict, maxRuntimeMs]
       );
 
-      const [[state]] = await conn.execute(
+      const { rows: stateRows } = await conn.query(
         `
         SELECT solved, wrong_attempts
         FROM contest_problem_status
-        WHERE contest_id = ? AND user_id = ? AND problem_id = ?
+        WHERE contest_id = $1 AND user_id = $2 AND problem_id = $3
         FOR UPDATE
         `,
         [contestId, userId, problemId]
       );
+      const state = stateRows[0];
 
       if (!state) {
         throw new Error("Contest problem state missing");
@@ -649,41 +659,41 @@ router.post(
             Math.floor((Date.now() - startMs) / 60000)
           );
 
-          await conn.execute(
+          await conn.query(
             `
             UPDATE contest_problem_status
             SET solved = 1,
-                first_ac_time_minutes = ?
-            WHERE contest_id = ? AND user_id = ? AND problem_id = ?
+                first_ac_time_minutes = $1
+            WHERE contest_id = $2 AND user_id = $3 AND problem_id = $4
             `,
             [minutes, contestId, userId, problemId]
           );
 
-          await conn.execute(
+          await conn.query(
             `
             UPDATE contest_scores
             SET solved_count = solved_count + 1,
-                penalty = penalty + ? + 5 * ?
-            WHERE contest_id = ? AND user_id = ?
+                penalty = penalty + $1 + 5 * $2
+            WHERE contest_id = $3 AND user_id = $4
             `,
             [minutes, state.wrong_attempts, contestId, userId]
           );
         } else {
-          await conn.execute(
+          await conn.query(
             `
             UPDATE contest_problem_status
             SET wrong_attempts = wrong_attempts + 1
-            WHERE contest_id = ? AND user_id = ? AND problem_id = ?
+            WHERE contest_id = $1 AND user_id = $2 AND problem_id = $3
             `,
             [contestId, userId, problemId]
           );
         }
       }
 
-      await conn.commit();
+      await conn.query('COMMIT');
 
       /* =======================
-          Response
+         Response
       ======================= */
       res.json({
         verdict: finalVerdict,
@@ -694,7 +704,7 @@ router.post(
             : null,
       });
     } catch (err) {
-      await conn.rollback();
+      await conn.query('ROLLBACK');
       console.error(err);
       res.status(500).json({ error: "Contest submission failed" });
     } finally {
@@ -712,14 +722,15 @@ router.get(
     const { contestId } = req.params;
 
     try {
-      const [[row]] = await db.execute(
+      const { rows } = await db.query(
         `
         SELECT 1
         FROM contest_scores
-        WHERE contest_id = ? AND user_id = ?
+        WHERE contest_id = $1 AND user_id = $2
         `,
         [contestId, userId]
       );
+      const row = rows[0];
 
       res.json({ registered: !!row });
     } catch (err) {
@@ -737,10 +748,11 @@ router.get(
 
     try {
       //  Contest existence + ended check
-      const [[contest]] = await db.execute(
-        `SELECT end_time FROM contests WHERE id = ?`,
+      const { rows: contestRows } = await db.query(
+        `SELECT end_time FROM contests WHERE id = $1`,
         [contestId]
       );
+      const contest = contestRows[0];
 
       if (!contest) {
         return res.status(404).json({ error: "Contest not found" });
@@ -751,21 +763,22 @@ router.get(
       }
 
       //  User must be in final results
-      const [[ranked]] = await db.execute(
+      const { rows: rankedRows } = await db.query(
         `
         SELECT 1
         FROM contest_results
-        WHERE contest_id = ? AND user_id = ?
+        WHERE contest_id = $1 AND user_id = $2
         `,
         [contestId, userId]
       );
+      const ranked = rankedRows[0];
 
       if (!ranked) {
         return res.status(404).json({ error: "User not ranked" });
       }
 
       //  Problem-wise breakdown
-      const [rows] = await db.execute(
+      const { rows } = await db.query(
         `
         SELECT
           cp.problem_index,
@@ -780,8 +793,8 @@ router.get(
          AND cp.contest_id = cps.contest_id
         JOIN problems p
           ON p.id = cps.problem_id
-        WHERE cps.contest_id = ?
-          AND cps.user_id = ?
+        WHERE cps.contest_id = $1
+          AND cps.user_id = $2
         ORDER BY cp.problem_index
         `,
         [contestId, userId]
@@ -800,7 +813,7 @@ router.get("/users/:userId/contest-stats", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT
         user_id,
@@ -818,7 +831,7 @@ router.get("/users/:userId/contest-stats", async (req, res) => {
         created_at,
         updated_at
       FROM user_contest_stats
-      WHERE user_id = ?
+      WHERE user_id = $1
       `,
       [userId]
     );
@@ -846,7 +859,7 @@ router.get("/users/:userId/contest-rating-history", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT
         crh.contest_id,
@@ -857,7 +870,7 @@ router.get("/users/:userId/contest-rating-history", async (req, res) => {
         crh.solved_count,
         crh.created_at
       FROM contest_rating_history crh
-      WHERE crh.user_id = ?
+      WHERE crh.user_id = $1
       ORDER BY crh.created_at ASC
       `,
       [userId]
@@ -874,7 +887,5 @@ router.get("/users/:userId/contest-rating-history", async (req, res) => {
     });
   }
 });
-
-
 
 export default router;

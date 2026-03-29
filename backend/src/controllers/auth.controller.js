@@ -21,17 +21,17 @@ export async function signup(req, res) {
   const hash = await bcrypt.hash(password, 10);
 
   try {
-    // users
-    const [result] = await db.execute(
+    // users (Postgres requires RETURNING to get the insert ID)
+    const { rows: userRows } = await db.query(
       `INSERT INTO users (username, email, password_hash)
-       VALUES (?, ?, ?)`,
+       VALUES ($1, $2, $3) RETURNING id`,
       [username, email, hash]
     );
 
-    const userId = result.insertId;
+    const userId = userRows[0].id;
 
     // user_stats
-    await db.execute(
+    await db.query(
       `INSERT INTO user_stats (
         user_id,
         total_submissions,
@@ -41,17 +41,17 @@ export async function signup(req, res) {
         hard_solved,
         acceptance_rate,
         global_rank
-      ) VALUES (?, 0, 0, 0, 0, 0, NULL, NULL)`,
+      ) VALUES ($1, 0, 0, 0, 0, 0, NULL, NULL)`,
       [userId]
     );
 
     const accessToken = signAccessToken({ id: userId });
     const refreshToken = signRefreshToken({ id: userId });
 
-    // optional persistence
-    await db.execute(
+    // optional persistence (Postgres interval syntax)
+    await db.query(
       `INSERT INTO refresh_tokens (user_id, token, expires_at)
-       VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))`,
+       VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
       [userId, refreshToken]
     );
 
@@ -65,7 +65,8 @@ export async function signup(req, res) {
     return res.status(201).json({ accessToken });
 
   } catch (err) {
-    if (err.code === "ER_DUP_ENTRY") {
+    // 23505 is the Postgres error code for unique_violation
+    if (err.code === "23505") {
       return res.status(409).json({ error: "User already exists" });
     }
     throw err;
@@ -82,10 +83,10 @@ export async function login(req, res) {
     return res.status(400).json({ error: "Missing fields" });
   }
 
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT id, password_hash
      FROM users
-     WHERE email = ?
+     WHERE email = $1
      LIMIT 1`,
     [email]
   );
@@ -104,9 +105,9 @@ export async function login(req, res) {
   const accessToken = signAccessToken({ id: user.id });
   const refreshToken = signRefreshToken({ id: user.id });
 
-  await db.execute(
+  await db.query(
     `INSERT INTO refresh_tokens (user_id, token, expires_at)
-     VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))`,
+     VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
     [user.id, refreshToken]
   );
 
@@ -145,8 +146,8 @@ export async function logout(req, res) {
   const token = req.cookies.refreshToken;
 
   if (token) {
-    await db.execute(
-      `DELETE FROM refresh_tokens WHERE token = ?`,
+    await db.query(
+      `DELETE FROM refresh_tokens WHERE token = $1`,
       [token]
     );
   }

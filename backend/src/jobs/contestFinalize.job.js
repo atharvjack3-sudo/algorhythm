@@ -16,47 +16,50 @@ function calculateRating({ rating, avgRating, rank, participants, K = 800 }) {
 }
 
 export async function finalizeContest(contestId) {
-  const conn = await db.getConnection();
+  // pg uses .connect() instead of .getConnection()
+  const conn = await db.connect();
 
   try {
-    await conn.beginTransaction();
+    // pg syntax for transactions
+    await conn.query('BEGIN');
 
-    /*  Prevent double finalization */
-    const [existing] = await conn.execute(
-      `SELECT 1 FROM contest_results WHERE contest_id = ? LIMIT 1`,
+    /* Prevent double finalization */
+    const { rows: existing } = await conn.query(
+      `SELECT 1 FROM contest_results WHERE contest_id = $1 LIMIT 1`,
       [contestId]
     );
 
     if (existing.length > 0) {
-      await conn.rollback();
+      await conn.query('ROLLBACK');
       return;
     }
 
-    /*  Aggregate submissions → contest_scores */
-    await conn.execute(
+    /* Aggregate submissions → contest_scores */
+    // Postgres uses UPDATE ... FROM instead of UPDATE ... JOIN
+    await conn.query(
       `
       UPDATE contest_scores cs
-      JOIN (
+      SET
+        total_submissions = agg.total_submissions,
+        successful_submissions = agg.successful_submissions
+      FROM (
         SELECT
           contest_id,
           user_id,
           COUNT(*) AS total_submissions,
-          SUM(verdict = 'AC') AS successful_submissions
+          SUM(CASE WHEN verdict = 'AC' THEN 1 ELSE 0 END) AS successful_submissions
         FROM contest_submissions
-        WHERE contest_id = ?
+        WHERE contest_id = $1
         GROUP BY contest_id, user_id
       ) agg
-        ON agg.contest_id = cs.contest_id
-       AND agg.user_id = cs.user_id
-      SET
-        cs.total_submissions = agg.total_submissions,
-        cs.successful_submissions = agg.successful_submissions
+      WHERE agg.contest_id = cs.contest_id
+        AND agg.user_id = cs.user_id
       `,
       [contestId]
     );
 
-    /*  Freeze final leaderboard */
-    await conn.execute(
+    /* Freeze final leaderboard */
+    await conn.query(
       `
       INSERT INTO contest_results
         (contest_id, user_id, final_rank, solved_count, penalty)
@@ -67,13 +70,13 @@ export async function finalizeContest(contestId) {
         solved_count,
         penalty
       FROM contest_scores
-      WHERE contest_id = ?
+      WHERE contest_id = $1
       `,
       [contestId]
     );
 
-    /*  Fetch finalized contest stats */
-    const [scores] = await conn.execute(
+    /* Fetch finalized contest stats */
+    const { rows: scores } = await conn.query(
       `
       SELECT
         cs.user_id,
@@ -85,14 +88,14 @@ export async function finalizeContest(contestId) {
       JOIN contest_results cr
         ON cr.contest_id = cs.contest_id
        AND cr.user_id = cs.user_id
-      WHERE cs.contest_id = ?
+      WHERE cs.contest_id = $1
       `,
       [contestId]
     );
 
     const participants = scores.length;
 
-    /*  Aggregate lifetime contest stats */
+    /* Aggregate lifetime contest stats */
     for (const row of scores) {
       const {
         user_id,
@@ -101,7 +104,9 @@ export async function finalizeContest(contestId) {
         successful_submissions
       } = row;
 
-      await conn.execute(
+      // Postgres uses ON CONFLICT DO UPDATE SET instead of ON DUPLICATE KEY UPDATE
+      // and EXCLUDED instead of VALUES()
+      await conn.query(
         `
         INSERT INTO user_contest_stats (
           user_id,
@@ -112,21 +117,20 @@ export async function finalizeContest(contestId) {
           contest_acceptance_rate,
           last_contest_date
         )
-        VALUES (?, 1, ?, ?, ?, ?, CURRENT_DATE)
-        ON DUPLICATE KEY UPDATE
-          contests_participated = contests_participated + 1,
-          contests_solved = contests_solved + VALUES(contests_solved),
+        VALUES ($1, 1, $2, $3, $4, $5, CURRENT_DATE)
+        ON CONFLICT (user_id) DO UPDATE SET
+          contests_participated = user_contest_stats.contests_participated + 1,
+          contests_solved = user_contest_stats.contests_solved + EXCLUDED.contests_solved,
           contest_total_submissions =
-            contest_total_submissions + VALUES(contest_total_submissions),
+            user_contest_stats.contest_total_submissions + EXCLUDED.contest_total_submissions,
           contest_successful_submissions =
-            contest_successful_submissions + VALUES(contest_successful_submissions),
+            user_contest_stats.contest_successful_submissions + EXCLUDED.contest_successful_submissions,
           contest_acceptance_rate =
-            IF(
-              contest_total_submissions + VALUES(contest_total_submissions) = 0,
-              0,
-              (contest_successful_submissions + VALUES(contest_successful_submissions)) /
-              (contest_total_submissions + VALUES(contest_total_submissions)) * 100
-            ),
+            CASE 
+              WHEN user_contest_stats.contest_total_submissions + EXCLUDED.contest_total_submissions = 0 THEN 0
+              ELSE (user_contest_stats.contest_successful_submissions + EXCLUDED.contest_successful_submissions)::DECIMAL /
+                   (user_contest_stats.contest_total_submissions + EXCLUDED.contest_total_submissions) * 100
+            END,
           last_contest_date = CURRENT_DATE
         `,
         [
@@ -141,13 +145,13 @@ export async function finalizeContest(contestId) {
       );
     }
 
-    /*  Rating calculation */
-    const [ratings] = await conn.execute(
+    /* Rating calculation */
+    const { rows: ratings } = await conn.query(
       `
       SELECT user_id, contest_rating
       FROM user_contest_stats
       WHERE user_id IN (
-        SELECT user_id FROM contest_scores WHERE contest_id = ?
+        SELECT user_id FROM contest_scores WHERE contest_id = $1
       )
       `,
       [contestId]
@@ -173,16 +177,18 @@ export async function finalizeContest(contestId) {
         participants
       });
 
-      await conn.execute(
-        `UPDATE user_contest_stats SET contest_rating = ? WHERE user_id = ?`,
+      await conn.query(
+        `UPDATE user_contest_stats SET contest_rating = $1 WHERE user_id = $2`,
         [ratingAfter, user_id]
       );
 
-      await conn.execute(
+      // Postgres uses ON CONFLICT DO NOTHING instead of INSERT IGNORE
+      await conn.query(
         `
-        INSERT IGNORE INTO contest_rating_history
+        INSERT INTO contest_rating_history
           (user_id, contest_id, rating_before, rating_after, rating_change, final_rank, solved_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (user_id, contest_id) DO NOTHING
         `,
         [
           user_id,
@@ -196,11 +202,13 @@ export async function finalizeContest(contestId) {
       );
     }
 
-    /*  Recompute global contest ranks (rating → AC rate → user_id) */
-    await conn.execute(
+    /* Recompute global contest ranks (rating → AC rate → user_id) */
+    // Postgres UPDATE ... FROM syntax for join updates
+    await conn.query(
       `
       UPDATE user_contest_stats u
-      JOIN (
+      SET contest_global_rank = r.new_rank
+      FROM (
         SELECT
           user_id,
           DENSE_RANK() OVER (
@@ -210,15 +218,15 @@ export async function finalizeContest(contestId) {
               user_id ASC
           ) AS new_rank
         FROM user_contest_stats
-      ) r ON r.user_id = u.user_id
-      SET u.contest_global_rank = r.new_rank
+      ) r 
+      WHERE r.user_id = u.user_id
       `
     );
 
-    await conn.commit();
+    await conn.query('COMMIT');
     console.log(`Contest ${contestId} finalized`);
   } catch (err) {
-    await conn.rollback();
+    await conn.query('ROLLBACK');
     console.error("Finalize contest failed:", err);
   } finally {
     conn.release();

@@ -16,17 +16,18 @@ router.post("/blogs", authMiddleware, async (req, res) => {
     .replace(/(^-|-$)/g, "");
 
   try {
-    await db.execute(
+    await db.query(
       `
       INSERT INTO blogs (author_id, title, slug, content)
-      VALUES (?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4)
       `,
       [req.user.id, title, slug, content]
     );
 
     res.status(201).json({ message: "Blog created successfully" });
   } catch (err) {
-    if (err.code === "ER_DUP_ENTRY") {
+    // 23505 is Postgres for unique violation (duplicate entry)
+    if (err.code === "23505") {
       return res.status(409).json({ error: "Blog with this title already exists" });
     }
     res.status(500).json({ error: "Failed to create blog" });
@@ -39,24 +40,24 @@ router.get("/blogs", async (req, res) => {
 
   try {
     const query = `
-  SELECT
-    b.id,
-    b.title,
-    b.slug,
-    b.likes_count,
-    b.views_count,
-    b.comments_count,
-    b.created_at,
-    u.username AS author
-  FROM blogs b
-  JOIN users u ON u.id = b.author_id
-  WHERE b.is_published = TRUE
-  ORDER BY b.created_at DESC
-  LIMIT ${limit} OFFSET ${offset}
-`;
+      SELECT
+        b.id,
+        b.title,
+        b.slug,
+        b.likes_count,
+        b.views_count,
+        b.comments_count,
+        b.created_at,
+        u.username AS author
+      FROM blogs b
+      JOIN users u ON u.id = b.author_id
+      WHERE b.is_published = TRUE
+      ORDER BY b.created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
 
-const [rows] = await db.execute(query);
-res.json(rows);
+    const { rows } = await db.query(query);
+    res.json(rows);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Failed to fetch blogs" });
@@ -65,7 +66,7 @@ res.json(rows);
 
 router.get("/blogs/mine", authMiddleware, async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT
         id,
@@ -76,7 +77,7 @@ router.get("/blogs/mine", authMiddleware, async (req, res) => {
         views_count,
         created_at
       FROM blogs
-      WHERE author_id = ?
+      WHERE author_id = $1
       ORDER BY created_at DESC
       `,
       [req.user.id]
@@ -89,11 +90,9 @@ router.get("/blogs/mine", authMiddleware, async (req, res) => {
   }
 });
 
-
-
 router.get("/blogs/:slug", async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT
         b.id,
@@ -107,7 +106,7 @@ router.get("/blogs/:slug", async (req, res) => {
         u.id AS author_id
       FROM blogs b
       JOIN users u ON u.id = b.author_id
-      WHERE b.slug = ? AND b.is_published = TRUE
+      WHERE b.slug = $1 AND b.is_published = TRUE
       `,
       [req.params.slug]
     );
@@ -126,8 +125,8 @@ router.put("/blogs/:id", authMiddleware, async (req, res) => {
   const { title, content } = req.body;
 
   try {
-    const [rows] = await db.execute(
-      `SELECT author_id FROM blogs WHERE id = ?`,
+    const { rows } = await db.query(
+      `SELECT author_id FROM blogs WHERE id = $1`,
       [req.params.id]
     );
 
@@ -139,11 +138,11 @@ router.put("/blogs/:id", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    await db.execute(
+    await db.query(
       `
       UPDATE blogs
-      SET title = ?, content = ?
-      WHERE id = ?
+      SET title = $1, content = $2
+      WHERE id = $3
       `,
       [title, content, req.params.id]
     );
@@ -156,8 +155,8 @@ router.put("/blogs/:id", authMiddleware, async (req, res) => {
 
 router.delete("/blogs/:id", authMiddleware, async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      `SELECT author_id FROM blogs WHERE id = ?`,
+    const { rows } = await db.query(
+      `SELECT author_id FROM blogs WHERE id = $1`,
       [req.params.id]
     );
 
@@ -169,7 +168,7 @@ router.delete("/blogs/:id", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    await db.execute(`DELETE FROM blogs WHERE id = ?`, [req.params.id]);
+    await db.query(`DELETE FROM blogs WHERE id = $1`, [req.params.id]);
 
     res.json({ message: "Blog deleted successfully" });
   } catch (err) {
@@ -185,31 +184,31 @@ router.post("/blogs/:id/comments", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Comment content required" });
   }
 
-  const conn = await db.getConnection();
+  const conn = await db.connect();
   try {
-    await conn.beginTransaction();
+    await conn.query('BEGIN');
 
-    await conn.execute(
+    await conn.query(
       `
       INSERT INTO blog_comments (blog_id, user_id, content)
-      VALUES (?, ?, ?)
+      VALUES ($1, $2, $3)
       `,
       [blogId, req.user.id, content]
     );
 
-    await conn.execute(
+    await conn.query(
       `
       UPDATE blogs
       SET comments_count = comments_count + 1
-      WHERE id = ?
+      WHERE id = $1
       `,
       [blogId]
     );
 
-    await conn.commit();
+    await conn.query('COMMIT');
     res.status(201).json({ message: "Comment added" });
   } catch (err) {
-    await conn.rollback();
+    await conn.query('ROLLBACK');
     res.status(500).json({ error: "Failed to add comment" });
   } finally {
     conn.release();
@@ -218,7 +217,7 @@ router.post("/blogs/:id/comments", authMiddleware, async (req, res) => {
 
 router.get("/blogs/:id/comments", async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT
         c.id,
@@ -229,7 +228,7 @@ router.get("/blogs/:id/comments", async (req, res) => {
         u.id AS user_id
       FROM blog_comments c
       JOIN users u ON u.id = c.user_id
-      WHERE c.blog_id = ?
+      WHERE c.blog_id = $1
       ORDER BY c.created_at ASC
       `,
       [req.params.id]
@@ -244,60 +243,60 @@ router.get("/blogs/:id/comments", async (req, res) => {
 router.post("/blogs/:id/like", authMiddleware, async (req, res) => {
   const blogId = req.params.id;
 
-  const conn = await db.getConnection();
+  const conn = await db.connect();
   try {
-    await conn.beginTransaction();
+    await conn.query('BEGIN');
 
-    const [rows] = await conn.execute(
+    const { rows } = await conn.query(
       `
       SELECT 1 FROM blog_likes
-      WHERE blog_id = ? AND user_id = ?
+      WHERE blog_id = $1 AND user_id = $2
       `,
       [blogId, req.user.id]
     );
 
     if (rows.length) {
       // Unlike
-      await conn.execute(
-        `DELETE FROM blog_likes WHERE blog_id = ? AND user_id = ?`,
+      await conn.query(
+        `DELETE FROM blog_likes WHERE blog_id = $1 AND user_id = $2`,
         [blogId, req.user.id]
       );
 
-      await conn.execute(
+      await conn.query(
         `
         UPDATE blogs
         SET likes_count = likes_count - 1
-        WHERE id = ?
+        WHERE id = $1
         `,
         [blogId]
       );
 
-      await conn.commit();
+      await conn.query('COMMIT');
       return res.json({ liked: false });
     }
 
     // Like
-    await conn.execute(
+    await conn.query(
       `
       INSERT INTO blog_likes (blog_id, user_id)
-      VALUES (?, ?)
+      VALUES ($1, $2)
       `,
       [blogId, req.user.id]
     );
 
-    await conn.execute(
+    await conn.query(
       `
       UPDATE blogs
       SET likes_count = likes_count + 1
-      WHERE id = ?
+      WHERE id = $1
       `,
       [blogId]
     );
 
-    await conn.commit();
+    await conn.query('COMMIT');
     res.json({ liked: true });
   } catch (err) {
-    await conn.rollback();
+    await conn.query('ROLLBACK');
     res.status(500).json({ error: "Failed to toggle like" });
   } finally {
     conn.release();
@@ -307,61 +306,61 @@ router.post("/blogs/:id/like", authMiddleware, async (req, res) => {
 router.post("/comments/:id/like", authMiddleware, async (req, res) => {
   const commentId = req.params.id;
 
-  const conn = await db.getConnection();
+  const conn = await db.connect();
   try {
-    await conn.beginTransaction();
+    await conn.query('BEGIN');
 
-    const [rows] = await conn.execute(
+    const { rows } = await conn.query(
       `
       SELECT 1 FROM comment_likes
-      WHERE comment_id = ? AND user_id = ?
+      WHERE comment_id = $1 AND user_id = $2
       `,
       [commentId, req.user.id]
     );
 
     if (rows.length) {
-      await conn.execute(
+      await conn.query(
         `
         DELETE FROM comment_likes
-        WHERE comment_id = ? AND user_id = ?
+        WHERE comment_id = $1 AND user_id = $2
         `,
         [commentId, req.user.id]
       );
 
-      await conn.execute(
+      await conn.query(
         `
         UPDATE blog_comments
         SET likes_count = likes_count - 1
-        WHERE id = ?
+        WHERE id = $1
         `,
         [commentId]
       );
 
-      await conn.commit();
+      await conn.query('COMMIT');
       return res.json({ liked: false });
     }
 
-    await conn.execute(
+    await conn.query(
       `
       INSERT INTO comment_likes (comment_id, user_id)
-      VALUES (?, ?)
+      VALUES ($1, $2)
       `,
       [commentId, req.user.id]
     );
 
-    await conn.execute(
+    await conn.query(
       `
       UPDATE blog_comments
       SET likes_count = likes_count + 1
-      WHERE id = ?
+      WHERE id = $1
       `,
       [commentId]
     );
 
-    await conn.commit();
+    await conn.query('COMMIT');
     res.json({ liked: true });
   } catch (err) {
-    await conn.rollback();
+    await conn.query('ROLLBACK');
     res.status(500).json({ error: "Failed to toggle comment like" });
   } finally {
     conn.release();
@@ -381,53 +380,53 @@ router.post("/blogs/:id/view", async (req, res) => {
     if (userId) {
       query = `
         SELECT 1 FROM blog_views
-        WHERE blog_id = ?
-          AND user_id = ?
-          AND viewed_at >= NOW() - INTERVAL 1 DAY
+        WHERE blog_id = $1
+          AND user_id = $2
+          AND viewed_at >= NOW() - INTERVAL '1 day'
         LIMIT 1
       `;
       params = [blogId, userId];
     } else {
       query = `
         SELECT 1 FROM blog_views
-        WHERE blog_id = ?
-          AND ip_address = ?
-          AND viewed_at >= NOW() - INTERVAL 1 DAY
+        WHERE blog_id = $1
+          AND ip_address = $2
+          AND viewed_at >= NOW() - INTERVAL '1 day'
         LIMIT 1
       `;
       params = [blogId, ip];
     }
 
-    const [rows] = await db.execute(query, params);
+    const { rows } = await db.query(query, params);
 
     if (rows.length) {
       return res.json({ viewed: false });
     }
 
-    const conn = await db.getConnection();
+    const conn = await db.connect();
     try {
-      await conn.beginTransaction();
+      await conn.query('BEGIN');
 
-      await conn.execute(
+      await conn.query(
         `
         INSERT INTO blog_views (blog_id, user_id, ip_address)
-        VALUES (?, ?, ?)
+        VALUES ($1, $2, $3)
         `,
         [blogId, userId, ip]
       );
 
-      await conn.execute(
+      await conn.query(
         `
         UPDATE blogs
         SET views_count = views_count + 1
-        WHERE id = ?
+        WHERE id = $1
         `,
         [blogId]
       );
 
-      await conn.commit();
+      await conn.query('COMMIT');
     } catch (err) {
-      await conn.rollback();
+      await conn.query('ROLLBACK');
       throw err;
     } finally {
       conn.release();
@@ -438,6 +437,5 @@ router.post("/blogs/:id/view", async (req, res) => {
     res.status(500).json({ error: "Failed to register view" });
   }
 });
-
 
 export default router;

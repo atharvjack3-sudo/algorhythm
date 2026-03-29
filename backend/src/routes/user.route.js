@@ -6,22 +6,24 @@ import { analyzeUserPerformance } from "../utils/google.js";
 const router = express.Router();
 
 router.get("/me", authMiddleware, async (req, res) => {
-  const [rows] = await db.execute(
-    `SELECT * FROM users WHERE id = ?`,
+  const { rows } = await db.query(
+    `SELECT * FROM users WHERE id = $1`,
     [req.user.id]
   );
   res.json(rows[0]);
 });
+
 router.get("/userdetails", authMiddleware, async (req, res) => {
-  const [rows] = await db.execute(
-    `SELECT * FROM user_stats WHERE user_id = ?`,
+  const { rows } = await db.query(
+    `SELECT * FROM user_stats WHERE user_id = $1`,
     [req.user.id]
   );
   res.json(rows[0]);
 });
+
 router.get("/userbadges", authMiddleware, async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT 
         ub.badge_id,
@@ -30,7 +32,7 @@ router.get("/userbadges", authMiddleware, async (req, res) => {
         ub.earned_at
       FROM user_badges ub
       JOIN badges b ON ub.badge_id = b.id
-      WHERE ub.user_id = ?
+      WHERE ub.user_id = $1
       ORDER BY ub.earned_at DESC
       `,
       [req.user.id]
@@ -49,19 +51,19 @@ router.get("/recent-accepted", authMiddleware,
     const userId = req.user.id;
 
     try {
-      const [rows] = await db.execute(
+      const { rows } = await db.query(
         `SELECT s.id, s.problem_id, p.title AS problem_title,
-  s.language,
-  s.runtime_ms,
-  s.memory_kb,
-  s.submitted_at
-FROM submissions s
-JOIN problems p ON p.id = s.problem_id
-WHERE 
-  s.user_id = ?
-  AND s.verdict = 'AC'
-ORDER BY s.submitted_at DESC
-LIMIT 10`,
+          s.language,
+          s.runtime_ms,
+          s.memory_kb,
+          s.submitted_at
+        FROM submissions s
+        JOIN problems p ON p.id = s.problem_id
+        WHERE 
+          s.user_id = $1
+          AND s.verdict = 'AC'
+        ORDER BY s.submitted_at DESC
+        LIMIT 10`,
         [userId]
       );
 
@@ -77,18 +79,17 @@ router.get("/activity-heatmap", authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const [rows] = await db.execute(
+    const { rows } = await db.query(
       `
       SELECT
-  DATE(submitted_at) AS day,
-  COUNT(*) AS count
-FROM submissions
-WHERE
-  user_id = ?
-  AND submitted_at >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
-GROUP BY DATE(submitted_at)
-ORDER BY day;
-
+        submitted_at::DATE AS day,
+        COUNT(*)::INTEGER AS count
+      FROM submissions
+      WHERE
+        user_id = $1
+        AND submitted_at >= CURRENT_DATE - INTERVAL '3 months'
+      GROUP BY submitted_at::DATE
+      ORDER BY day;
       `,
       [userId]
     );
@@ -103,8 +104,8 @@ ORDER BY day;
 
 router.get("/get-platform-stats", async (req, res) => {
   try {
-    const [row] = await db.execute("SELECT * FROM platform_stats");
-    res.json(row);
+    const { rows } = await db.query("SELECT * FROM platform_stats");
+    res.json(rows);
   } catch (err) {
     res.status(500).json({error: "Failed to fetch stats."});
   }
@@ -112,7 +113,7 @@ router.get("/get-platform-stats", async (req, res) => {
 
 router.get("/leaderboard", async (req, res) => {
   try {
-    const [rows] = await db.execute("SELECT username, global_rank, total_solved FROM users JOIN user_stats on users.id = user_stats.user_id ORDER BY user_stats.global_rank ASC LIMIT 100"); 
+    const { rows } = await db.query("SELECT username, global_rank, total_solved FROM users JOIN user_stats on users.id = user_stats.user_id ORDER BY user_stats.global_rank ASC LIMIT 100"); 
     res.json(rows);
   } catch (err) {
     res.status(500).json({error: "Failed to fetch leaderboard"});
@@ -121,11 +122,10 @@ router.get("/leaderboard", async (req, res) => {
 
 router.get("/users/:id/performance", authMiddleware, async (req, res) => {
   const userId = req.params.id;
-  const conn = await db.getConnection();
-  //console.log("hi")
+  const conn = await db.connect();
 
   try {
-    const [rows] = await conn.execute(
+    const { rows } = await conn.query(
       `
       SELECT
         t.name AS topic,
@@ -134,7 +134,7 @@ router.get("/users/:id/performance", authMiddleware, async (req, res) => {
         utr.solves
       FROM user_topic_rating utr
       JOIN topics t ON t.id = utr.topic_id
-      WHERE utr.user_id = ?
+      WHERE utr.user_id = $1
       `,
       [userId]
     );
@@ -149,6 +149,7 @@ router.get("/users/:id/performance", authMiddleware, async (req, res) => {
         r.rating > 1500 ? "strong" :
         "medium"
     }));
+    
     let aiRes = "";
     try {
        aiRes = {
@@ -161,6 +162,7 @@ router.get("/users/:id/performance", authMiddleware, async (req, res) => {
       console.log(err);
       aiRes = "error."
     }
+    
     res.json({
       user_id: userId,
       topics,
@@ -174,6 +176,4 @@ router.get("/users/:id/performance", authMiddleware, async (req, res) => {
   }
 });
 
-
 export default router;
-
