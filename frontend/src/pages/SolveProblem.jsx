@@ -295,9 +295,11 @@ export default function SolveProblem() {
           {activeTab === "Problem" && (
             <div className="space-y-6 leading-relaxed">
               <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-line text-gray-700">
-                  {content.statement}
-                </p>
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}>
+                    {content.statement}
+                </ReactMarkdown>
               </div>
 
               {content.constraints && (
