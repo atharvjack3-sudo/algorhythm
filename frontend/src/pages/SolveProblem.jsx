@@ -309,7 +309,11 @@ export default function SolveProblem() {
                     Constraints
                   </h3>
                   <pre className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-xs whitespace-pre-line text-gray-700">
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}>
                     {content.constraints}
+                </ReactMarkdown>
                   </pre>
                 </div>
               )}
