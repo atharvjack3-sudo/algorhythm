@@ -20,10 +20,14 @@ router.post("/playground/run", authMiddleware, async (req, res) => {
   const JUDGE_URL = process.env.JUDGE0_URL;
 
   try {
+    // 1. Encode source code and stdin to Base64
+    const codeBase64 = Buffer.from(sourceCode || "").toString("base64");
+    const stdinBase64 = Buffer.from(stdin || "").toString("base64");
+
     const judgeRes = await axios.post(JUDGE_URL, {
-      source_code: sourceCode,
+      source_code: codeBase64,
       language_id: LANGUAGE_MAP[lang],
-      stdin: stdin,
+      stdin: stdinBase64,
       cpu_time_limit: 2,
       memory_limit: 128000,
     }, 
@@ -32,20 +36,28 @@ router.post("/playground/run", authMiddleware, async (req, res) => {
         "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
         "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
        },
-        }
-  );
+    });
 
-    // Extracting data for 'Output Stream' UI
+    // 2. Extract Judge0 results
     const { stdout, stderr, compile_output, time, memory } = judgeRes.data;
 
+    // 3. Helper function to decode Base64 strings from Judge0
+    const decode = (str) => str ? Buffer.from(str, "base64").toString("utf-8") : "";
+
+    // 4. Decode all potential output streams
+    const decodedStdout = decode(stdout);
+    const decodedStderr = decode(stderr);
+    const decodedCompileOutput = decode(compile_output);
+
     res.status(200).json({
-      output: stdout || stderr || compile_output, // Shows errors if code fails
+      output: decodedStdout || decodedStderr || decodedCompileOutput, 
       time: time,
       memory: memory,
     });
 
   } catch (err) {
-    console.error("Execution Error:", err.message);
+    // Log the actual response data if available to help debug future 400s
+    console.error("Execution Error:", err.response?.data || err.message);
     res.status(500).json({ error: "Execution Engine Offline" });
   }
 });
