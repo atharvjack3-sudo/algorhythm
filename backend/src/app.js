@@ -19,10 +19,15 @@ const app = express();
 
 
 
+// app.use(cors({
+//   origin: "https://algorhythm-xi.vercel.app",
+//   credentials: true,
+// }));
 app.use(cors({
-  origin: "https://algorhythm-xi.vercel.app",
+  origin: true,
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 
