@@ -50,7 +50,7 @@ router.get("/blogs", async (req, res) => {
         u.username AS author
       FROM blogs b
       JOIN users u ON u.id = b.author_id
-      WHERE b.is_published = TRUE
+      WHERE b.is_published = 1
       ORDER BY b.created_at DESC
       LIMIT $1 OFFSET $2
     `;
@@ -105,7 +105,7 @@ router.get("/blogs/:slug", async (req, res) => {
         u.id AS author_id
       FROM blogs b
       JOIN users u ON u.id = b.author_id
-      WHERE b.slug = $1 AND b.is_published = TRUE
+      WHERE b.slug = $1 AND b.is_published = 1
       `,
       [req.params.slug]
     );
