@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Playground() {
@@ -31,7 +30,7 @@ function Playground() {
   const handleReset = () => {
     if (
       window.confirm(
-        "Are you sure you want to reset the editor? All progress will be lost.",
+        "Are you sure you want to reset the editor? All progress will be lost."
       )
     ) {
       setCode("");
@@ -70,7 +69,7 @@ function Playground() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#fdfeff] text-slate-900 font-sans selection:bg-sky-100 overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#f8f9fa] text-slate-900 font-sans selection:bg-sky-100 overflow-x-hidden">
       {/* BACKGROUND Effect */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-sky-100/50 rounded-full blur-[120px]"></div>
@@ -82,57 +81,37 @@ function Playground() {
         <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-2">
           <div>
             <h1 className="text-xl font-black tracking-tight text-slate-800">
-              Code <span className="text-sky-500">Playground</span>
+              Code <span className="text-[#1a73e8]">Playground</span>
             </h1>
             <div className="flex gap-4 mt-1">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 Time Limit: 2s
               </p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 Memory Limit: 128MB
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 bg-white/80 backdrop-blur-md border border-slate-200/60 p-1.5 rounded-2xl shadow-sm w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 p-1.5 rounded-lg shadow-sm w-full md:w-auto">
             {/* Action Buttons Group */}
             <div className="flex border-r border-slate-200 pr-2 gap-1">
               <button
                 onClick={handleCopy}
                 title="Copy Content"
-                className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-sky-500 transition-colors"
+                className="p-2 hover:bg-slate-100 rounded-md text-slate-500 hover:text-[#1a73e8] transition-colors"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </button>
               <button
                 onClick={handleReset}
                 title="Reset Editor"
-                className="p-2 hover:bg-rose-50 rounded-xl text-slate-400 hover:text-rose-500 transition-colors"
+                className="p-2 hover:bg-rose-50 rounded-md text-slate-500 hover:text-rose-600 transition-colors"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </button>
             </div>
@@ -140,7 +119,7 @@ function Playground() {
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="bg-transparent px-2 md:px-4 py-1.5 text-xs md:text-sm font-bold text-slate-600 outline-none cursor-pointer"
+              className="bg-transparent px-2 md:px-4 py-1.5 text-xs md:text-sm font-semibold text-slate-700 outline-none cursor-pointer"
             >
               <option value="cpp">C++ 17</option>
               <option value="python">Python 3</option>
@@ -150,7 +129,7 @@ function Playground() {
             <button
               onClick={() => handleSubmit(code, input, language)}
               disabled={loadingRes}
-              className="flex-grow md:flex-grow-0 bg-slate-900 hover:bg-sky-500 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md active:scale-95"
+              className="flex-grow md:flex-grow-0 bg-[#1a73e8] hover:bg-[#1557b0] text-white px-6 py-2 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               Run Code
             </button>
@@ -158,118 +137,125 @@ function Playground() {
         </header>
 
         {/* --- MAIN WORKSPACE --- */}
-        
-        <main className="flex-grow flex flex-col lg:flex-row gap-6 min-h-0">
-          {/* EDITOR SECTION */}
-          <div className="flex-[3] bg-white rounded-2xl border border-slate-200/60 shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col min-h-[400px] lg:min-h-0">
-            <div className="px-8 py-4 border-b border-slate-100 flex items-center justify-between">
+        <main className="flex-grow flex flex-col gap-6">
+          
+          {/* TOP: FULL WIDTH EDITOR SECTION */}
+          <div className="w-full h-[55vh] min-h-[400px] bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-shrink-0">
+            <div className="px-6 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
-                </div>
-                <span className="ml-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                   Main Source File
                 </span>
               </div>
             </div>
 
-            <div className="flex-grow pt-4">
+            <div className="flex-grow pt-2">
               <Editor
                 height="100%"
                 language={language}
                 value={code}
                 onChange={(val) => setCode(val ?? "")}
+                theme="vs-light"
                 options={{
-                  fontSize: 15,
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 14,
+                  fontFamily: "'JetBrains Mono', 'Roboto Mono', monospace",
                   lineNumbers: "on",
-                  minimap: { enabled: true },
+                  minimap: { enabled: false },
                   scrollBeyondLastLine: false,
                   automaticLayout: true,
                   tabSize: 4,
                   wordWrap: "on",
-                  padding: { top: 20 },
+                  padding: { top: 16 },
                   cursorBlinking: "smooth",
                   renderLineHighlight: "all",
-                  fontWeight: "500",
+                  fontWeight: "400",
                 }}
               />
             </div>
           </div>
 
-          {/* CONSOLE SECTION */}
-          <div className="flex-[1] flex flex-col gap-6 h-full">
-            {/* Input Card */}
-            <div className="bg-white rounded-[2rem] border border-slate-200/60 p-6 shadow-lg shadow-slate-200/20">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
-                Input Stream
+          {/* BOTTOM: INPUT & CMD TERMINAL SECTION */}
+          <div className="w-full flex flex-col lg:flex-row gap-6 mb-4">
+            
+            {/* Input Card (Left on Desktop, Top on Mobile) */}
+            <div className="w-full lg:w-1/3 flex flex-col bg-white rounded-xl border border-slate-200 p-5 shadow-sm min-h-[300px]">
+              <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">
+                Standard Input
               </h3>
               <textarea
-                className="w-full h-32 md:h-40 bg-slate-50 rounded-2xl p-4 text-sm font-medium outline-none focus:ring-2 ring-sky-100 transition-all resize-none placeholder:text-slate-300"
-                placeholder="Standard Input..."
+                className="w-full flex-grow bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm font-mono outline-none focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] transition-all resize-none placeholder:text-slate-400"
+                placeholder="Enter standard input here..."
                 value={input}
-                onChange={(e) => {
-                  setInput(e.target.value);
-                  //  console.log(input);
-                }}
+                onChange={(e) => setInput(e.target.value)}
               />
             </div>
 
-            
-            <div className="flex-grow min-h-[200px] bg-slate-900 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-20"></div>
-              <div className="relative h-full flex flex-col">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    Output Stream
-                  </h3>
-                  <div
-                    className={`w-1.5 h-1.5 rounded-full ${loadingRes ? "bg-amber-500 animate-bounce" : "bg-emerald-500 animate-pulse"}`}
-                  ></div>
-                </div>
-
-                {/* Main Result Area */}
-                <div
-                  className={`flex-grow font-mono text-sm leading-relaxed whitespace-pre-wrap ${loadingRes ? "text-slate-500 italic" : "text-sky-400/90"}`}
-                >
-                  {">"} {output.output}
-                </div>
-
-                {/* Metrics Footer */}
-                {!loadingRes && output.time !== null && (
-                  <div className="mt-4 pt-4 border-t border-slate-800/50 flex gap-6">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                        Execution Time
-                      </span>
-                      <span className="text-xs font-mono text-slate-400">
-                        {output.time}s
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                        Memory Peak
-                      </span>
-                      <span className="text-xs font-mono text-slate-400">
-                        {output.memory} KB
-                      </span>
-                    </div>
+            {/* WINDOWS CMD TERMINAL REPLICA (Right on Desktop, Bottom on Mobile) */}
+            <div className="w-full lg:w-2/3 flex flex-col bg-[#0c0c0c] rounded-md shadow-2xl overflow-hidden border border-[#2a2a2a] min-h-[300px]">
+              
+              {/* CMD Title Bar */}
+              <div className="flex items-center justify-between px-3 py-0 bg-white text-black select-none h-8 border-b border-gray-300 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-[14px] h-[14px] bg-black border border-gray-500 flex items-center justify-center">
+                    <span className="text-[#cccccc] text-[6px] font-mono leading-none font-bold">C:\_</span>
                   </div>
-                )}
+                  <span className="text-xs" style={{ fontFamily: '"Segoe UI", sans-serif' }}>Command Prompt</span>
+                </div>
+                <div className="flex items-center h-full -mr-3">
+                  <button className="w-11 h-full hover:bg-[#e5e5e5] flex items-center justify-center text-gray-700 transition-colors">
+                    <svg width="10" height="10" viewBox="0 0 10 10"><path fill="currentColor" d="M0 4h10v1H0z"/></svg>
+                  </button>
+                  <button className="w-11 h-full hover:bg-[#e5e5e5] flex items-center justify-center text-gray-700 transition-colors">
+                    <svg width="10" height="10" viewBox="0 0 10 10"><path fill="none" stroke="currentColor" d="M1.5 1.5h7v7h-7z"/></svg>
+                  </button>
+                  <button className="w-11 h-full hover:bg-[#e81123] hover:text-white flex items-center justify-center text-gray-700 transition-colors">
+                    <svg width="10" height="10" viewBox="0 0 10 10"><path fill="currentColor" d="M1.054 1.054l7.892 7.892-.741.741-7.892-7.892z"/><path fill="currentColor" d="M8.946 1.054L1.054 8.946l.741.741 7.892-7.892z"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* CMD Body */}
+              <div className="flex-grow p-3 overflow-y-auto text-[#cccccc] text-[14px] leading-relaxed" style={{ fontFamily: 'Consolas, "Lucida Console", monospace' }}>
+                <p>Microsoft Windows [Version 10.0.22621.3007]</p>
+                <p>(c) Microsoft Corporation. All rights reserved.</p>
+                <br />
+                
+                <div className="whitespace-pre-wrap break-words">
+                  <span>C:\Users\Developer&gt;</span>
+                  
+                  {loadingRes ? (
+                    <span className="ml-1">
+                      run_code.exe<br />
+                      <span className="animate-pulse font-bold">_</span>
+                    </span>
+                  ) : output.output === "Run code to see results" ? (
+                    <span className="animate-pulse font-bold ml-1">_</span>
+                  ) : (
+                    <>
+                      <span className="ml-1">run_code.exe</span><br />
+                      {output.output !== "Loading" && (
+                        <div className="mt-1 text-[#ffffff]">
+                          {output.output || "(no output)"}
+                        </div>
+                      )}
+                      
+                      {output.time !== null && output.time !== "Calculating" && (
+                        <div className="mt-3 mb-1 text-[#888888]">
+                          <p>Process returned 0 (0x0)</p>
+                          <p>Execution Time: {output.time}s</p>
+                          <p>Memory Peak: {output.memory} KB</p>
+                        </div>
+                      )}
+                      <br />
+                      <p>C:\Users\Developer&gt;<span className="animate-pulse font-bold">_</span></p>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
+
           </div>
         </main>
-
-        {/* FOOTER STATS */}
-        <footer className="flex items-center justify-between px-4 pb-2 opacity-40">
-          <div className="flex gap-6 text-[9px] font-bold uppercase tracking-widest">
-            <span>Uplink: Active</span>
-            <span>Latency: Low</span>
-          </div>
-        </footer>
       </div>
     </div>
   );
