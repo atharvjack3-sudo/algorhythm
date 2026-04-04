@@ -26,7 +26,6 @@ router.post("/blogs", authMiddleware, async (req, res) => {
 
     res.status(201).json({ message: "Blog created successfully" });
   } catch (err) {
-    // 23505 is Postgres for unique violation (duplicate entry)
     if (err.code === "23505") {
       return res.status(409).json({ error: "Blog with this title already exists" });
     }
@@ -53,10 +52,10 @@ router.get("/blogs", async (req, res) => {
       JOIN users u ON u.id = b.author_id
       WHERE b.is_published = TRUE
       ORDER BY b.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
+      LIMIT $1 OFFSET $2
     `;
 
-    const { rows } = await db.query(query);
+    const { rows } = await db.query(query, [limit, offset]);
     res.json(rows);
   } catch (err) {
     console.log(err);
@@ -256,7 +255,6 @@ router.post("/blogs/:id/like", authMiddleware, async (req, res) => {
     );
 
     if (rows.length) {
-      // Unlike
       await conn.query(
         `DELETE FROM blog_likes WHERE blog_id = $1 AND user_id = $2`,
         [blogId, req.user.id]
@@ -275,7 +273,6 @@ router.post("/blogs/:id/like", authMiddleware, async (req, res) => {
       return res.json({ liked: false });
     }
 
-    // Like
     await conn.query(
       `
       INSERT INTO blog_likes (blog_id, user_id)
