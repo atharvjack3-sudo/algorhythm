@@ -26,7 +26,7 @@ export default function Navbar() {
   if (loading) return null;
 
   return (
-    <nav className="w-full h-16 bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="w-full h-16 bg-white border-b border-gray-200 sticky top-0 z-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
         
         {/* Left: Logo */}
