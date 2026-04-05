@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "/src/api/client";
-import { Plus, MessageSquare } from "lucide-react";
+import { Plus, MessageSquare, ArrowUpCircle, MessageCircle } from "lucide-react";
 import { useAuth } from "/src/context/AuthContext";
 import CreateDiscussionModal from "../CreateDiscussionModal";
 
@@ -49,91 +49,91 @@ export default function DiscussionTab() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="font-semibold text-lg flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
+        <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
+          <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-500" />
           Discussions
         </h2>
 
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-3 py-1.5
-             bg-cyan-500 text-white rounded-lg text-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           New Post
         </button>
       </div>
 
-      {/* Create Post */}
-      {/* {showCreate && (
-        <div className="border rounded-xl p-4 bg-gray-50 space-y-3">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Discussion title"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
-
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="Write your thoughts (Markdown supported)"
-            rows={4}
-            className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-          />
-
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => setShowCreate(false)}
-              className="px-3 py-1.5 text-sm text-gray-600"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={createDiscussion}
-              className="px-4 py-1.5 bg-cyan-500
-                         text-white rounded-lg text-sm"
-            >
-              Post
-            </button>
-          </div>
-        </div>
-      )} */}
-
       {/* Discussion List */}
       {loading ? (
-        <div className="text-gray-500 text-sm">Loading discussions…</div>
+        <div className="py-16 flex flex-col items-center justify-center">
+          <div className="relative w-10 h-10 flex items-center justify-center mb-4">
+            <div className="absolute inset-0 rounded-full border-[3px] border-slate-200 dark:border-slate-800"></div>
+            <div className="absolute inset-0 rounded-full border-[3px] border-blue-600 dark:border-blue-500 border-t-transparent border-r-transparent animate-[spin_0.8s_linear_infinite]"></div>
+          </div>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading discussions...</p>
+        </div>
       ) : discussions.length === 0 ? (
-        <div className="text-gray-500 text-sm">
-          No discussions yet. Be the first to post!
+        <div className="text-center py-16 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 transition-colors">
+          <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+            <MessageSquare className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+          </div>
+          <h4 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white mb-1">No discussions yet</h4>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">Be the first to start a conversation!</p>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="px-6 py-2.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95"
+          >
+            Start Discussion
+          </button>
         </div>
       ) : (
-        <div className="divide-y divide-gray-200">
+        <div className="space-y-3">
           {discussions.map((d) => (
-            <div key={d.id} className="px-2 py-4 hover:bg-gray-50">
-              <h3
-                onClick={() =>
-                  navigate(`/problemset/${problemId}/discussions/${d.id}`)
-                }
-                className="font-semibold text-gray-900
-                           hover:text-cyan-500 cursor-pointer"
-              >
+            <div 
+              key={d.id} 
+              onClick={() => navigate(`/problemset/${problemId}/discussions/${d.id}`)}
+              className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:shadow-md hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-blue-300 dark:hover:border-slate-700 transition-all cursor-pointer group"
+            >
+              <h3 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3 tracking-tight">
                 {d.title}
               </h3>
 
-              <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                <span>by {d.username}</span>
-                <span>{d.reply_count} replies</span>
-                <span>{d.upvotes} upvotes</span>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-medium text-slate-500 dark:text-slate-400">
+                
+                {/* Author */}
+                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <div className="w-5 h-5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-[10px] font-bold border border-blue-100 dark:border-blue-500/20">
+                    {d.username.charAt(0).toUpperCase()}
+                  </div>
+                  {d.username}
+                </span>
+
+                <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+
+                {/* Stats */}
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1.5 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
+                    <MessageCircle className="w-4 h-4" />
+                    {d.reply_count} replies
+                  </span>
+                  
+                  <span className="flex items-center gap-1.5 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
+                    <ArrowUpCircle className="w-4 h-4" />
+                    {d.upvotes} upvotes
+                  </span>
+                </div>
+
               </div>
             </div>
           ))}
         </div>
       )}
 
+      {/* Modal */}
       <CreateDiscussionModal
         open={showCreate}
         onClose={() => setShowCreate(false)}
