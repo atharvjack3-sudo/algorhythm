@@ -381,7 +381,7 @@ export default function SolveProblem() {
 
               <div className="space-y-6 pt-2">
                 {samples.map((s, i) => (
-                  <div key={i} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-colors">
+                  <div key={i} className="border mt-4 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-colors">
                     <div className="bg-slate-50 dark:bg-slate-800/80 px-4 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                       <h3 className="text-[13px] font-bold text-slate-800 dark:text-slate-200">Example {i + 1}</h3>
                     </div>

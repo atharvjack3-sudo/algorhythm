@@ -70,7 +70,7 @@ router.get(
         FROM problem_discussions d
         JOIN users u ON u.id = d.user_id
         WHERE d.problem_id = $1
-          AND d.is_deleted = FALSE
+          AND d.is_deleted = 0
         ORDER BY d.is_pinned DESC, d.created_at DESC
         `,
         [problemId]
@@ -117,7 +117,7 @@ router.get(
           u.username
         FROM problem_discussions d
         JOIN users u ON u.id = d.user_id
-        WHERE d.id = $1 AND d.is_deleted = FALSE
+        WHERE d.id = $1 AND d.is_deleted = 0
         `,
         [discussionId]
       );
