@@ -350,7 +350,7 @@ router.get(
     p.difficulty
   FROM contest_problems cp
   JOIN problems p ON p.id = cp.problem_id
-  WHERE cp.contest_id = $1
+  WHERE cp.contest_id = $1::INT
   ORDER BY cp.problem_index
   `,
   [contestId]
@@ -367,7 +367,7 @@ router.get(
   cr.penalty
 FROM contest_results cr
 JOIN users u ON u.id = cr.user_id
-WHERE cr.contest_id = $1
+WHERE cr.contest_id = $1::INT
 ORDER BY cr.solved_count DESC, cr.penalty ASC
 
         `,
