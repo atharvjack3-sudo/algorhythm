@@ -301,7 +301,7 @@ function MyList() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Total Problems</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {lists.reduce((sum, list) => sum + list.problemCount, 0)}
+                  {lists.reduce((sum, list) => sum + Number(list.problemCount), 0)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -327,7 +327,7 @@ function MyList() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Problems Solved</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {lists.reduce((sum, list) => sum + list.solvedCount, 0)}
+                  {lists.reduce((sum, list) => sum + Number(list.solvedCount), 0)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
