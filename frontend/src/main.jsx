@@ -5,9 +5,12 @@ import App from "./App.jsx";
 import 'remixicon/fonts/remixicon.css';
 import "katex/dist/katex.min.css";
 import "highlight.js/styles/github.css";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 
 createRoot(document.getElementById("root")).render(
     <BrowserRouter>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </BrowserRouter>
 );

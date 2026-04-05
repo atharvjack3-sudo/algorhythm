@@ -352,7 +352,7 @@ export default function ProblemSet() {
                     <th className="px-6 py-4">Title</th>
                     <th className="px-6 py-4 text-center w-32">Acceptance</th>
                     <th className="px-6 py-4 text-center w-32">Difficulty</th>
-                    <th className="px-6 py-4 text-right w-24">Actions</th>
+                    <th className="px-6 py-4 text-right w-24">List</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
