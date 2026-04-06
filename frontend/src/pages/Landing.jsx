@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
-// Helper hook for scroll reveal animations
 function useReveal() {
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -22,7 +22,7 @@ function useReveal() {
   return { ref, isVisible };
 }
 
-// Reveal Wrapper Component
+
 const Reveal = ({ children, delay = 0, className = "" }) => {
   const { ref, isVisible } = useReveal();
   return (
@@ -39,6 +39,7 @@ const Reveal = ({ children, delay = 0, className = "" }) => {
 };
 
 export default function AlgorhythmLanding() {
+  const navigate = useNavigate();
   const [activeLang, setActiveLang] = useState("C++17");
   const [timeLeft, setTimeLeft] = useState(7724);
   const [stats, setStats] = useState({ s1: 20, s2: 50, s3: 100, s4: 15 });
@@ -46,22 +47,10 @@ export default function AlgorhythmLanding() {
   const statsRef = useRef(null);
   const [statsAnimated, setStatsAnimated] = useState(false);
 
-  // Heatmap data from original JS
+
   const hmLevels = [
     0, 0, 0, 1, 0, 1, 2, 0, 1, 3, 2, 1, 0, 2, 3, 4, 3, 2, 1, 3, 4, 3, 2, 4, 3, 2,
     2, 1, 0, 0, 1, 2, 3, 1, 2, 4, 3, 2, 4, 3, 2, 1, 3, 4, 2, 1, 0, 2, 3, 4, 3, 2,
-  ];
-
-  // Company "Logos" constructed using typography and simple SVGs to keep the code clean and lightweight
-  const companies = [
-    <div className="flex items-center gap-2"><svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/></svg><span className="font-semibold text-[22px] tracking-tight">Microsoft</span></div>,
-    <span className="font-medium tracking-tighter text-[26px]">Google</span>,
-    <span className="font-normal tracking-[0.2em] text-[22px] uppercase">Uber</span>,
-    <span className="font-bold text-[26px] tracking-tighter">amazon</span>,
-    <span className="font-black text-[24px] tracking-widest uppercase">NETFLIX</span>,
-    <span className="font-semibold text-[24px] tracking-wide">Meta</span>,
-    <span className="font-bold text-[26px] tracking-tighter">spotify</span>,
-    <span className="font-bold text-[24px] tracking-tight">stripe</span>,
   ];
 
   // Countdown timer
@@ -138,10 +127,16 @@ export default function AlgorhythmLanding() {
             </p>
           </Reveal>
           <Reveal delay={300} className="flex gap-3 justify-center flex-wrap">
-            <button className="bg-blue-600 text-white border-none px-8 py-3.5 rounded-full text-[15px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]">
+            <button 
+              onClick={() => navigate('/auth')}
+              className="bg-blue-600 text-white border-none px-8 py-3.5 rounded-full text-[15px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
+            >
               Start Coding Free
             </button>
-            <button className="bg-transparent text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10 px-7 py-3.5 rounded-full text-[15px] cursor-pointer transition-all hover:bg-white dark:hover:bg-[#13151a] hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee]">
+            <button 
+              onClick={() => navigate('/problemset')}
+              className="bg-transparent text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10 px-7 py-3.5 rounded-full text-[15px] cursor-pointer transition-all hover:bg-white dark:hover:bg-[#13151a] hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee]"
+            >
               Browse Problem Set
             </button>
           </Reveal>
@@ -699,7 +694,9 @@ export default function AlgorhythmLanding() {
           <Reveal className="bg-blue-600 rounded-[32px] p-12 md:p-20 text-center relative overflow-hidden">
             <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] text-white mb-5">Ready to start your journey?</h2>
             <p className="text-[18px] text-white/75 max-w-[500px] mx-auto mb-10 leading-[1.6]">Join thousands of competitive programmers who are getting better every day on Algorhythm.</p>
-            <button className="bg-white text-blue-600 border-none px-10 py-4 rounded-full text-[16px] font-medium cursor-pointer transition-all hover:scale-105">
+            <button
+              onClick={() => navigate('/auth')}
+            className="bg-white text-blue-600 border-none px-10 py-4 rounded-full text-[16px] font-medium cursor-pointer transition-all hover:scale-105">
               Create a free account
             </button>
           </Reveal>
