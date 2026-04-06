@@ -307,19 +307,19 @@ export default function AlgorhythmLanding() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]"><span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">✓ Accepted</span></td>
+                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]"><span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">AC</span></td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">38ms</td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">4.1 MB</td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">1–45</td>
                   </tr>
                   <tr>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]"><span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]">↻ TLE</span></td>
+                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]"><span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]">TLE</span></td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">&gt;2000ms</td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">—</td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">46</td>
                   </tr>
                   <tr>
-                    <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]"><span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185]">✕ Wrong</span></td>
+                    <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]"><span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185]">WA</span></td>
                     <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">14ms</td>
                     <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">3.8 MB</td>
                     <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">47</td>
