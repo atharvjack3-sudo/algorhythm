@@ -334,11 +334,11 @@ export default function AlgorhythmLanding() {
               </p>
 
               <div className="flex gap-2 flex-wrap mt-4">
-                {["C++17", "Python 3.12", "Java 21", "Go", "Rust"].map(
+                {["C++17", "Python 3", "Java 21", "JavaScript"].map(
                   (lang) => (
                     <div
                       key={lang}
-                      onClick={() => setActiveLang(lang)}
+                      
                       className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border cursor-pointer transition-all ${activeLang === lang ? "bg-blue-600 text-white border-transparent" : "border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]"}`}
                     >
                       {lang}
