@@ -144,14 +144,14 @@ export default function AlgorhythmLanding() {
 
         {/* TRUSTED BY MARQUEE */}
 {/* TRUSTED BY MARQUEE */}
-        <Reveal className="py-12 border-y border-black/10 dark:border-white/10 bg-white dark:bg-[#13151a] -mx-6 md:mx-0 md:rounded-2xl flex flex-col items-center relative overflow-hidden">
+        <Reveal className="py-12   -mx-6 md:mx-0 md:rounded-2xl flex flex-col items-center relative overflow-hidden">
           <p className="text-[11px] font-bold text-[#888] dark:text-[#555] uppercase tracking-[0.2em] mb-10 text-center">
             Trusted by engineers at
           </p>
           
           {/* Gradient Masks for Seamless Fade In/Out */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-white dark:from-[#13151a] to-transparent z-10 pointer-events-none"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-white dark:from-[#13151a] to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-white dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-white dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
 
           {/* Marquee Container */}
           <div className="flex w-full overflow-hidden">
