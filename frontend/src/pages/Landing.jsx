@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/navico/main_logo.png";
 
 function useReveal() {
   const ref = useRef(null);
@@ -1016,19 +1017,18 @@ export default function AlgorhythmLanding() {
                 Next Up
               </span>
               <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
-                Weekly Arena #43
+                Algorhythm Weekly
               </h3>
               <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
-                4 problems. 90 minutes. Rated for all participants. 1,240
-                already registered.
+                4 problems. 90 minutes. Rated for all participants.
               </p>
 
-              <div className="bg-[#f0efe9] dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-5 mt-5">
+              <div className="bg-[#f0efe9] text-center dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-5 mt-5">
                 <div className="text-[12px] text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
-                  Starts in
+                  Scheduled on
                 </div>
                 <div className="text-[32px] font-medium tracking-[-0.03em] font-mono my-2 text-[#0d0d0d] dark:text-[#f0f0ee]">
-                  {formatTime(timeLeft)}
+                  Next Sunday
                 </div>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24] mt-1.5">
                   ⭐ Rating · Rated Contest
@@ -1713,12 +1713,7 @@ export default function AlgorhythmLanding() {
           <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-10 mb-12">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-3.5">
-                <div className="w-[30px] h-[30px] bg-blue-600 rounded-lg flex items-center justify-center text-white text-[14px] font-medium">
-                  A
-                </div>
-                <span className="text-[18px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee] m-0">
-                  Algorhythm
-                </span>
+                <img src={logo} className="w-50"  alt="Algorhythm" />
               </div>
               <div className="text-[13px] text-[#888] dark:text-[#555] leading-[1.7] max-w-[240px]">
                 The minimalist arena for competitive programmers. Built for
@@ -1820,27 +1815,21 @@ export default function AlgorhythmLanding() {
             </div>
           </div>
           <div className="flex items-center justify-between pt-6 border-t border-black/10 dark:border-white/10">
-            <div className="text-[13px] text-[#888] dark:text-[#555]">
-              © 2026 Algorhythm. All rights reserved.
+            <div className="text-[13px] font-semibold text-[#888] dark:text-[#555]">
+              © 2026 Algorhythm. Built by Atharv Dubey.
             </div>
             <div className="flex gap-4">
               <a
-                href="#"
+                href="https://www.linkedin.com/in/atharv-dubey-4a2199323" target="_blank"
                 className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                Twitter
+                LinkedIn
               </a>
               <a
-                href="#"
+                href="https://github.com/AtharvDubey12/Algorhythm" target="_blank"
                 className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
                 GitHub
-              </a>
-              <a
-                href="#"
-                className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
-              >
-                Discord
               </a>
             </div>
           </div>
