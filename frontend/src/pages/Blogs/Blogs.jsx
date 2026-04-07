@@ -2,11 +2,20 @@ import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import BlogCard from "../../components/BlogCard";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Blogs() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user,loading : authLoading } = useAuth();
+  const navigate = useNavigate();
 
+    useEffect(() => {
+      if (authLoading) return;
+      if (!user) navigate("/auth");
+    }, [user, authLoading, navigate]);
+  
   useEffect(() => {
     api.get("/blogs")
       .then(res => setBlogs(res.data))
