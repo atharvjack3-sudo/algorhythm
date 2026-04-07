@@ -22,6 +22,7 @@ import BlogDetail from "./pages/Blogs/BlogDetail";
 import EditBlog from "./pages/Blogs/EditBlog";
 import Playground from "./pages/Playground";
 import Coach from "./pages/Coach";
+import PublicApi from "./pages/PublicApi";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/contests/:contestId" element={<ContestResults />} />
         <Route path="/playground" element={<Playground />} />
         <Route path="/performance/mine" element={<Coach />} />
+        <Route path="/publicapi" element={<PublicApi />} />
         
         {/* Blog routes */}
         <Route path="/blogs" element={<Blogs />} />

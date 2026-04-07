@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/navico/main_logo.png";
+import { NavLink } from "react-router-dom";
 
 function useReveal() {
   const ref = useRef(null);
@@ -44,6 +45,8 @@ export default function AlgorhythmLanding() {
   const [activeLang, setActiveLang] = useState("C++17");
   const [timeLeft, setTimeLeft] = useState(7724);
   const [stats, setStats] = useState({ s1: 20, s2: 50, s3: 100, s4: 15 });
+  const [activeCategory, setActiveCategory] = useState("Arrays & Strings");
+  const [activePrepList, setActivePrepList] = useState("FAANG Interview Prep");
 
   const statsRef = useRef(null);
   const [statsAnimated, setStatsAnimated] = useState(false);
@@ -92,17 +95,18 @@ export default function AlgorhythmLanding() {
         <>
           <span className="text-[#ffcb6b]">string</span>{" "}
           <span className="text-[#82aaff]">longestPalindrome</span>(
-          <span className="text-[#ffcb6b]">string</span> s) {"{\n"} <br/>
+          <span className="text-[#ffcb6b]">string</span> s) {"{\n"} <br />
           &nbsp;&nbsp;<span className="text-[#ffcb6b]">string</span> res ={" "}
           <span className="text-[#c3e88d]">""</span>;<br />
           &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
           <span className="text-[#c792ea]">int</span> i ={" "}
           <span className="text-[#f78c6c]">0</span>; i &lt; s.size(); i++){" "}
-          {"{\n"} <br/>
+          {"{\n"} <br />
           &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
           <span className="text-[#c792ea]">int</span> j = i; j &lt; s.size();
           j++) {"{\n"}
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br/> &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br /> &nbsp; &nbsp; &nbsp;
+          &nbsp;
           <span className="text-[#ffcb6b]">string</span> sub = s.substr(i, j-i+
           <span className="text-[#f78c6c]">1</span>);
           <br />
@@ -113,8 +117,8 @@ export default function AlgorhythmLanding() {
           <br />
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res = sub;
           <br />
-          &nbsp;&nbsp;&nbsp;&nbsp;  {"}\n"}
-          &nbsp;&nbsp; <br/> &nbsp;&nbsp;{"}\n"} <br/>
+          &nbsp;&nbsp;&nbsp;&nbsp; {"}\n"}
+          &nbsp;&nbsp; <br /> &nbsp;&nbsp;{"}\n"} <br />
           &nbsp;&nbsp;<span className="text-[#c792ea]">return</span> res;
           <br />
           {"}"}
@@ -162,9 +166,13 @@ export default function AlgorhythmLanding() {
           <span className="text-[#ffcb6b]">string</span>&amp; s,{" "}
           <span className="text-[#c792ea]">int</span> l,{" "}
           <span className="text-[#c792ea]">int</span> r) {"{\n"}
-          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp; while</span> (l &gt;={" "}
-          <span className="text-[#f78c6c]">0</span> &amp;&amp; r &lt; s.size()
-          &amp;&amp; s[l] == s[r])
+          &nbsp;&nbsp;
+          <span className="text-[#c792ea]">
+            <br />
+            &nbsp; while
+          </span>{" "}
+          (l &gt;= <span className="text-[#f78c6c]">0</span> &amp;&amp; r &lt;
+          s.size() &amp;&amp; s[l] == s[r])
           <br />
           &nbsp;&nbsp;&nbsp;&nbsp;l--, r++;
           <br />
@@ -172,18 +180,24 @@ export default function AlgorhythmLanding() {
           <span className="text-[#f78c6c]">1</span>, r-l-
           <span className="text-[#f78c6c]">1</span>);
           <br />
-          {"}\n"} <br/>
+          {"}\n"} <br />
           <span className="text-[#ffcb6b]">string</span>{" "}
           <span className="text-[#82aaff]">longestPalindrome</span>(
           <span className="text-[#ffcb6b]">string</span> s) {"{\n"}
-          &nbsp;&nbsp;<span className="text-[#ffcb6b]"><br/>&nbsp;&nbsp;string</span> res ={" "}
-          <span className="text-[#c3e88d]">""</span>;<br />
+          &nbsp;&nbsp;
+          <span className="text-[#ffcb6b]">
+            <br />
+            &nbsp;&nbsp;string
+          </span>{" "}
+          res = <span className="text-[#c3e88d]">""</span>;<br />
           &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
           <span className="text-[#c792ea]">int</span> i ={" "}
           <span className="text-[#f78c6c]">0</span>; i &lt; s.size(); i++){" "}
           {"{\n"}
-          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#ffcb6b]">
-            <br/>&nbsp;&nbsp;&nbsp;&nbsp;string
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <span className="text-[#ffcb6b]">
+            <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;string
           </span>{" "}
           odd = <span className="text-[#82aaff]">expand</span>(s, i, i);
           <br />
@@ -204,7 +218,12 @@ export default function AlgorhythmLanding() {
           (even.size() &gt; res.size()) res = even;
           <br />
           &nbsp;&nbsp;{"}\n"}
-          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;return</span> res;
+          &nbsp;&nbsp;
+          <span className="text-[#c792ea]">
+            <br />
+            &nbsp;&nbsp;return
+          </span>{" "}
+          res;
           <br />
           {"}"}
         </>
@@ -249,8 +268,12 @@ export default function AlgorhythmLanding() {
           <span className="text-[#ffcb6b]">string</span>{" "}
           <span className="text-[#82aaff]">longestPalindrome</span>(
           <span className="text-[#ffcb6b]">string</span> s) {"{\n"}
-          &nbsp;&nbsp;<span className="text-[#ffcb6b]"><br/>&nbsp;&nbsp;string</span> t ={" "}
-          <span className="text-[#c3e88d]">"^#"</span>;<br />
+          &nbsp;&nbsp;
+          <span className="text-[#ffcb6b]">
+            <br />
+            &nbsp;&nbsp;string
+          </span>{" "}
+          t = <span className="text-[#c3e88d]">"^#"</span>;<br />
           &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
           <span className="text-[#c792ea]">char</span> c : s) t += c, t +={" "}
           <span className="text-[#c3e88d]">"#"</span>;<br />
@@ -268,8 +291,13 @@ export default function AlgorhythmLanding() {
           <span className="text-[#c792ea]">int</span> i ={" "}
           <span className="text-[#f78c6c]">1</span>; i &lt; t.size()-
           <span className="text-[#f78c6c]">1</span>; i++) {"{\n"}
-          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;&nbsp;&nbsp;if</span> (r
-          &gt; i) p[i] = <span className="text-[#82aaff]">min</span>(r - i, p[
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <span className="text-[#c792ea]">
+            <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;if
+          </span>{" "}
+          (r &gt; i) p[i] = <span className="text-[#82aaff]">min</span>(r - i,
+          p[
           <span className="text-[#f78c6c]">2</span>*c - i]);
           <br />
           &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
@@ -287,7 +315,11 @@ export default function AlgorhythmLanding() {
           (p[i] &gt; maxLen) maxLen = p[i], center = i;
           <br />
           &nbsp;&nbsp;{"}\n"}
-          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;return</span>{" "}
+          &nbsp;&nbsp;
+          <span className="text-[#c792ea]">
+            <br />
+            &nbsp;&nbsp;return
+          </span>{" "}
           s.substr((center - maxLen)/<span className="text-[#f78c6c]">2</span>,
           maxLen);
           <br />
@@ -334,8 +366,12 @@ export default function AlgorhythmLanding() {
           <span className="text-[#ffcb6b]">string</span>{" "}
           <span className="text-[#82aaff]">longestPalindrome</span>(
           <span className="text-[#ffcb6b]">string</span> s) {"{\n"}
-          &nbsp;&nbsp;<span className="text-[#ffcb6b]"><br/>&nbsp;&nbsp;string</span> res ={" "}
-          <span className="text-[#c3e88d]">""</span>;<br />
+          &nbsp;&nbsp;
+          <span className="text-[#ffcb6b]">
+            <br />
+            &nbsp;&nbsp;string
+          </span>{" "}
+          res = <span className="text-[#c3e88d]">""</span>;<br />
           &nbsp;&nbsp;
           <span className="text-[#888] italic">
             // Bug: Only checks odd-length palindromes!
@@ -345,19 +381,26 @@ export default function AlgorhythmLanding() {
           <span className="text-[#c792ea]">int</span> i ={" "}
           <span className="text-[#f78c6c]">0</span>; i &lt; s.size(); i++){" "}
           {"{\n"}
-          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;&nbsp;&nbsp;int</span> l
-          = i, r = i;
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <span className="text-[#c792ea]">
+            <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;int
+          </span>{" "}
+          l = i, r = i;
           <br />
           &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
             while
           </span>{" "}
           (l &gt;= <span className="text-[#f78c6c]">0</span> &amp;&amp; r &lt;
-          s.size() &amp;&amp; s[l] == s[r]) {"{\n"}<br/>
+          s.size() &amp;&amp; s[l] == s[r]) {"{\n"}
+          <br />
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l--, r++;
           <br />
           &nbsp;&nbsp;&nbsp;&nbsp;{"}\n"}
-          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#ffcb6b]">
-            <br/>&nbsp;&nbsp;&nbsp;&nbsp;string
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <span className="text-[#ffcb6b]">
+            <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;string
           </span>{" "}
           sub = s.substr(l+<span className="text-[#f78c6c]">1</span>, r-l-
           <span className="text-[#f78c6c]">1</span>);
@@ -368,7 +411,12 @@ export default function AlgorhythmLanding() {
           (sub.size() &gt; res.size()) res = sub;
           <br />
           &nbsp;&nbsp;{"}\n"}
-          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;return</span> res;
+          &nbsp;&nbsp;
+          <span className="text-[#c792ea]">
+            <br />
+            &nbsp;&nbsp;return
+          </span>{" "}
+          res;
           <br />
           {"}"}
         </>
@@ -863,40 +911,168 @@ export default function AlgorhythmLanding() {
                 set exactly how you need it.
               </p>
 
-              <div className="flex flex-col gap-2 mt-5">
-                {[
+              {/* Dynamic Problem List based on activeCategory */}
+              <div
+                key={activeCategory}
+                className="flex flex-col gap-2 mt-5 animate-in fade-in slide-in-from-right-4 duration-500"
+              >
+                {(
                   {
-                    name: "Two Sum",
-                    tags: "Array · Hash Map",
-                    diff: "Easy",
-                    diffColor: "text-[#16a34a] dark:text-[#22c55e]",
-                    done: true,
-                  },
-                  {
-                    name: "Longest Palindromic Substring",
-                    tags: "String · DP",
-                    diff: "Medium",
-                    diffColor: "text-[#d97706] dark:text-[#fbbf24]",
-                    done: true,
-                  },
-                  {
-                    name: "Trapping Rain Water",
-                    tags: "Array · Two Pointers",
-                    diff: "Hard",
-                    diffColor: "text-[#e11d48] dark:text-[#fb7185]",
-                    done: false,
-                  },
-                  {
-                    name: "Word Ladder II",
-                    tags: "BFS · Graph",
-                    diff: "Hard",
-                    diffColor: "text-[#e11d48] dark:text-[#fb7185]",
-                    done: false,
-                  },
-                ].map((prob, i) => (
+                    "Arrays & Strings": [
+                      {
+                        name: "Two Sum",
+                        tags: "Array · Hash Map",
+                        diff: "Easy",
+                        diffColor: "text-[#16a34a] dark:text-[#22c55e]",
+                        done: true,
+                      },
+                      {
+                        name: "Longest Substring",
+                        tags: "String · Sliding Window",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Trapping Rain Water",
+                        tags: "Array · Two Pointers",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                      {
+                        name: "Minimum Window Substring",
+                        tags: "String · Hash Table",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                    ],
+                    "Dynamic Programming": [
+                      {
+                        name: "Climbing Stairs",
+                        tags: "Math · DP",
+                        diff: "Easy",
+                        diffColor: "text-[#16a34a] dark:text-[#22c55e]",
+                        done: true,
+                      },
+                      {
+                        name: "Longest Palindromic Substring",
+                        tags: "String · DP",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Coin Change",
+                        tags: "Array · DP",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: false,
+                      },
+                      {
+                        name: "Edit Distance",
+                        tags: "String · DP",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                    ],
+                    "Trees & Graphs": [
+                      {
+                        name: "Invert Binary Tree",
+                        tags: "Tree · DFS",
+                        diff: "Easy",
+                        diffColor: "text-[#16a34a] dark:text-[#22c55e]",
+                        done: true,
+                      },
+                      {
+                        name: "Course Schedule",
+                        tags: "DFS · Graph",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Lowest Common Ancestor",
+                        tags: "Tree · DFS",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: false,
+                      },
+                      {
+                        name: "Word Ladder II",
+                        tags: "BFS · Graph",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                    ],
+                    "Segment Trees / BIT": [
+                      {
+                        name: "Range Sum Query",
+                        tags: "Segment Tree",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Count of Smaller Numbers",
+                        tags: "Array · BIT",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                      {
+                        name: "Reverse Pairs",
+                        tags: "Divide & Conquer · BIT",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                      {
+                        name: "Falling Squares",
+                        tags: "Segment Tree",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                    ],
+                    "Hard Combinatorics": [
+                      {
+                        name: "Unique Paths",
+                        tags: "Math · Combinatorics",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Find the Winner",
+                        tags: "Math · Simulation",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: false,
+                      },
+                      {
+                        name: "Permutation Sequence",
+                        tags: "Math · Recursion",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                      {
+                        name: "Number of Digit One",
+                        tags: "Math · DP",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                    ],
+                  }[activeCategory] || []
+                ).map((prob, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between p-3 px-4 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-xl text-[13px]"
+                    className="flex items-center justify-between p-3 px-4 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-xl text-[13px] border border-transparent hover:border-black/5 dark:hover:border-white/5 transition-all cursor-default"
                   >
                     <div>
                       <div className="font-medium text-[#0d0d0d] dark:text-[#f0f0ee]">
@@ -907,7 +1083,9 @@ export default function AlgorhythmLanding() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`text-[12px] ${prob.diffColor}`}>
+                      <span
+                        className={`text-[12px] font-medium ${prob.diffColor}`}
+                      >
                         {prob.diff}
                       </span>
                       {prob.done ? (
@@ -937,11 +1115,11 @@ export default function AlgorhythmLanding() {
                 Topic-by-topic mastery
               </h3>
               <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
-                Know exactly where your gaps are. Algorhythm breaks your solve
-                rate down by every major DSA category.
+                Know exactly where your gaps are. Select a category below to
+                view your curated problems.
               </p>
 
-              <div className="flex flex-col gap-3.5 mt-6">
+              <div className="flex flex-col gap-1.5 mt-5">
                 {[
                   {
                     label: "Arrays & Strings",
@@ -974,16 +1152,30 @@ export default function AlgorhythmLanding() {
                     color: "bg-[#e11d48] dark:bg-[#fb7185]",
                   },
                 ].map((item, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-[12px] mb-1.5">
-                      <span className="text-[#555] dark:text-[#a0a0a8]">
+                  <div
+                    key={i}
+                    onClick={() => setActiveCategory(item.label)}
+                    className={`p-2.5 -mx-2.5 rounded-xl cursor-pointer transition-all duration-300 border border-transparent ${
+                      activeCategory === item.label
+                        ? "bg-black/[0.03] dark:bg-white/[0.03] border-black/5 dark:border-white/5"
+                        : "hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                    }`}
+                  >
+                    <div className="flex justify-between text-[12px] mb-2">
+                      <span
+                        className={`transition-colors ${activeCategory === item.label ? "text-[#0d0d0d] dark:text-white font-medium" : "text-[#555] dark:text-[#a0a0a8]"}`}
+                      >
                         {item.label}
                       </span>
-                      <span className="font-medium font-mono">{item.val}</span>
+                      <span
+                        className={`font-mono transition-colors ${activeCategory === item.label ? "font-bold text-[#0d0d0d] dark:text-white" : "font-medium text-[#555] dark:text-[#a0a0a8]"}`}
+                      >
+                        {item.val}
+                      </span>
                     </div>
                     <div className="h-1.5 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-1000 ${item.color}`}
+                        className={`h-full rounded-full transition-all duration-1000 ${item.color} ${activeCategory !== item.label ? "opacity-60" : ""}`}
                         style={{ width: item.pct }}
                       ></div>
                     </div>
@@ -1035,10 +1227,12 @@ export default function AlgorhythmLanding() {
                 </span>
 
                 <div className="mt-6 items-center justify-center flex gap-2">
-                  <button onClick={()=>navigate("/auth")} className="bg-blue-600 text-white border-none px-5 py-2.5 rounded-full text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]">
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className="bg-blue-600 text-white border-none px-5 py-2.5 rounded-full text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
+                  >
                     Register
                   </button>
-                 
                 </div>
               </div>
             </Reveal>
@@ -1310,72 +1504,135 @@ export default function AlgorhythmLanding() {
                 pick up exactly where you left off.
               </p>
 
-              <div className="flex flex-col gap-3.5 mt-6">
-                <div className="bg-[#f0efe9] dark:bg-[#1a1c24] rounded-[14px] p-4">
-                  <div className="flex justify-between items-center mb-2.5">
+              {/* Dynamic Content based on activePrepList */}
+              <div
+                key={activePrepList}
+                className="flex flex-col gap-2 mt-6 animate-in fade-in slide-in-from-right-4 duration-500"
+              >
+                {(
+                  {
+                    "FAANG Interview Prep": [
+                      {
+                        name: "Two Sum",
+                        tags: "Array · Hash Map",
+                        diff: "Easy",
+                        diffColor: "text-[#16a34a] dark:text-[#22c55e]",
+                        done: true,
+                      },
+                      {
+                        name: "LRU Cache",
+                        tags: "Linked List · Hash Map",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Merge K Sorted Lists",
+                        tags: "Heap · Linked List",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                      {
+                        name: "Alien Dictionary",
+                        tags: "Graph · BFS",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                    ],
+                    "DP Mastery Series": [
+                      {
+                        name: "Climbing Stairs",
+                        tags: "Math · DP",
+                        diff: "Easy",
+                        diffColor: "text-[#16a34a] dark:text-[#22c55e]",
+                        done: true,
+                      },
+                      {
+                        name: "Coin Change",
+                        tags: "Array · DP",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: false,
+                      },
+                      {
+                        name: "Longest Increasing Subsequence",
+                        tags: "Binary Search · DP",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: false,
+                      },
+                      {
+                        name: "Edit Distance",
+                        tags: "String · DP",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: false,
+                      },
+                    ],
+                    "Arrays & Strings": [
+                      {
+                        name: "Valid Anagram",
+                        tags: "String · Hash Table",
+                        diff: "Easy",
+                        diffColor: "text-[#16a34a] dark:text-[#22c55e]",
+                        done: true,
+                      },
+                      {
+                        name: "Product of Array Except Self",
+                        tags: "Array · Prefix Sum",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Group Anagrams",
+                        tags: "String · Sorting",
+                        diff: "Medium",
+                        diffColor: "text-[#d97706] dark:text-[#fbbf24]",
+                        done: true,
+                      },
+                      {
+                        name: "Minimum Window Substring",
+                        tags: "String · Hash Table",
+                        diff: "Hard",
+                        diffColor: "text-[#e11d48] dark:text-[#fb7185]",
+                        done: true,
+                      },
+                    ],
+                  }[activePrepList] || []
+                ).map((prob, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-3 px-4 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-xl text-[13px] border border-transparent hover:border-black/5 dark:hover:border-white/5 transition-all cursor-default"
+                  >
                     <div>
-                      <div className="text-[14px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee]">
-                        FAANG Interview Prep
+                      <div className="font-medium text-[#0d0d0d] dark:text-[#f0f0ee]">
+                        {prob.name}
                       </div>
-                      <div className="text-[12px] text-[#888] dark:text-[#555] mt-0.5">
-                        75 problems · Google focus
+                      <div className="text-[11px] text-[#888] dark:text-[#555] mt-1">
+                        {prob.tags}
                       </div>
                     </div>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24] border border-transparent">
-                      60%
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-white dark:bg-[#13151a] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-1000 bg-[#d97706] dark:bg-[#fbbf24]"
-                      style={{ width: "60%" }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="bg-[#f0efe9] dark:bg-[#1a1c24] rounded-[14px] p-4">
-                  <div className="flex justify-between items-center mb-2.5">
-                    <div>
-                      <div className="text-[14px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee]">
-                        DP Mastery Series
-                      </div>
-                      <div className="text-[12px] text-[#888] dark:text-[#555] mt-0.5">
-                        50 problems · All patterns
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`text-[12px] font-medium ${prob.diffColor}`}
+                      >
+                        {prob.diff}
+                      </span>
+                      {prob.done ? (
+                        <span className="text-[14px] text-[#16a34a] dark:text-[#22c55e]">
+                          ✓
+                        </span>
+                      ) : (
+                        <span className="text-[14px] text-[#888] dark:text-[#555]">
+                          —
+                        </span>
+                      )}
                     </div>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-white dark:bg-[#13151a] text-[#555] dark:text-[#a0a0a8] border border-transparent">
-                      25%
-                    </span>
                   </div>
-                  <div className="h-1.5 bg-white dark:bg-[#13151a] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-1000 bg-[#7c3aed] dark:bg-[#a78bfa]"
-                      style={{ width: "25%" }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="bg-[#f0efe9] dark:bg-[#1a1c24] rounded-[14px] p-4">
-                  <div className="flex justify-between items-center mb-2.5">
-                    <div>
-                      <div className="text-[14px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee]">
-                        Arrays & Strings
-                      </div>
-                      <div className="text-[12px] text-[#888] dark:text-[#555] mt-0.5">
-                        30 problems · Foundation
-                      </div>
-                    </div>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
-                      100%
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-white dark:bg-[#13151a] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-1000 bg-[#16a34a] dark:bg-[#22c55e]"
-                      style={{ width: "100%" }}
-                    ></div>
-                  </div>
-                </div>
+                ))}
               </div>
             </Reveal>
 
@@ -1395,74 +1652,67 @@ export default function AlgorhythmLanding() {
                 Medium, and Hard — and where to push next.
               </p>
 
-              <div className="flex gap-4 mt-6 items-end h-[140px]">
+              <div className="flex flex-col gap-1.5 mt-6">
                 {[
                   {
-                    label: "Easy",
-                    count: "180",
-                    h: "88%",
-                    color: "bg-[#16a34a] dark:bg-[#22c55e]",
-                    textColor: "text-[#16a34a] dark:text-[#22c55e]",
-                  },
-                  {
-                    label: "Medium",
-                    count: "250",
-                    h: "66%",
+                    label: "FAANG Interview Prep",
+                    desc: "75 problems · Google focus",
+                    val: "60%",
                     color: "bg-[#d97706] dark:bg-[#fbbf24]",
-                    textColor: "text-[#d97706] dark:text-[#fbbf24]",
+                    badgeColor:
+                      "bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]",
                   },
                   {
-                    label: "Hard",
-                    count: "70",
-                    h: "22%",
-                    color: "bg-[#e11d48] dark:bg-[#fb7185]",
-                    textColor: "text-[#e11d48] dark:text-[#fb7185]",
+                    label: "DP Mastery Series",
+                    desc: "50 problems · All patterns",
+                    val: "25%",
+                    color: "bg-[#7c3aed] dark:bg-[#a78bfa]",
+                    badgeColor:
+                      "bg-white dark:bg-[#13151a] text-[#555] dark:text-[#a0a0a8]",
                   },
                   {
-                    label: "Total",
-                    count: "500",
-                    h: "100%",
-                    color: "bg-blue-600 dark:bg-blue-400",
-                    textColor: "text-blue-600 dark:text-blue-400",
+                    label: "Arrays & Strings",
+                    desc: "30 problems · Foundation",
+                    val: "100%",
+                    color: "bg-[#16a34a] dark:bg-[#22c55e]",
+                    badgeColor:
+                      "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
                   },
-                ].map((bar, i) => (
+                ].map((item, i) => (
                   <div
                     key={i}
-                    className="flex-1 flex flex-col items-center gap-2"
+                    onClick={() => setActivePrepList(item.label)}
+                    className={`p-3 -mx-3 rounded-[14px] cursor-pointer transition-all duration-300 border border-transparent ${
+                      activePrepList === item.label
+                        ? "bg-black/[0.03] dark:bg-white/[0.03] border-black/5 dark:border-white/5"
+                        : "hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                    }`}
                   >
-                    <div className="flex-1 w-full flex items-end">
+                    <div className="flex justify-between items-center mb-2.5 px-1">
+                      <div>
+                        <div
+                          className={`text-[14px] transition-colors ${activePrepList === item.label ? "font-bold text-[#0d0d0d] dark:text-white" : "font-medium text-[#0d0d0d] dark:text-[#f0f0ee]"}`}
+                        >
+                          {item.label}
+                        </div>
+                        <div className="text-[12px] text-[#888] dark:text-[#555] mt-0.5">
+                          {item.desc}
+                        </div>
+                      </div>
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase border border-transparent transition-colors ${item.badgeColor} ${activePrepList !== item.label ? "opacity-60" : ""}`}
+                      >
+                        {item.val}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-full overflow-hidden mx-1">
                       <div
-                        className={`w-full ${bar.color} rounded-t-md transition-all duration-1000`}
-                        style={{ height: bar.h }}
+                        className={`h-full rounded-full transition-all duration-1000 ${item.color} ${activePrepList !== item.label ? "opacity-60" : ""}`}
+                        style={{ width: item.val }}
                       ></div>
-                    </div>
-                    <div className={`text-[11px] font-medium ${bar.textColor}`}>
-                      {bar.label}
-                    </div>
-                    <div className="text-[12px] text-[#0d0d0d] dark:text-[#f0f0ee] font-medium font-mono">
-                      {bar.count}
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-6 flex gap-2.5">
-                <div className="flex-1 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-xl p-3.5 text-center">
-                  <div className="text-[22px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee] tracking-[-0.02em]">
-                    74%
-                  </div>
-                  <div className="text-[11px] text-[#888] dark:text-[#555] mt-1">
-                    Acceptance rate
-                  </div>
-                </div>
-                <div className="flex-1 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-xl p-3.5 text-center">
-                  <div className="text-[22px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee] tracking-[-0.02em]">
-                    +12%
-                  </div>
-                  <div className="text-[11px] text-[#888] dark:text-[#555] mt-1">
-                    vs. global avg
-                  </div>
-                </div>
               </div>
             </Reveal>
           </div>
@@ -1689,7 +1939,7 @@ export default function AlgorhythmLanding() {
         <div className="py-[60px] pt-0">
           <Reveal className="mb-12 bg-slate-900 flex flex-col justify-center items-center dark:bg-slate-800 rounded-3xl p-8 md:p-10 text-white shadow-xl dark:shadow-none border border-transparent dark:border-slate-700 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
             <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] text-white mb-5">
               Ready to start your journey?
             </h2>
@@ -1713,9 +1963,13 @@ export default function AlgorhythmLanding() {
           <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-10 mb-12">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-3.5">
-                <img src={logo} className="w-50"  alt="Algorhythm" />
+                <img
+                  src={logo}
+                  className="w-50 not-dark:invert"
+                  alt="Algorhythm"
+                />
               </div>
-              <div className="text-[13px] text-[#888] dark:text-[#555] leading-[1.7] max-w-[240px]">
+              <div className="text-[13px] text-[#888] dark:text-[#555] font-light leading-[1.7] max-w-[240px]">
                 The minimalist arena for competitive programmers. Built for
                 speed, depth, and community.
               </div>
@@ -1724,59 +1978,53 @@ export default function AlgorhythmLanding() {
               <h4 className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#888] dark:text-[#555] mb-4">
                 Platform
               </h4>
-              <a
-                href="#"
+              <NavLink
+                to="/problemset"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
                 Problems
-              </a>
-              <a
-                href="#"
+              </NavLink>
+              <NavLink
+                to="/contests"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
                 Contests
-              </a>
-              <a
-                href="#"
+              </NavLink>
+              <NavLink
+                to="/leaderboard"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
                 Leaderboard
-              </a>
-              <a
-                href="#"
+              </NavLink>
+              <NavLink
+                to="/premium"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                Discuss
-              </a>
-              <a
-                href="#"
-                className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
-              >
-                Lists
-              </a>
+                Premium
+              </NavLink>
             </div>
             <div className="flex flex-col">
               <h4 className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#888] dark:text-[#555] mb-4">
                 Resources
               </h4>
-              <a
-                href="#"
+              <NavLink
+                to="/blogs"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
                 Blogs
-              </a>
+              </NavLink>
               <a
                 href="#"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
                 Editorial
               </a>
-              <a
-                href="#"
+              <NavLink
+                to="/publicapi"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                API Docs
-              </a>
+                Public API
+              </NavLink>
               <a
                 href="#"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
@@ -1792,7 +2040,7 @@ export default function AlgorhythmLanding() {
                 href="#"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                About
+                Careers
               </a>
               <a
                 href="#"
@@ -1810,7 +2058,7 @@ export default function AlgorhythmLanding() {
                 href="#"
                 className="text-[14px] text-[#555] dark:text-[#a0a0a8] no-underline mb-2.5 hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                Contact
+                Sponsor a Contest
               </a>
             </div>
           </div>
@@ -1820,16 +2068,25 @@ export default function AlgorhythmLanding() {
             </div>
             <div className="flex gap-4">
               <a
-                href="https://www.linkedin.com/in/atharv-dubey-4a2199323" target="_blank"
+                href="https://www.linkedin.com/in/atharv-dubey-4a2199323"
+                target="_blank"
                 className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
                 LinkedIn
               </a>
               <a
-                href="https://github.com/AtharvDubey12/Algorhythm" target="_blank"
+                href="https://github.com/AtharvDubey12/Algorhythm"
+                target="_blank"
                 className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                GitHub
+                GitHub1
+              </a>
+              <a
+                href="https://github.com/atharvjack3-sudo/algorhythm"
+                target="_blank"
+                className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
+              >
+                GitHub2
               </a>
             </div>
           </div>
