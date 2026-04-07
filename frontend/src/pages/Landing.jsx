@@ -1034,13 +1034,11 @@ export default function AlgorhythmLanding() {
                   ⭐ Rating · Rated Contest
                 </span>
 
-                <div className="mt-4 flex gap-2">
-                  <button className="bg-blue-600 text-white border-none px-5 py-2.5 rounded-full text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]">
+                <div className="mt-6 items-center justify-center flex gap-2">
+                  <button onClick={()=>navigate("/auth")} className="bg-blue-600 text-white border-none px-5 py-2.5 rounded-full text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]">
                     Register
                   </button>
-                  <button className="bg-transparent text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10 px-4 py-2.5 rounded-full text-[13px] cursor-pointer transition-all hover:bg-white dark:hover:bg-[#13151a] hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee]">
-                    View Problems
-                  </button>
+                 
                 </div>
               </div>
             </Reveal>
@@ -1689,7 +1687,9 @@ export default function AlgorhythmLanding() {
 
         {/* CTA */}
         <div className="py-[60px] pt-0">
-          <Reveal className="bg-blue-600 rounded-[32px] p-12 md:p-20 text-center relative overflow-hidden">
+          <Reveal className="mb-12 bg-slate-900 flex flex-col justify-center items-center dark:bg-slate-800 rounded-3xl p-8 md:p-10 text-white shadow-xl dark:shadow-none border border-transparent dark:border-slate-700 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
             <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] text-white mb-5">
               Ready to start your journey?
             </h2>
