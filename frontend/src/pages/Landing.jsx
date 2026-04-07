@@ -38,6 +38,7 @@ const Reveal = ({ children, delay = 0, className = "" }) => {
 };
 
 export default function AlgorhythmLanding() {
+  const [activeSolutionId, setActiveSolutionId] = useState(2);
   const navigate = useNavigate();
   const [activeLang, setActiveLang] = useState("C++17");
   const [timeLeft, setTimeLeft] = useState(7724);
@@ -50,6 +51,328 @@ export default function AlgorhythmLanding() {
     0, 0, 0, 1, 0, 1, 2, 0, 1, 3, 2, 1, 0, 2, 3, 4, 3, 2, 1, 3, 4, 3, 2, 4, 3,
     2, 2, 1, 0, 0, 1, 2, 3, 1, 2, 4, 3, 2, 4, 3, 2, 1, 3, 4, 2, 1, 0, 2, 3, 4,
     3, 2,
+  ];
+  const solutions = [
+    {
+      id: 1,
+      label: "Brute Force",
+      tc: "O(n³)",
+      tcWidth: "90%",
+      sc: "O(1)",
+      scWidth: "15%",
+      verdictId: "tle",
+      verdicts: [
+        {
+          label: "AC",
+          time: "1850ms",
+          mem: "3.8 MB",
+          test: "1–25",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+        {
+          label: "TLE",
+          time: ">2000ms",
+          mem: "—",
+          test: "26",
+          color:
+            "bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]",
+        },
+        {
+          label: "TLE",
+          time: ">2000ms",
+          mem: "—",
+          test: "27",
+          color:
+            "bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]",
+        },
+      ],
+      code: (
+        <>
+          <span className="text-[#ffcb6b]">string</span>{" "}
+          <span className="text-[#82aaff]">longestPalindrome</span>(
+          <span className="text-[#ffcb6b]">string</span> s) {"{\n"} <br/>
+          &nbsp;&nbsp;<span className="text-[#ffcb6b]">string</span> res ={" "}
+          <span className="text-[#c3e88d]">""</span>;<br />
+          &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
+          <span className="text-[#c792ea]">int</span> i ={" "}
+          <span className="text-[#f78c6c]">0</span>; i &lt; s.size(); i++){" "}
+          {"{\n"} <br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
+          <span className="text-[#c792ea]">int</span> j = i; j &lt; s.size();
+          j++) {"{\n"}
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br/> &nbsp; &nbsp; &nbsp; &nbsp;
+          <span className="text-[#ffcb6b]">string</span> sub = s.substr(i, j-i+
+          <span className="text-[#f78c6c]">1</span>);
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <span className="text-[#c792ea]"> if</span> (
+          <span className="text-[#82aaff]">isPalindrome</span>(sub) &amp;&amp;
+          sub.size() &gt; res.size())
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res = sub;
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;  {"}\n"}
+          &nbsp;&nbsp; <br/> &nbsp;&nbsp;{"}\n"} <br/>
+          &nbsp;&nbsp;<span className="text-[#c792ea]">return</span> res;
+          <br />
+          {"}"}
+        </>
+      ),
+    },
+    {
+      id: 2,
+      label: "Better",
+      tc: "O(n²)",
+      tcWidth: "60%",
+      sc: "O(1)",
+      scWidth: "15%",
+      verdictId: "ac",
+      verdicts: [
+        {
+          label: "AC",
+          time: "38ms",
+          mem: "4.1 MB",
+          test: "1–45",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+        {
+          label: "AC",
+          time: "42ms",
+          mem: "4.2 MB",
+          test: "46",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+        {
+          label: "AC",
+          time: "39ms",
+          mem: "4.1 MB",
+          test: "47",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+      ],
+      code: (
+        <>
+          <span className="text-[#ffcb6b]">string</span>{" "}
+          <span className="text-[#82aaff]">expand</span>(
+          <span className="text-[#ffcb6b]">string</span>&amp; s,{" "}
+          <span className="text-[#c792ea]">int</span> l,{" "}
+          <span className="text-[#c792ea]">int</span> r) {"{\n"}
+          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp; while</span> (l &gt;={" "}
+          <span className="text-[#f78c6c]">0</span> &amp;&amp; r &lt; s.size()
+          &amp;&amp; s[l] == s[r])
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;l--, r++;
+          <br />
+          &nbsp;&nbsp;<span className="text-[#c792ea]">return</span> s.substr(l+
+          <span className="text-[#f78c6c]">1</span>, r-l-
+          <span className="text-[#f78c6c]">1</span>);
+          <br />
+          {"}\n"} <br/>
+          <span className="text-[#ffcb6b]">string</span>{" "}
+          <span className="text-[#82aaff]">longestPalindrome</span>(
+          <span className="text-[#ffcb6b]">string</span> s) {"{\n"}
+          &nbsp;&nbsp;<span className="text-[#ffcb6b]"><br/>&nbsp;&nbsp;string</span> res ={" "}
+          <span className="text-[#c3e88d]">""</span>;<br />
+          &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
+          <span className="text-[#c792ea]">int</span> i ={" "}
+          <span className="text-[#f78c6c]">0</span>; i &lt; s.size(); i++){" "}
+          {"{\n"}
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#ffcb6b]">
+            <br/>&nbsp;&nbsp;&nbsp;&nbsp;string
+          </span>{" "}
+          odd = <span className="text-[#82aaff]">expand</span>(s, i, i);
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#ffcb6b]">
+            string
+          </span>{" "}
+          even = <span className="text-[#82aaff]">expand</span>(s, i, i+
+          <span className="text-[#f78c6c]">1</span>);
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
+            if
+          </span>{" "}
+          (odd.size() &gt; res.size()) res = odd;
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
+            if
+          </span>{" "}
+          (even.size() &gt; res.size()) res = even;
+          <br />
+          &nbsp;&nbsp;{"}\n"}
+          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;return</span> res;
+          <br />
+          {"}"}
+        </>
+      ),
+    },
+    {
+      id: 3,
+      label: "Optimal",
+      tc: "O(n)",
+      tcWidth: "20%",
+      sc: "O(n)",
+      scWidth: "60%",
+      verdictId: "ac",
+      verdicts: [
+        {
+          label: "AC",
+          time: "4ms",
+          mem: "5.2 MB",
+          test: "1–47",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+        {
+          label: "AC",
+          time: "6ms",
+          mem: "5.3 MB",
+          test: "48",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+        {
+          label: "AC",
+          time: "5ms",
+          mem: "5.2 MB",
+          test: "49",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+      ],
+      code: (
+        <>
+          <span className="text-[#ffcb6b]">string</span>{" "}
+          <span className="text-[#82aaff]">longestPalindrome</span>(
+          <span className="text-[#ffcb6b]">string</span> s) {"{\n"}
+          &nbsp;&nbsp;<span className="text-[#ffcb6b]"><br/>&nbsp;&nbsp;string</span> t ={" "}
+          <span className="text-[#c3e88d]">"^#"</span>;<br />
+          &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
+          <span className="text-[#c792ea]">char</span> c : s) t += c, t +={" "}
+          <span className="text-[#c3e88d]">"#"</span>;<br />
+          &nbsp;&nbsp;t += <span className="text-[#c3e88d]">"$"</span>;<br />
+          &nbsp;&nbsp;<span className="text-[#ffcb6b]">vector</span>&lt;
+          <span className="text-[#c792ea]">int</span>&gt; p(t.size(),{" "}
+          <span className="text-[#f78c6c]">0</span>);
+          <br />
+          &nbsp;&nbsp;<span className="text-[#c792ea]">int</span> c ={" "}
+          <span className="text-[#f78c6c]">0</span>, r ={" "}
+          <span className="text-[#f78c6c]">0</span>, maxLen ={" "}
+          <span className="text-[#f78c6c]">0</span>, center ={" "}
+          <span className="text-[#f78c6c]">0</span>;<br />
+          &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
+          <span className="text-[#c792ea]">int</span> i ={" "}
+          <span className="text-[#f78c6c]">1</span>; i &lt; t.size()-
+          <span className="text-[#f78c6c]">1</span>; i++) {"{\n"}
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;&nbsp;&nbsp;if</span> (r
+          &gt; i) p[i] = <span className="text-[#82aaff]">min</span>(r - i, p[
+          <span className="text-[#f78c6c]">2</span>*c - i]);
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
+            while
+          </span>{" "}
+          (t[i+<span className="text-[#f78c6c]">1</span>+p[i]] == t[i-
+          <span className="text-[#f78c6c]">1</span>-p[i]]) p[i]++;
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">if</span> (i
+          + p[i] &gt; r) c = i, r = i + p[i];
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
+            if
+          </span>{" "}
+          (p[i] &gt; maxLen) maxLen = p[i], center = i;
+          <br />
+          &nbsp;&nbsp;{"}\n"}
+          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;return</span>{" "}
+          s.substr((center - maxLen)/<span className="text-[#f78c6c]">2</span>,
+          maxLen);
+          <br />
+          {"}"}
+        </>
+      ),
+    },
+    {
+      id: 4,
+      label: "Wrong",
+      tc: "O(n²)",
+      tcWidth: "60%",
+      sc: "O(1)",
+      scWidth: "15%",
+      verdictId: "wa",
+      verdicts: [
+        {
+          label: "AC",
+          time: "14ms",
+          mem: "3.9 MB",
+          test: "1–15",
+          color:
+            "bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]",
+        },
+        {
+          label: "WA",
+          time: "14ms",
+          mem: "3.8 MB",
+          test: "16",
+          color:
+            "bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185]",
+        },
+        {
+          label: "WA",
+          time: "14ms",
+          mem: "3.8 MB",
+          test: "17",
+          color:
+            "bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185]",
+        },
+      ],
+      code: (
+        <>
+          <span className="text-[#ffcb6b]">string</span>{" "}
+          <span className="text-[#82aaff]">longestPalindrome</span>(
+          <span className="text-[#ffcb6b]">string</span> s) {"{\n"}
+          &nbsp;&nbsp;<span className="text-[#ffcb6b]"><br/>&nbsp;&nbsp;string</span> res ={" "}
+          <span className="text-[#c3e88d]">""</span>;<br />
+          &nbsp;&nbsp;
+          <span className="text-[#888] italic">
+            // Bug: Only checks odd-length palindromes!
+          </span>
+          <br />
+          &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
+          <span className="text-[#c792ea]">int</span> i ={" "}
+          <span className="text-[#f78c6c]">0</span>; i &lt; s.size(); i++){" "}
+          {"{\n"}
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;&nbsp;&nbsp;int</span> l
+          = i, r = i;
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
+            while
+          </span>{" "}
+          (l &gt;= <span className="text-[#f78c6c]">0</span> &amp;&amp; r &lt;
+          s.size() &amp;&amp; s[l] == s[r]) {"{\n"}<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l--, r++;
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;{"}\n"}
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#ffcb6b]">
+            <br/>&nbsp;&nbsp;&nbsp;&nbsp;string
+          </span>{" "}
+          sub = s.substr(l+<span className="text-[#f78c6c]">1</span>, r-l-
+          <span className="text-[#f78c6c]">1</span>);
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#c792ea]">
+            if
+          </span>{" "}
+          (sub.size() &gt; res.size()) res = sub;
+          <br />
+          &nbsp;&nbsp;{"}\n"}
+          &nbsp;&nbsp;<span className="text-[#c792ea]"><br/>&nbsp;&nbsp;return</span> res;
+          <br />
+          {"}"}
+        </>
+      ),
+    },
   ];
 
   // Countdown timer
@@ -317,7 +640,6 @@ export default function AlgorhythmLanding() {
               per-test-case breakdowns.
             </p>
           </Reveal>
-
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
             {/* Left Bento */}
             <Reveal className="col-span-12 md:col-span-7 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
@@ -334,17 +656,19 @@ export default function AlgorhythmLanding() {
               </p>
 
               <div className="flex gap-2 flex-wrap mt-4">
-                {["C++17", "Python 3", "Java 21", "JavaScript"].map(
-                  (lang) => (
-                    <div
-                      key={lang}
-                      
-                      className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border cursor-pointer transition-all ${activeLang === lang ? "bg-blue-600 text-white border-transparent" : "border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]"}`}
-                    >
-                      {lang}
-                    </div>
-                  ),
-                )}
+                {solutions.map((sol) => (
+                  <div
+                    key={sol.id}
+                    onClick={() => setActiveSolutionId(sol.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border cursor-pointer transition-all ${
+                      activeSolutionId === sol.id
+                        ? "bg-blue-600 text-white border-transparent"
+                        : "border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8] hover:bg-[#f0efe9] dark:hover:bg-[#1a1c24]"
+                    }`}
+                  >
+                    {sol.label}
+                  </div>
+                ))}
               </div>
 
               <div className="bg-[#0f1117] dark:bg-[#0a0b0f] rounded-2xl overflow-hidden mt-6 border border-white/5">
@@ -356,58 +680,8 @@ export default function AlgorhythmLanding() {
                     longest_palindrome.cpp
                   </span>
                 </div>
-                <div className="p-5 px-5.5 text-[13px] font-mono leading-[1.8] overflow-x-auto text-[#f0f0ee]">
-                  <span className="text-[#ffcb6b]">string</span>{" "}
-                  <span className="text-[#82aaff]">expand</span>(
-                  <span className="text-[#ffcb6b]">string</span>&amp; s,{" "}
-                  <span className="text-[#c792ea]">int</span> l,{" "}
-                  <span className="text-[#c792ea]">int</span> r) {"{\n"}
-                  &nbsp;&nbsp;<span className="text-[#c792ea]">while</span> (l
-                  &gt;= <span className="text-[#f78c6c]">0</span> &amp;&amp; r
-                  &lt; s.size() &amp;&amp; s[l] == s[r])
-                  <br />
-                  &nbsp;&nbsp;&nbsp;&nbsp;l--, r++;
-                  <br />
-                  &nbsp;&nbsp;<span className="text-[#c792ea]">
-                    return
-                  </span>{" "}
-                  s.substr(l+<span className="text-[#f78c6c]">1</span>, r-l-
-                  <span className="text-[#f78c6c]">1</span>);
-                  <br />
-                  {"}\n"}
-                  <span className="text-[#ffcb6b]">string</span>{" "}
-                  <span className="text-[#82aaff]">longestPalindrome</span>(
-                  <span className="text-[#ffcb6b]">string</span> s) {"{\n"}
-                  &nbsp;&nbsp;<span className="text-[#ffcb6b]">string</span> res
-                  = <span className="text-[#c3e88d]">""</span>;<br />
-                  &nbsp;&nbsp;<span className="text-[#c792ea]">for</span> (
-                  <span className="text-[#c792ea]">int</span> i ={" "}
-                  <span className="text-[#f78c6c]">0</span>; i &lt; s.size();
-                  i++) {"{\n"}
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  <span className="text-[#ffcb6b]">string</span> odd ={" "}
-                  <span className="text-[#82aaff]">expand</span>(s, i, i);
-                  <br />
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  <span className="text-[#ffcb6b]">string</span> even ={" "}
-                  <span className="text-[#82aaff]">expand</span>(s, i, i+
-                  <span className="text-[#f78c6c]">1</span>);
-                  <br />
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  <span className="text-[#c792ea]">if</span> (odd.size() &gt;
-                  res.size()) res = odd;
-                  <br />
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  <span className="text-[#c792ea]">if</span> (even.size() &gt;
-                  res.size()) res = even;
-                  <br />
-                  &nbsp;&nbsp;{"}\n"}
-                  &nbsp;&nbsp;<span className="text-[#c792ea]">
-                    return
-                  </span>{" "}
-                  res;
-                  <br />
-                  {"}"}
+                <div className="p-5 px-5.5 text-[13px] font-mono leading-[1.8] overflow-x-auto text-[#f0f0ee] min-h-[360px]">
+                  {solutions.find((s) => s.id === activeSolutionId)?.code}
                 </div>
               </div>
             </Reveal>
@@ -446,23 +720,27 @@ export default function AlgorhythmLanding() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
+                  <tr
+                    className={`transition-all duration-300 ${activeSolutionId === 2 || activeSolutionId === 3 ? "bg-[#eff4ff] dark:bg-[#4d8dff]/10" : "opacity-40 grayscale-[50%]"}`}
+                  >
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">
                         AC
                       </span>
                     </td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
-                      38ms
+                      {activeSolutionId === 3 ? "4ms" : "38ms"}
                     </td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
-                      4.1 MB
+                      {activeSolutionId === 3 ? "5.2 MB" : "4.1 MB"}
                     </td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
-                      1–45
+                      1–47
                     </td>
                   </tr>
-                  <tr>
+                  <tr
+                    className={`transition-all duration-300 ${activeSolutionId === 1 ? "bg-[#fffbeb] dark:bg-[#fbbf24]/10" : "opacity-40 grayscale-[50%]"}`}
+                  >
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]">
                         TLE
@@ -478,7 +756,13 @@ export default function AlgorhythmLanding() {
                       46
                     </td>
                   </tr>
-                  <tr>
+                  <tr
+                    className={`transition-all duration-300 ${
+                      activeSolutionId === 4
+                        ? "bg-rose-50 dark:bg-rose-500/10"
+                        : "opacity-40 grayscale-[50%]"
+                    }`}
+                  >
                     <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
                       <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185]">
                         WA
@@ -508,13 +792,17 @@ export default function AlgorhythmLanding() {
                         Time complexity
                       </span>
                       <span className="font-medium font-mono text-[#16a34a] dark:text-[#22c55e]">
-                        O(n²)
+                        {solutions.find((s) => s.id === activeSolutionId)?.tc}
                       </span>
                     </div>
                     <div className="h-1.5 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-1000 bg-[#16a34a] dark:bg-[#22c55e]"
-                        style={{ width: "60%" }}
+                        style={{
+                          width: solutions.find(
+                            (s) => s.id === activeSolutionId,
+                          )?.tcWidth,
+                        }}
                       ></div>
                     </div>
                   </div>
@@ -524,20 +812,24 @@ export default function AlgorhythmLanding() {
                         Space complexity
                       </span>
                       <span className="font-medium font-mono text-[#16a34a] dark:text-[#22c55e]">
-                        O(1)
+                        {solutions.find((s) => s.id === activeSolutionId)?.sc}
                       </span>
                     </div>
                     <div className="h-1.5 bg-[#f0efe9] dark:bg-[#1a1c24] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-1000 bg-blue-600 dark:bg-blue-400"
-                        style={{ width: "15%" }}
+                        style={{
+                          width: solutions.find(
+                            (s) => s.id === activeSolutionId,
+                          )?.scWidth,
+                        }}
                       ></div>
                     </div>
                   </div>
                 </div>
               </div>
             </Reveal>
-          </div>
+          </div>{" "}
         </div>
 
         {/* SECTION 2: PROBLEM SET */}
@@ -943,8 +1235,6 @@ export default function AlgorhythmLanding() {
                     array and skip nodes already settled.
                   </div>
                 </div>
-
-                
               </div>
             </Reveal>
 
