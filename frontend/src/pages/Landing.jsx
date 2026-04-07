@@ -163,8 +163,8 @@ export default function AlgorhythmLanding() {
           </p>
 
           {/* Gradient Masks for Seamless Fade In/Out */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-white dark:from-[#f5f4f0] to-transparent z-10 pointer-events-none"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-white dark:from-[#f5f4f0] to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[#f5f4f0] dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-[#f5f4f0] dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
 
           {/* Marquee Container */}
           <div className="flex w-full overflow-hidden">
