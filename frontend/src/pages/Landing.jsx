@@ -735,7 +735,7 @@ export default function AlgorhythmLanding() {
                       {activeSolutionId === 3 ? "5.2 MB" : "4.1 MB"}
                     </td>
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
-                      1–47
+                      All
                     </td>
                   </tr>
                   <tr
