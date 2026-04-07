@@ -490,22 +490,22 @@ export default function AlgorhythmLanding() {
         {/* HERO */}
         <div className="py-[120px] pb-20 text-center relative">
           <Reveal className="mb-7">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff]">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
+            <span className="inline-flex select-none items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff]">
+              <span className="select-none w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
               Now in Public Beta
             </span>
           </Reveal>
           <Reveal delay={100}>
-            <h1 className="text-[clamp(48px,8vw,88px)] font-medium leading-[1.04] tracking-[-0.03em] mb-6">
+            <h1 className="select-none text-[clamp(48px,8vw,88px)] font-medium leading-[1.04] tracking-[-0.03em] mb-6">
               Think in algorithms.
               <br />
-              <em className="not-italic text-blue-600 dark:text-blue-400">
+              <em className="select-none not-italic text-blue-600 dark:text-blue-400">
                 Execute in seconds.
               </em>
             </h1>
           </Reveal>
           <Reveal delay={200}>
-            <p className="text-[clamp(16px,2vw,20px)] text-[#555] dark:text-[#a0a0a8] max-w-[560px] mx-auto mb-10 leading-[1.65]">
+            <p className="select-none text-[clamp(16px,2vw,20px)] text-[#555] dark:text-[#a0a0a8] max-w-[560px] mx-auto mb-10 leading-[1.65]">
               The modern arena for competitive programmers. Solve curated
               problems, compete in live contests, discuss approaches, and track
               every step of your growth.
@@ -514,13 +514,13 @@ export default function AlgorhythmLanding() {
           <Reveal delay={300} className="flex gap-3 justify-center flex-wrap">
             <button
               onClick={() => navigate("/auth")}
-              className="bg-blue-600 text-white border-none px-8 py-3.5 rounded-full text-[15px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
+              className="bg-blue-600 select-none text-white border-none px-8 py-3.5 rounded-full text-[15px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
             >
               Start Coding Free
             </button>
             <button
               onClick={() => navigate("/problemset")}
-              className="bg-transparent text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10 px-7 py-3.5 rounded-full text-[15px] cursor-pointer transition-all hover:bg-white dark:hover:bg-[#13151a] hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee]"
+              className="bg-transparent select-none text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10 px-7 py-3.5 rounded-full text-[15px] cursor-pointer transition-all hover:bg-white dark:hover:bg-[#13151a] hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee]"
             >
               Browse Problem Set
             </button>
@@ -530,17 +530,17 @@ export default function AlgorhythmLanding() {
         {/* TRUSTED BY MARQUEE */}
         {/* TRUSTED BY MARQUEE */}
         <Reveal className="py-12   -mx-6 md:mx-0 md:rounded-2xl flex flex-col items-center relative overflow-hidden">
-          <p className="text-[11px] font-bold text-[#888] dark:text-[#555] uppercase tracking-[0.2em] mb-10 text-center">
+          <p className="text-[11px] select-none font-bold text-[#888] dark:text-[#555] uppercase tracking-[0.2em] mb-10 text-center">
             Trusted by engineers at
           </p>
 
           {/* Gradient Masks for Seamless Fade In/Out */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[#f5f4f0] dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-[#f5f4f0] dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute select-none left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[#f5f4f0] dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute select-none right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-[#f5f4f0] dark:from-[#0c0d10] to-transparent z-10 pointer-events-none"></div>
 
           {/* Marquee Container */}
-          <div className="flex w-full overflow-hidden">
-            <div className="flex animate-tick whitespace-nowrap hover:[animation-play-state:paused] items-center">
+          <div className="flex select-none w-full overflow-hidden">
+            <div className="flex select-none animate-tick whitespace-nowrap hover:[animation-play-state:paused] items-center">
               {/* Duplicated list for infinite scroll effect */}
               {[...Array(2)].map((_, i) => (
                 <div
@@ -640,34 +640,34 @@ export default function AlgorhythmLanding() {
         <Reveal className="my-[60px]" ref={statsRef}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-[20px] overflow-hidden">
             <div className="bg-white dark:bg-[#13151a] p-8 text-center">
-              <div className="text-[40px] font-medium tracking-[-0.03em] leading-none">
+              <div className="text-[40px] select-none font-medium tracking-[-0.03em] leading-none">
                 {stats.s1.toLocaleString()}+
               </div>
-              <div className="text-[12px] text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
+              <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
                 Active Coders
               </div>
             </div>
             <div className="bg-white dark:bg-[#13151a] p-8 text-center">
-              <div className="text-[40px] font-medium tracking-[-0.03em] leading-none">
+              <div className="text-[40px] select-none font-medium tracking-[-0.03em] leading-none">
                 {stats.s2.toLocaleString()}+
               </div>
-              <div className="text-[12px] text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
+              <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
                 Curated Problems
               </div>
             </div>
             <div className="bg-white dark:bg-[#13151a] p-8 text-center">
-              <div className="text-[40px] font-medium tracking-[-0.03em] leading-none">
+              <div className="text-[40px] select-none font-medium tracking-[-0.03em] leading-none">
                 {stats.s3.toLocaleString()}+
               </div>
-              <div className="text-[12px] text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
+              <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
                 Solutions Submitted
               </div>
             </div>
             <div className="bg-white dark:bg-[#13151a] p-8 text-center">
-              <div className="text-[40px] font-medium tracking-[-0.03em] leading-none">
+              <div className="text-[40px] select-none font-medium tracking-[-0.03em] leading-none">
                 {stats.s4.toLocaleString()}+
               </div>
-              <div className="text-[12px] text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
+              <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.08em] mt-2">
                 Contests Held
               </div>
             </div>
@@ -677,13 +677,13 @@ export default function AlgorhythmLanding() {
         {/* SECTION 1: CODE EDITOR */}
         <div className="py-[100px] pt-0">
           <Reveal className="text-center mb-16">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0efe9] dark:bg-[#1a1c24] text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10">
+            <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0efe9] dark:bg-[#1a1c24] text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10">
               Core Environment
             </span>
-            <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] leading-[1.1] mt-4">
+            <h2 className="text-[clamp(36px,5vw,56px)] select-none font-medium tracking-[-0.025em] leading-[1.1] mt-4">
               Write. Run. Submit.
             </h2>
-            <p className="text-[17px] text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
+            <p className="text-[17px] select-none text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
               A full-featured in-browser IDE with real-time compilation for C++,
               Python, and Java. Get instant verdicts, time and memory stats, and
               per-test-case breakdowns.
@@ -692,13 +692,13 @@ export default function AlgorhythmLanding() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
             {/* Left Bento */}
             <Reveal className="col-span-12 md:col-span-7 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0efe9] dark:bg-[#1a1c24] text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10">
+              <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0efe9] dark:bg-[#1a1c24] text-[#555] dark:text-[#a0a0a8] border border-black/10 dark:border-white/10">
                 Code Editor
               </span>
-              <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
+              <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
                 Syntax-aware, instant feedback
               </h3>
-              <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
+              <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
                 Write in your language of choice. Submissions are evaluated
                 against hidden test cases with real-time verdicts — AC, WA, TLE,
                 MLE — and full memory/time profiling.
@@ -725,7 +725,7 @@ export default function AlgorhythmLanding() {
                   <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]"></div>
-                  <span className="text-[11px] text-[#555] font-mono ml-2">
+                  <span className="text-[11px] select-none text-[#555] font-mono ml-2">
                     longest_palindrome.cpp
                   </span>
                 </div>
@@ -740,13 +740,13 @@ export default function AlgorhythmLanding() {
               delay={100}
               className="col-span-12 md:col-span-5 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden"
             >
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
+              <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
                 Verdicts
               </span>
-              <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
+              <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
                 Know exactly what failed
               </h3>
-              <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
+              <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
                 Per-test-case breakdowns show time, memory, and the exact input
                 that caused a wrong answer or timeout.
               </p>
@@ -754,16 +754,16 @@ export default function AlgorhythmLanding() {
               <table className="w-full mt-5 border-collapse">
                 <thead>
                   <tr>
-                    <th className="text-[11px] uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
+                    <th className="text-[11px] select-none uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
                       Status
                     </th>
-                    <th className="text-[11px] uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
+                    <th className="text-[11px] select-none uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
                       Time
                     </th>
-                    <th className="text-[11px] uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
+                    <th className="text-[11px] select-none uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
                       Memory
                     </th>
-                    <th className="text-[11px] uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
+                    <th className="text-[11px] select-none uppercase tracking-[0.06em] text-[#888] dark:text-[#555] font-medium p-2 px-3 text-left border-b border-black/10 dark:border-white/10">
                       Test
                     </th>
                   </tr>
@@ -773,17 +773,17 @@ export default function AlgorhythmLanding() {
                     className={`transition-all duration-300 ${activeSolutionId === 2 || activeSolutionId === 3 ? "bg-[#eff4ff] dark:bg-[#4d8dff]/10" : "opacity-40 grayscale-[50%]"}`}
                   >
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
-                      <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">
+                      <span className="inline-flex select-none items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">
                         AC
                       </span>
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] p-2.5 px-3 border-b select-none border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       {activeSolutionId === 3 ? "4ms" : "38ms"}
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] p-2.5 px-3 border-b select-none border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       {activeSolutionId === 3 ? "5.2 MB" : "4.1 MB"}
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] p-2.5 px-3 border-b select-none border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       All
                     </td>
                   </tr>
@@ -791,17 +791,17 @@ export default function AlgorhythmLanding() {
                     className={`transition-all duration-300 ${activeSolutionId === 1 ? "bg-[#fffbeb] dark:bg-[#fbbf24]/10" : "opacity-40 grayscale-[50%]"}`}
                   >
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
-                      <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]">
+                      <span className="inline-flex select-none items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24]">
                         TLE
                       </span>
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] select-none p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       &gt;2000ms
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] select-none p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       —
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] select-none p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       46
                     </td>
                   </tr>
@@ -813,17 +813,17 @@ export default function AlgorhythmLanding() {
                     }`}
                   >
                     <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
-                      <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185]">
+                      <span className="inline-flex select-none items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185]">
                         WA
                       </span>
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] select-none p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
                       14ms
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] select-none p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
                       3.8 MB
                     </td>
-                    <td className="text-[13px] p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
+                    <td className="text-[13px] select-none p-2.5 px-3 text-[#555] dark:text-[#a0a0a8]">
                       47
                     </td>
                   </tr>
@@ -831,13 +831,13 @@ export default function AlgorhythmLanding() {
               </table>
 
               <div className="mt-5">
-                <div className="text-[12px] text-[#888] dark:text-[#555] mb-2.5 uppercase tracking-[0.06em]">
+                <div className="text-[12px] select-none text-[#888] dark:text-[#555] mb-2.5 uppercase tracking-[0.06em]">
                   Complexity Analysis
                 </div>
                 <div className="flex flex-col gap-3.5">
                   <div>
                     <div className="flex justify-between text-[12px] mb-1.5">
-                      <span className="text-[#555] dark:text-[#a0a0a8]">
+                      <span className="text-[#555] select-none dark:text-[#a0a0a8]">
                         Time complexity
                       </span>
                       <span className="font-medium font-mono text-[#16a34a] dark:text-[#22c55e]">
@@ -857,7 +857,7 @@ export default function AlgorhythmLanding() {
                   </div>
                   <div>
                     <div className="flex justify-between text-[12px] mb-1.5">
-                      <span className="text-[#555] dark:text-[#a0a0a8]">
+                      <span className="text-[#555] select-none dark:text-[#a0a0a8]">
                         Space complexity
                       </span>
                       <span className="font-medium font-mono text-[#16a34a] dark:text-[#22c55e]">
@@ -884,13 +884,13 @@ export default function AlgorhythmLanding() {
         {/* SECTION 2: PROBLEM SET */}
         <div className="pb-[100px]">
           <Reveal className="text-center mb-16">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f5f3ff] dark:bg-[#a78bfa]/10 text-[#7c3aed] dark:text-[#a78bfa] border border-transparent">
+            <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f5f3ff] dark:bg-[#a78bfa]/10 text-[#7c3aed] dark:text-[#a78bfa] border border-transparent">
               Problem Set
             </span>
-            <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] leading-[1.1] mt-4">
+            <h2 className="text-[clamp(36px,5vw,56px)] select-none font-medium tracking-[-0.025em] leading-[1.1] mt-4">
               500+ problems. Perfectly curated.
             </h2>
-            <p className="text-[17px] text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
+            <p className="text-[17px] text-[#555] select-none dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
               From foundational arrays to advanced graph theory — every problem
               is tagged by topic, difficulty, and company. Filter, favourite,
               and track your exact progress.
@@ -900,13 +900,13 @@ export default function AlgorhythmLanding() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
             {/* Left Bento */}
             <Reveal className="col-span-12 md:col-span-5 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f5f3ff] dark:bg-[#a78bfa]/10 text-[#7c3aed] dark:text-[#a78bfa] border border-transparent">
+              <span className="inline-flex items-center select-none px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f5f3ff] dark:bg-[#a78bfa]/10 text-[#7c3aed] dark:text-[#a78bfa] border border-transparent">
                 Browse
               </span>
-              <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
+              <h3 className="text-[22px] font-medium select-none tracking-[-0.02em] mt-4 mb-2.5">
                 Filter by what matters
               </h3>
-              <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65] mb-0">
+              <p className="text-[14px] text-[#555] select-none dark:text-[#a0a0a8] leading-[1.65] mb-0">
                 Topic, difficulty, company, acceptance rate — slice the problem
                 set exactly how you need it.
               </p>
@@ -1108,13 +1108,13 @@ export default function AlgorhythmLanding() {
               delay={100}
               className="col-span-12 md:col-span-7 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden"
             >
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24] border border-transparent">
+              <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24] border border-transparent">
                 Your Progress
               </span>
-              <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
+              <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
                 Topic-by-topic mastery
               </h3>
-              <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
+              <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
                 Know exactly where your gaps are. Select a category below to
                 view your curated problems.
               </p>
@@ -1189,13 +1189,13 @@ export default function AlgorhythmLanding() {
         {/* SECTION 3: CONTESTS */}
         <div className="pb-[100px]">
           <Reveal className="text-center mb-16">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185] border border-transparent">
+            <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185] border border-transparent">
               Live Contests
             </span>
-            <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] leading-[1.1] mt-4">
+            <h2 className="text-[clamp(36px,5vw,56px)] select-none font-medium tracking-[-0.025em] leading-[1.1] mt-4">
               Compete. Rank. Rise.
             </h2>
-            <p className="text-[17px] text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
+            <p className="text-[17px] select-none text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
               Weekly and monthly rated contests with real-time leaderboards.
               Every submission counts. Performance updates your global rating
               the moment the contest ends.
@@ -1205,31 +1205,31 @@ export default function AlgorhythmLanding() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
             {/* Left Bento */}
             <Reveal className="col-span-12 md:col-span-4 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185] border border-transparent">
+              <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185] border border-transparent">
                 Next Up
               </span>
-              <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
+              <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
                 Algorhythm Weekly
               </h3>
-              <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
+              <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
                 4 problems. 90 minutes. Rated for all participants.
               </p>
 
               <div className="bg-[#f0efe9] text-center dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-5 mt-5">
-                <div className="text-[12px] text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
+                <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
                   Scheduled on
                 </div>
-                <div className="text-[32px] font-medium tracking-[-0.03em] font-mono my-2 text-[#0d0d0d] dark:text-[#f0f0ee]">
+                <div className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono my-2 text-[#0d0d0d] dark:text-[#f0f0ee]">
                   Next Sunday
                 </div>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24] mt-1.5">
+                <span className="inline-flex select-none items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-[#fffbeb] dark:bg-[#fbbf24]/10 text-[#d97706] dark:text-[#fbbf24] mt-1.5">
                   ⭐ Rating · Rated Contest
                 </span>
 
-                <div className="mt-6 items-center justify-center flex gap-2">
+                <div className="mt-6 select-none items-center justify-center flex gap-2">
                   <button
                     onClick={() => navigate("/auth")}
-                    className="bg-blue-600 text-white border-none px-5 py-2.5 rounded-full text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
+                    className="bg-blue-600 text-white select-none border-none px-5 py-2.5 rounded-full text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
                   >
                     Register
                   </button>
@@ -1936,7 +1936,7 @@ export default function AlgorhythmLanding() {
         </div>
 
         {/* CTA */}
-        <div className="py-[60px] pt-0">
+        <div className="py-[60px] select-none pt-0">
           <Reveal className="mb-12 bg-slate-900 flex flex-col justify-center items-center dark:bg-slate-800 rounded-3xl p-8 md:p-10 text-white shadow-xl dark:shadow-none border border-transparent dark:border-slate-700 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
@@ -1958,7 +1958,7 @@ export default function AlgorhythmLanding() {
       </div>
 
       {/* FOOTER */}
-      <footer className="border-t border-black/10 dark:border-white/10 pt-[60px] pb-10 bg-white dark:bg-[#13151a]">
+      <footer className="border-t select-none border-black/10 dark:border-white/10 pt-[60px] pb-10 bg-white dark:bg-[#13151a]">
         <div className="max-w-[1100px] mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-10 mb-12">
             <div className="col-span-2 md:col-span-1">
