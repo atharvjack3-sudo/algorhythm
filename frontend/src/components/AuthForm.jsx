@@ -91,7 +91,7 @@ export default function AuthForm() {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-[13px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-400 transition-colors">Password</label>
-            <a href="#" className="text-[12px] font-medium text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-blue-400 transition-colors" onClick={(e) => e.preventDefault()}>Forgot?</a>
+            
           </div>
           <input
             type="password"
@@ -221,10 +221,12 @@ export default function AuthForm() {
           If mode === "login", the panel moves to the LEFT (translate-x-0), exposing the RIGHT side (Login Form).
         */}
         <div 
-          className={`absolute top-0 left-0 w-1/2 h-full z-50 transform transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] overflow-hidden bg-slate-900 dark:bg-blue-600 shadow-2xl dark:shadow-none ${
+          className={`absolute top-0 left-0 w-1/2 h-full z-50 transform transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] overflow-hidden bg-slate-900 dark:bg-gray-950 shadow-2xl dark:shadow-none ${
             mode === "signup" ? "translate-x-full rounded-[2.5rem]" : "translate-x-0 rounded-[2.5rem]"
           }`}
         >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
           {/* Inner container translating inversely to keep content visually centered during the slide */}
           <div className={`relative w-[200%] h-full flex transform transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
             mode === "signup" ? "-translate-x-1/2" : "translate-x-0"
@@ -241,7 +243,7 @@ export default function AuthForm() {
               <button 
                 type="button"
                 onClick={toggleMode}
-                className="px-10 py-3.5 rounded-xl border-2 border-slate-600 dark:border-blue-400 text-white font-bold hover:bg-white hover:text-slate-900 dark:hover:text-blue-700 transition-all duration-300 active:scale-95"
+                className="px-10 py-3.5 dark:hover:bg-slate-800 rounded-xl border-2 border-slate-600 dark:border-blue-400 text-white font-bold hover:bg-white hover:text-slate-900 dark:hover:text-gray-200 transition-all duration-300 active:scale-95"
               >
                 Create an account
               </button>
@@ -258,7 +260,7 @@ export default function AuthForm() {
               <button 
                 type="button"
                 onClick={toggleMode}
-                className="px-10 py-3.5 rounded-xl border-2 border-slate-600 dark:border-blue-400 text-white font-bold hover:bg-white hover:text-slate-900 dark:hover:text-blue-700 transition-all duration-300 active:scale-95"
+                className="px-10 py-3.5 dark:hover:bg-slate-800 rounded-xl border-2 border-slate-600 dark:border-blue-400 text-white font-bold hover:bg-white hover:text-slate-900 dark:hover:text-gray-200 transition-all duration-300 active:scale-95"
               >
                 Sign in to account
               </button>
