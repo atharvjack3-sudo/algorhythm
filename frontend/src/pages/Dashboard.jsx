@@ -4,6 +4,8 @@ import { Navigate, useNavigate, Link } from "react-router-dom";
 import { api } from "../api/client";
 import QuesCountCircle from "../components/QuesCountCircle";
 import "./css/scrollbar.css"
+
+
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -470,7 +472,7 @@ export default function Dashboard() {
               <svg className="w-5 h-5 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               Recently <span className="text-green-400"> Accepted </span>Submissions
             </h2>
-            <Link to="/problemset" className="text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline">View all</Link>
+          
           </div>
 
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
