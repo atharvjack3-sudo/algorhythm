@@ -381,11 +381,11 @@ export default function Dashboard() {
         </div>
 
         {/* ===== ACTIVITY / BADGES ===== */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 flex flex-col mb-6 transition-colors">
+        <div className="bg-white select-none dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 flex flex-col mb-6 transition-colors">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[18px] font-medium text-slate-900 dark:text-white flex items-center gap-2">
               {showBadges ? (
-                <><svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 2a1 1 0 01.832.545l2.42 4.912 5.424.788a1 1 0 01.554 1.705l-3.926 3.826.926 5.402a1 1 0 01-1.45 1.054L10 17.143l-4.85 2.55a1 1 0 01-1.45-1.054l.926-5.402-3.926-3.826a1 1 0 01.554-1.705l5.424-.788 2.42-4.912A1 1 0 0110 2z" clipRule="evenodd" /></svg> Achievements</>
+                <><svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 2a1 1 0 01.832.545l2.42 4.912 5.424.788a1 1 0 01.554 1.705l-3.926 3.826.926 5.402a1 1 0 01-1.45 1.054L10 17.143l-4.85 2.55a1 1 0 01-1.45-1.054l.926-5.402-3.926-3.826a1 1 0 01.554-1.705l5.424-.788 2.42-4.912A1 1 0 0110 2z" clipRule="evenodd" /></svg> Your Badges</>
               ) : (
                 <><svg className="w-5 h-5 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> Activity Heatmap</>
               )}
@@ -421,7 +421,7 @@ export default function Dashboard() {
                 ) : (
                   <div className="text-center w-full py-6">
                     <p className="text-slate-500 dark:text-slate-400 font-medium">No badges earned yet.</p>
-                    <p className="text-[13px] text-slate-400 dark:text-slate-500 mt-1">Keep solving problems to unlock achievements!</p>
+                    <p className="text-[13px] text-slate-400 dark:text-slate-500 mt-1">Keep solving problems to unlock Badges!</p>
                   </div>
                 )}
               </div>

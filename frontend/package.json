@@ -14,7 +14,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "highlight.js": "^11.11.1",
-    "katex": "^0.16.27",
+    "katex": "^0.16.45",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
