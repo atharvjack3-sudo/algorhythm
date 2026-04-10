@@ -7,8 +7,12 @@ import { api } from "../api/client";
 import Editor from "@monaco-editor/react";
 import { InlineMath } from "react-katex";
 import ReactMarkdown from "react-markdown";
+import 'highlight.js/styles/atom-one-dark.css';
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import rehypeHighlight from "rehype-highlight";
+import 'katex/dist/katex.min.css';
 
 const DiscussionTab = lazy(() =>
   import("../components/discussion/DiscussionTab")
@@ -202,7 +206,7 @@ export default function SolveProblem() {
 
   if (loading) {
     return (
-      <div className="w-full h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-[#f8f9fa] dark:bg-[#0a0c10] transition-colors duration-300">
+      <div className="w-full h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-[#f8f9fa] dark:bg-slate-950 transition-colors duration-300">
         <div className="relative w-12 h-12 flex items-center justify-center mb-4">
           <div className="absolute inset-0 rounded-full border-[3px] border-slate-200 dark:border-slate-800"></div>
           <div className="absolute inset-0 rounded-full border-[3px] border-blue-600 dark:border-blue-500 border-t-transparent border-r-transparent animate-[spin_0.8s_linear_infinite]"></div>
@@ -362,7 +366,13 @@ export default function SolveProblem() {
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl h-full">
                     <pre className="text-[13px] whitespace-pre-line text-slate-700 dark:text-slate-300 font-sans">
-                      {content.input_format}
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {content.input_format}
+                      </ReactMarkdown>
+                      
                     </pre>
                   </div>
                 </div>
@@ -373,7 +383,13 @@ export default function SolveProblem() {
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl h-full">
                     <pre className="text-[13px] whitespace-pre-line text-slate-700 dark:text-slate-300 font-sans">
-                      {content.output_format}
+                      <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {content.output_format}
+                      </ReactMarkdown>
+                      
                     </pre>
                   </div>
                 </div>
@@ -404,9 +420,14 @@ export default function SolveProblem() {
           {/* ===== EDITORIAL ===== */}
           {activeTab === "Editorial" && (
             <div className="prose prose-slate dark:prose-invert prose-sm max-w-none">
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+              <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex, rehypeHighlight]}
+                >
                 {data.content.editorial}
-              </p>
+                </ReactMarkdown>
+                
+              
             </div>
           )}
 
