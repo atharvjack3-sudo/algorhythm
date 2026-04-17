@@ -74,6 +74,8 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     let hiddenFailedIndex = null;
     const sampleResults = [];
     let hiddenCount = 0;
+    let finalCO = null;
+    let finalErr = null;
 
     let maxRuntimeMs = 0;
     let maxMemoryKb = 0;
@@ -115,8 +117,18 @@ router.post("/submissions", authMiddleware, async (req, res) => {
       );
 
       const judgeStatus = judgeRes.data.status.description;
+      const compileOutputBase64 = judgeRes.data.compile_output || "";
+      const stderrBase64 = judgeRes.data.stderr || "";
       const runtimeMs = Math.round(parseFloat(judgeRes.data.time || "0") * 1000);
       const memoryKb = judgeRes.data.memory || 0;
+
+      const compileOutput = compileOutputBase64
+  ? Buffer.from(compileOutputBase64, "base64").toString("utf-8")
+  : "";
+
+        const stderr = stderrBase64
+  ? Buffer.from(stderrBase64, "base64").toString("utf-8")
+  : "";
 
       maxRuntimeMs = Math.max(maxRuntimeMs, runtimeMs);
       maxMemoryKb = Math.max(maxMemoryKb, memoryKb);
@@ -145,6 +157,8 @@ router.post("/submissions", authMiddleware, async (req, res) => {
 
       if (!tc.is_sample && !passed) {
         finalVerdict = verdict;
+        finalCO = compileOutput;
+        finalErr = stderr;
         hiddenFailedIndex = hiddenCount;
         break;
       }
@@ -306,6 +320,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
       verdict: finalVerdict,
       samples: sampleResults,
       hidden_failed: hiddenFailedIndex !== null ? `Hidden testcase #${hiddenFailedIndex}` : null,
+      error: finalCO || finalErr || null
     });
   } catch (err) {
     await conn.query('ROLLBACK');
