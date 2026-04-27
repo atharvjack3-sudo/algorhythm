@@ -203,6 +203,7 @@ router.get("/problems/:problemId", async (req, res) => {
         p.title,
         p.difficulty,
         p.created_at,
+        p.is_hidden,
 
         pc.statement,
         pc.constraints,
@@ -223,6 +224,9 @@ router.get("/problems/:problemId", async (req, res) => {
     const problem = problemRows[0];
 
     if (!problem) {
+      return res.status(404).json({ error: "Problem not found" });
+    }
+    if (problem.is_hidden) {
       return res.status(404).json({ error: "Problem not found" });
     }
 
