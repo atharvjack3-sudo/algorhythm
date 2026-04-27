@@ -122,19 +122,27 @@ router.post("/contests", authMiddleware, async (req, res) => {
 
     /* ---------- attach problems ---------- */
     for (let i = 0; i < problems.length; i++) {
-      await conn.query(
-        `
-        INSERT INTO contest_problems
-          (contest_id, problem_id, problem_index)
-        VALUES ($1, $2, $3)
-        `,
-        [
-          contestId,
-          problems[i],
-          String.fromCharCode(65 + i), // A, B, C...
-        ]
-      );
-    }
+  const { rows } = await conn.query(
+    `SELECT difficulty FROM problems WHERE id = $1`,
+    [problems[i]]
+  );
+
+  const difficulty = rows[0]?.difficulty;
+
+  await conn.query(
+    `
+    INSERT INTO contest_problems
+      (contest_id, problem_id, problem_index, difficulty)
+    VALUES ($1, $2, $3, $4)
+    `,
+    [
+      contestId,
+      problems[i],
+      String.fromCharCode(65 + i),
+      difficulty,
+    ]
+  );
+}
 
     await conn.query('COMMIT');
 
