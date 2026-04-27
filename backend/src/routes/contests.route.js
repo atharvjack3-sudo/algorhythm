@@ -223,8 +223,107 @@ router.get(
   "/contests/problems/:problemId",
   authMiddleware,
   async (req, res) => {
-    
+  const { problemId } = req.params;
+
+  if (!problemId || isNaN(problemId)) {
+    return res.status(400).json({ error: "Invalid problem ID" });
   }
+
+  try {
+    //  Fetch problem core + content + stats
+    const { rows: problemRows } = await db.query(
+      `
+      SELECT
+        p.id,
+        p.title,
+        p.difficulty,
+        p.created_at,
+
+        pc.statement,
+        pc.constraints,
+        pc.input_format,
+        pc.output_format,
+        pc.editorial,
+
+        ps.total_submissions,
+        ps.acceptance_rate
+      FROM problems p
+      JOIN problem_content pc ON pc.problem_id = p.id
+      JOIN problem_stats ps ON ps.problem_id = p.id
+      WHERE p.id = $1
+      `,
+      [problemId]
+    );
+
+    const problem = problemRows[0];
+
+    if (!problem) {
+      return res.status(404).json({ error: "Problem not found" });
+    }
+
+    //  Fetch topics
+    const { rows: topicRows } = await db.query(
+      `
+      SELECT t.name
+      FROM problem_topics pt
+      JOIN topics t ON t.id = pt.topic_id
+      WHERE pt.problem_id = $1
+      `,
+      [problemId]
+    );
+
+    const topics = topicRows.map((t) => t.name);
+
+    //  Fetch sample testcases (paths)
+    const { rows: sampleRows } = await db.query(
+      `
+      SELECT input_path, output_path
+      FROM problem_testcases
+      WHERE problem_id = $1 AND is_sample = 1
+      `,
+      [problemId]
+    );
+
+    //  Read testcase files from disk
+    const samples = [];
+
+    for (const tc of sampleRows) {
+      const inputPath = path.join(process.cwd(), tc.input_path);
+      const outputPath = path.join(process.cwd(), tc.output_path);
+
+      const input = await fs.readFile(inputPath, "utf-8");
+      const output = await fs.readFile(outputPath, "utf-8");
+
+      samples.push({ input, output });
+    }
+
+    //  Send response
+    res.json({
+      problem: {
+        id: problem.id,
+        title: problem.title,
+        difficulty: problem.difficulty,
+        created_at: problem.created_at,
+      },
+      content: {
+        statement: problem.statement,
+        constraints: problem.constraints,
+        input_format: problem.input_format,
+        output_format: problem.output_format,
+        editorial: problem.editorial,
+      },
+      stats: {
+        total_submissions: problem.total_submissions,
+        acceptance_rate: problem.acceptance_rate,
+      },
+      topics,
+      samples,
+    });
+  } catch (err) {
+    console.error("Failed to fetch problem:", err);
+    res.status(500).json({ error: "Failed to fetch problem details" });
+  }
+}
 );
 
 router.get(
