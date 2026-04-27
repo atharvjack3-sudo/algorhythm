@@ -382,6 +382,25 @@ router.post("/run", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Invalid run data" });
   }
 
+    const conn = await db.connect();
+
+  const { rows: problemRows } = await conn.query(
+  `SELECT is_hidden FROM problems WHERE id = $1`,
+  [problemId]
+);
+
+if (problemRows.length === 0) {
+  conn.release();
+  return res.status(404).json({ error: "Problem not found" });
+}
+
+const problem = problemRows[0];
+
+if (problem.is_hidden) {
+  conn.release();
+  return res.status(404).json({ error: "Problem not found" });
+}
+
   try {
     const { rows: samples } = await db.query(
       `SELECT id, input_path, output_path FROM problem_testcases WHERE problem_id = $1 AND is_sample = 1 ORDER BY id`,
