@@ -7,6 +7,17 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
+// Helper to safely parse Postgres timestamps as UTC
+const toUTC = (dbDate) => {
+  if (!dbDate) return new Date();
+  if (dbDate instanceof Date) return dbDate;
+  let d = dbDate;
+  if (typeof d === "string" && !d.includes("Z") && !d.includes("+")) {
+    d = d.replace(" ", "T") + "Z";
+  }
+  return new Date(d);
+};
+
 async function assertContestRunning(conn, contestId) {
   const { rows } = await conn.query(
     `SELECT start_time, end_time FROM contests WHERE id = $1`,
@@ -21,8 +32,8 @@ async function assertContestRunning(conn, contestId) {
   }
 
   const now = new Date();
-  const stime = new Date(contest.start_time + "+05:30");
-  const etime = new Date(contest.end_time + "+05:30");
+  const stime = toUTC(contest.start_time);
+  const etime = toUTC(contest.end_time);
   if (now < stime) {
     const err = new Error("Contest not started");
     err.status = 403;
@@ -94,8 +105,8 @@ router.post("/contests", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Invalid contest data" });
   }
 
-  const start = new Date(start_time  + "+05:30");
-  const end = new Date(end_time  + "+05:30");
+  const start = new Date(start_time);
+  const end = new Date(end_time);
 
   if (start >= end) {
     return res
@@ -387,8 +398,8 @@ router.get(
       }
 
       const now = new Date();
-      const start = new Date(contest.start_time + "+05:30");
-      const end   = new Date(contest.end_time + "+05:30");
+      const start = toUTC(contest.start_time);
+      const end   = toUTC(contest.end_time);
       
         
       if (now < start || now > end) {
@@ -448,7 +459,7 @@ router.get(
       }
 
       const now = new Date();
-      const end = new Date(contest.end_time  + "+05:30");
+      const end = toUTC(contest.end_time);
 
       //  only AFTER contest ends
       if (now <= end) {
@@ -564,7 +575,7 @@ router.get("/contests/:contestId/leaderboard", async (req, res) => {
   const contest = contestRows[0];
 
   const now = new Date();
-  const endtime = new Date(contest.end_time + "+05:30");
+  const endtime = toUTC(contest.end_time);
 
   const table =
     contest && now > endtime
@@ -617,8 +628,8 @@ router.post(
       }
 
       const now = new Date();
-      const start = new Date(contest.start_time + "+05:30");
-      const end   = new Date(contest.end_time + "+05:30");
+      const start = toUTC(contest.start_time);
+      const end   = toUTC(contest.end_time);
       if (now < start || now > end) {
         return res.status(403).json({ error: "Contest not active" });
       }
@@ -774,7 +785,7 @@ router.post(
 
       if (!state.solved) {
         if (finalVerdict === "AC") {
-          const startMs = new Date(contest.start_time + "05:30").getTime();
+          const startMs = toUTC(contest.start_time).getTime();
           const minutes = Math.max(
             0,
             Math.floor((Date.now() - startMs) / 60000)
@@ -879,7 +890,7 @@ router.get(
         return res.status(404).json({ error: "Contest not found" });
       }
 
-      if (new Date() <= new Date(contest.end_time + "+05:30")) {
+      if (new Date() <= toUTC(contest.end_time)) {
         return res.status(403).json({ error: "Results not available yet" });
       }
 
