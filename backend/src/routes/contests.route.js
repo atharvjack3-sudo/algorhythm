@@ -21,13 +21,15 @@ async function assertContestRunning(conn, contestId) {
   }
 
   const now = new Date();
-  if (now < contest.start_time) {
+  const stime = new Date(contest.start_time + "+05:30");
+  const etime = new Date(contest.end_time + "+05:30");
+  if (now < stime) {
     const err = new Error("Contest not started");
     err.status = 403;
     throw err;
   }
 
-  if (now > contest.end_time) {
+  if (now > etime) {
     const err = new Error("Contest ended");
     err.status = 403;
     throw err;
@@ -92,8 +94,8 @@ router.post("/contests", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Invalid contest data" });
   }
 
-  const start = new Date(start_time);
-  const end = new Date(end_time);
+  const start = new Date(start_time  + "+05:30");
+  const end = new Date(end_time  + "+05:30");
 
   if (start >= end) {
     return res
@@ -385,8 +387,8 @@ router.get(
       }
 
       const now = new Date();
-      const start = new Date(contest.start_time);
-      const end   = new Date(contest.end_time);
+      const start = new Date(contest.start_time + "+05:30");
+      const end   = new Date(contest.end_time + "+05:30");
       
         
       if (now < start || now > end) {
@@ -446,7 +448,7 @@ router.get(
       }
 
       const now = new Date();
-      const end = new Date(contest.end_time);
+      const end = new Date(contest.end_time  + "+05:30");
 
       //  only AFTER contest ends
       if (now <= end) {
@@ -562,9 +564,10 @@ router.get("/contests/:contestId/leaderboard", async (req, res) => {
   const contest = contestRows[0];
 
   const now = new Date();
+  const endtime = new Date(contest.end_time + "+05:30");
 
   const table =
-    contest && now > contest.end_time
+    contest && now > endtime
       ? "contest_results"
       : "contest_scores";
 
@@ -614,8 +617,8 @@ router.post(
       }
 
       const now = new Date();
-      const start = new Date(contest.start_time);
-      const end   = new Date(contest.end_time);
+      const start = new Date(contest.start_time + "+05:30");
+      const end   = new Date(contest.end_time + "+05:30");
       if (now < start || now > end) {
         return res.status(403).json({ error: "Contest not active" });
       }
@@ -771,7 +774,7 @@ router.post(
 
       if (!state.solved) {
         if (finalVerdict === "AC") {
-          const startMs = new Date(contest.start_time).getTime();
+          const startMs = new Date(contest.start_time + "05:30").getTime();
           const minutes = Math.max(
             0,
             Math.floor((Date.now() - startMs) / 60000)
@@ -876,7 +879,7 @@ router.get(
         return res.status(404).json({ error: "Contest not found" });
       }
 
-      if (new Date() <= new Date(contest.end_time)) {
+      if (new Date() <= new Date(contest.end_time + "+05:30")) {
         return res.status(403).json({ error: "Results not available yet" });
       }
 
