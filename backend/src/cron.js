@@ -5,7 +5,7 @@ import { finalizeContest } from "./jobs/contestFinalize.job.js";
 
 let isRunning = false;
 
-cron.schedule("*/20 * * * *", async () => {
+cron.schedule("*/2 * * * *", async () => {
   if (isRunning) {
     console.log("Skipping cron run: previous execution still in progress");
     return;
