@@ -220,6 +220,14 @@ router.get("/contests/:contestId", async (req, res) => {
 });
 
 router.get(
+  "/contests/problems/:problemId",
+  authMiddleware,
+  async (req, res) => {
+    
+  }
+);
+
+router.get(
   "/contests/:contestId/submissions",
   authMiddleware,
   async (req, res) => {
