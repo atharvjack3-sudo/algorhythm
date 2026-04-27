@@ -58,6 +58,21 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Invalid submission data" });
   }
 
+  const { rows: problemRows } = await conn.query(
+  `SELECT is_hidden FROM problems WHERE id = $1`,
+  [problemId]
+);
+
+if (problemRows.length === 0) {
+  return res.status(404).json({ error: "Problem not found" });
+}
+
+const problem = problemRows[0];
+
+if (problem.is_hidden) {
+  return res.status(404).json({ error: "Problem not found" });
+}
+
   const conn = await db.connect();
 
   try {
