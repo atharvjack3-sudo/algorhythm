@@ -22,3 +22,7 @@ export const db = new Pool({
     rejectUnauthorized: false,
   }
 });
+
+db.on("connect", async (client) => {
+  await client.query(`SET TIME ZONE 'Asia/Kolkata'`);
+});
