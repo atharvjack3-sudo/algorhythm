@@ -3,6 +3,20 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+// Helper to patch raw Postgres timestamps and force strict IST formatting
+const formatIST = (dateStr, isDateOnly = false) => {
+  if (!dateStr) return "---";
+  let d = typeof dateStr === "string" ? dateStr.replace(" ", "T") : dateStr;
+  // If Postgres strips the timezone, force it to be interpreted as UTC
+  if (typeof d === "string" && !d.includes("Z") && !d.includes("+") && d.length <= 23) {
+    d += "Z";
+  }
+  const opts = { timeZone: "Asia/Kolkata" };
+  return isDateOnly 
+    ? new Date(d).toLocaleDateString("en-IN", opts) 
+    : new Date(d).toLocaleString("en-IN", opts);
+};
+
 export default function Contests() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -156,8 +170,9 @@ export default function Contests() {
 
     await api.post("/contests", {
       name: form.name,
-      start_time: form.start_time,
-      end_time: form.end_time,
+      // Convert local input time to pure UTC string before sending
+      start_time: form.start_time ? new Date(form.start_time).toISOString() : "",
+      end_time: form.end_time ? new Date(form.end_time).toISOString() : "",
       duration_minutes: Number(form.duration_minutes),
       problems: form.problems.split(",").map((x) => Number(x.trim())),
     });
@@ -513,7 +528,7 @@ export default function Contests() {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  {new Date(c.start_time).toLocaleString()}
+                  {formatIST(c.start_time)}
                 </p>
                 {registered[c.id] ? (
                   <div className="w-full py-3.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl font-black text-[10px] text-center uppercase tracking-[0.2em] border border-emerald-200 dark:border-emerald-500/20 transition-colors">
@@ -561,7 +576,7 @@ export default function Contests() {
                     {c.name}
                   </h3>
                   <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 tracking-wider uppercase transition-colors">
-                    Concluded: {new Date(c.end_time).toLocaleDateString()}
+                    Concluded: {formatIST(c.end_time, true)}
                   </p>
                 </div>
                 <svg
