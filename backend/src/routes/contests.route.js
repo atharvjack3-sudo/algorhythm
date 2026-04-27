@@ -594,7 +594,8 @@ router.post(
         let passed = false;
 
         if (judgeStatus === "Accepted") {
-          const actual = (judgeRes.data.stdout || "").trim();
+          const stdoutBase64 = judgeRes.data.stdout || "";
+          const actual = stdoutBase64 ? Buffer.from(stdoutBase64, "base64").toString("utf-8").trim() : "";
           const expected = expectedOutput.trim();
           passed = actual === expected;
           verdict = passed ? "AC" : "WA";
