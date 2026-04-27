@@ -66,12 +66,14 @@ router.post("/submissions", authMiddleware, async (req, res) => {
 );
 
 if (problemRows.length === 0) {
+  conn.release();
   return res.status(404).json({ error: "Problem not found" });
 }
 
 const problem = problemRows[0];
 
 if (problem.is_hidden) {
+  conn.release();
   return res.status(404).json({ error: "Problem not found" });
 }
 
