@@ -309,7 +309,7 @@ router.get("/problem-list", async (req, res) => {
           .filter(d => ["easy", "medium", "hard"].includes(d))
       : [];
 
-    let whereClauses = [];
+    let whereClauses = ["p.is_hidden = false"];
     let params = [];
     let pIdx = 1; // Tracks parameter positioning ($1, $2, etc.)
 
