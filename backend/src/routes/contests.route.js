@@ -552,6 +552,7 @@ router.post(
       const sampleResults = [];
       let hiddenCount = 0;
       let maxRuntimeMs = 0;
+      const codeBase64 = Buffer.from(code).toString("base64");
 
       for (let i = 0; i < testcases.length; i++) {
         const tc = testcases[i];
@@ -560,6 +561,7 @@ router.post(
           path.join(process.cwd(), tc.input_path),
           "utf-8"
         );
+        const inputBase64 = Buffer.from(input).toString("base64");
 
         const expectedOutput = await fs.readFile(
           path.join(process.cwd(), tc.output_path),
@@ -569,9 +571,9 @@ router.post(
         const judgeRes = await axios.post(
           JUDGE0_URL,
           {
-            source_code: code,
+            source_code: codeBase64,
             language_id: LANGUAGE_MAP[language],
-            stdin: input,
+            stdin: inputBase64,
           },
           {
             headers: {
