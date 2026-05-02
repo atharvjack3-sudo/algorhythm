@@ -46,7 +46,7 @@ const CountdownTimer = ({ targetDateStr, format = "full" }) => {
       const diff = target - now;
 
       if (diff <= 0) {
-        setTimeLeft("00:00:00");
+        setTimeLeft(format === "days" ? "0d 00h 00m 00s" : "00:00:00");
         return;
       }
 
@@ -54,9 +54,14 @@ const CountdownTimer = ({ targetDateStr, format = "full" }) => {
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-      if (format === "days" && h > 24) {
+      if (format === "days" && h >= 24) {
         const d = Math.floor(h / 24);
-        setTimeLeft(`${d}d ${h % 24}h ${m}m`);
+        const remainingHours = h % 24;
+        
+        // Zero-padding prevents layout jitter in tables
+        setTimeLeft(
+          `${d}d ${String(remainingHours).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`
+        );
       } else {
         setTimeLeft(
           `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
