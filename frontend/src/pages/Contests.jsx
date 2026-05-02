@@ -114,14 +114,15 @@ export default function Contests() {
     return `M${points.join(" L")}`;
   }, [history]);
 
-  const getMilitaryRank = (rating) => {
-    if (!rating || rating < 1200) return "Newbie"; // Adjusted for Codeforces style
-    if (rating >= 1200 && rating <= 1399) return "Pupil";
-    if (rating >= 1400 && rating <= 1599) return "Specialist";
-    if (rating >= 1600 && rating <= 1899) return "Expert";
-    if (rating >= 1900 && rating <= 2099) return "Candidate Master";
-    if (rating >= 2100 && rating <= 2399) return "Master";
-    return "Grandmaster"; // 2400+
+    const getMilitaryRank = (rating) => {
+
+    if (!rating || rating < 1200) return "Trainee";
+    if (rating >= 1200 && rating <= 1399) return "Soldier";
+    if (rating >= 1400 && rating <= 1599) return "Lieutenant";
+    if (rating >= 1600 && rating <= 1799) return "Colonel";
+    if (rating >= 1800 && rating <= 1999) return "Brigadier";
+    if (rating >= 2000 && rating <= 2499) return "Major General";
+    return "Commander-in-Chief"; // 2500+
   };
 
   async function loadArenaData() {
@@ -291,7 +292,7 @@ export default function Contests() {
               <input 
                 required
                 className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
-                placeholder="e.g. Codeforces Round #900 (Div. 2)"
+                placeholder="e.g. Algorhythm Round #19 (Div. 2)"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
