@@ -280,7 +280,7 @@ export default function SolveProblem() {
             </span>
 
             <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-              Acceptance: {stats.acceptance_rate ?? "—"}%
+              Acceptance: {stats.acceptance_rate ?? "New"}%
             </span>
 
             {solved && (
@@ -359,7 +359,7 @@ export default function SolveProblem() {
                   remarkPlugins={[remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                 >
-                  {content.statement.replace(/\\n/g, '\n')}
+                  {content.statement}
                 </ReactMarkdown>
               </div>
 
