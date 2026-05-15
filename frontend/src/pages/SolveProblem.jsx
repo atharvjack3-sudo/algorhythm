@@ -355,7 +355,8 @@ export default function SolveProblem() {
           {/* ===== PROBLEM ===== */}
           {activeTab === "Problem" && (
             <div className="space-y-8 leading-relaxed">
-              <div className="prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200">
+              <div className=" prose dark:prose-invert max-w-none prose-headings:font-bold prose-h2:text-xl prose-h2:mb-4 prose-p:my-4 prose-ul:list-disc
+                                prose-ul:pl-6 prose-ul:my-4 prose-li:my-1">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeKatex]}
