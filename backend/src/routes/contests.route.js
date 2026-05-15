@@ -7,6 +7,17 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
+// Helper to safely parse Postgres timestamps as UTC
+const toUTC = (dbDate) => {
+  if (!dbDate) return new Date();
+  if (dbDate instanceof Date) return dbDate;
+  let d = dbDate;
+  if (typeof d === "string" && !d.includes("Z") && !d.includes("+")) {
+    d = d.replace(" ", "T") + "Z";
+  }
+  return new Date(d);
+};
+
 async function assertContestRunning(conn, contestId) {
   const { rows } = await conn.query(
     `SELECT start_time, end_time FROM contests WHERE id = $1`,
@@ -21,13 +32,15 @@ async function assertContestRunning(conn, contestId) {
   }
 
   const now = new Date();
-  if (now < contest.start_time) {
+  const stime = toUTC(contest.start_time);
+  const etime = toUTC(contest.end_time);
+  if (now < stime) {
     const err = new Error("Contest not started");
     err.status = 403;
     throw err;
   }
 
-  if (now > contest.end_time) {
+  if (now > etime) {
     const err = new Error("Contest ended");
     err.status = 403;
     throw err;
@@ -122,19 +135,27 @@ router.post("/contests", authMiddleware, async (req, res) => {
 
     /* ---------- attach problems ---------- */
     for (let i = 0; i < problems.length; i++) {
-      await conn.query(
-        `
-        INSERT INTO contest_problems
-          (contest_id, problem_id, problem_index)
-        VALUES ($1, $2, $3)
-        `,
-        [
-          contestId,
-          problems[i],
-          String.fromCharCode(65 + i), // A, B, C...
-        ]
-      );
-    }
+  const { rows } = await conn.query(
+    `SELECT difficulty FROM problems WHERE id = $1`,
+    [problems[i]]
+  );
+
+  const difficulty = rows[0]?.difficulty;
+
+  await conn.query(
+    `
+    INSERT INTO contest_problems
+      (contest_id, problem_id, problem_index, difficulty)
+    VALUES ($1, $2, $3, $4)
+    `,
+    [
+      contestId,
+      problems[i],
+      String.fromCharCode(65 + i),
+      difficulty,
+    ]
+  );
+}
 
     await conn.query('COMMIT');
 
@@ -220,6 +241,113 @@ router.get("/contests/:contestId", async (req, res) => {
 });
 
 router.get(
+  "/contests/problems/:problemId",
+  authMiddleware,
+  async (req, res) => {
+  const { problemId } = req.params;
+
+  if (!problemId || isNaN(problemId)) {
+    return res.status(400).json({ error: "Invalid problem ID" });
+  }
+
+  try {
+    //  Fetch problem core + content + stats
+    const { rows: problemRows } = await db.query(
+      `
+      SELECT
+        p.id,
+        p.title,
+        p.difficulty,
+        p.created_at,
+
+        pc.statement,
+        pc.constraints,
+        pc.input_format,
+        pc.output_format,
+        pc.editorial,
+
+        ps.total_submissions,
+        ps.acceptance_rate
+      FROM problems p
+      JOIN problem_content pc ON pc.problem_id = p.id
+      JOIN problem_stats ps ON ps.problem_id = p.id
+      WHERE p.id = $1
+      `,
+      [problemId]
+    );
+
+    const problem = problemRows[0];
+
+    if (!problem) {
+      return res.status(404).json({ error: "Problem not found" });
+    }
+
+    //  Fetch topics
+    const { rows: topicRows } = await db.query(
+      `
+      SELECT t.name
+      FROM problem_topics pt
+      JOIN topics t ON t.id = pt.topic_id
+      WHERE pt.problem_id = $1
+      `,
+      [problemId]
+    );
+
+    const topics = topicRows.map((t) => t.name);
+
+    //  Fetch sample testcases (paths)
+    const { rows: sampleRows } = await db.query(
+      `
+      SELECT input_path, output_path
+      FROM problem_testcases
+      WHERE problem_id = $1 AND is_sample = 1
+      `,
+      [problemId]
+    );
+
+    //  Read testcase files from disk
+    const samples = [];
+
+    for (const tc of sampleRows) {
+      const inputPath = path.join(process.cwd(), tc.input_path);
+      const outputPath = path.join(process.cwd(), tc.output_path);
+
+      const input = await fs.readFile(inputPath, "utf-8");
+      const output = await fs.readFile(outputPath, "utf-8");
+
+      samples.push({ input, output });
+    }
+
+    //  Send response
+    res.json({
+      problem: {
+        id: problem.id,
+        title: problem.title,
+        difficulty: problem.difficulty,
+        created_at: problem.created_at,
+      },
+      content: {
+        statement: problem.statement,
+        constraints: problem.constraints,
+        input_format: problem.input_format,
+        output_format: problem.output_format,
+        editorial: problem.editorial,
+      },
+      stats: {
+        total_submissions: problem.total_submissions,
+        acceptance_rate: problem.acceptance_rate,
+      },
+      topics,
+      samples,
+    });
+  } catch (err) {
+    console.error("Failed to fetch problem:", err);
+    res.status(500).json({ error: "Failed to fetch problem details" });
+  }
+}
+);
+
+router.get(
   "/contests/:contestId/submissions",
   authMiddleware,
   async (req, res) => {
@@ -270,8 +398,8 @@ router.get(
       }
 
       const now = new Date();
-      const start = new Date(contest.start_time);
-      const end   = new Date(contest.end_time);
+      const start = toUTC(contest.start_time);
+      const end   = toUTC(contest.end_time);
       
         
       if (now < start || now > end) {
@@ -331,7 +459,7 @@ router.get(
       }
 
       const now = new Date();
-      const end = new Date(contest.end_time);
+      const end = toUTC(contest.end_time);
 
       //  only AFTER contest ends
       if (now <= end) {
@@ -447,9 +575,10 @@ router.get("/contests/:contestId/leaderboard", async (req, res) => {
   const contest = contestRows[0];
 
   const now = new Date();
+  const endtime = toUTC(contest.end_time);
 
   const table =
-    contest && now > contest.end_time
+    contest && now > endtime
       ? "contest_results"
       : "contest_scores";
 
@@ -499,8 +628,8 @@ router.post(
       }
 
       const now = new Date();
-      const start = new Date(contest.start_time);
-      const end   = new Date(contest.end_time);
+      const start = toUTC(contest.start_time);
+      const end   = toUTC(contest.end_time);
       if (now < start || now > end) {
         return res.status(403).json({ error: "Contest not active" });
       }
@@ -552,6 +681,7 @@ router.post(
       const sampleResults = [];
       let hiddenCount = 0;
       let maxRuntimeMs = 0;
+      const codeBase64 = Buffer.from(code).toString("base64");
 
       for (let i = 0; i < testcases.length; i++) {
         const tc = testcases[i];
@@ -560,6 +690,7 @@ router.post(
           path.join(process.cwd(), tc.input_path),
           "utf-8"
         );
+        const inputBase64 = Buffer.from(input).toString("base64");
 
         const expectedOutput = await fs.readFile(
           path.join(process.cwd(), tc.output_path),
@@ -569,9 +700,9 @@ router.post(
         const judgeRes = await axios.post(
           JUDGE0_URL,
           {
-            source_code: code,
+            source_code: codeBase64,
             language_id: LANGUAGE_MAP[language],
-            stdin: input,
+            stdin: inputBase64,
           },
           {
             headers: {
@@ -592,7 +723,8 @@ router.post(
         let passed = false;
 
         if (judgeStatus === "Accepted") {
-          const actual = (judgeRes.data.stdout || "").trim();
+          const stdoutBase64 = judgeRes.data.stdout || "";
+          const actual = stdoutBase64 ? Buffer.from(stdoutBase64, "base64").toString("utf-8").trim() : "";
           const expected = expectedOutput.trim();
           passed = actual === expected;
           verdict = passed ? "AC" : "WA";
@@ -653,7 +785,7 @@ router.post(
 
       if (!state.solved) {
         if (finalVerdict === "AC") {
-          const startMs = new Date(contest.start_time).getTime();
+          const startMs = toUTC(contest.start_time).getTime();
           const minutes = Math.max(
             0,
             Math.floor((Date.now() - startMs) / 60000)
@@ -758,7 +890,7 @@ router.get(
         return res.status(404).json({ error: "Contest not found" });
       }
 
-      if (new Date() <= new Date(contest.end_time)) {
+      if (new Date() <= toUTC(contest.end_time)) {
         return res.status(403).json({ error: "Results not available yet" });
       }
 

@@ -22,3 +22,4 @@ export const db = new Pool({
     rejectUnauthorized: false,
   }
 });
+

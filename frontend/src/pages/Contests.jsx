@@ -3,6 +3,80 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+// Helper to patch raw Postgres timestamps and force strict IST formatting
+const formatIST = (dateStr, isDateOnly = false) => {
+  if (!dateStr) return "---";
+  let d = typeof dateStr === "string" ? dateStr.replace(" ", "T") : dateStr;
+  // If Postgres strips the timezone, force it to be interpreted as UTC
+  if (typeof d === "string" && !d.includes("Z") && !d.includes("+") && d.length <= 23) {
+    d += "Z";
+  }
+  const opts = { timeZone: "Asia/Kolkata" };
+  return isDateOnly 
+    ? new Date(d).toLocaleDateString("en-IN", opts) 
+    : new Date(d).toLocaleString("en-IN", opts);
+};
+
+// Helper to safely get absolute Unix time for our timers
+const getUnixTime = (dateStr) => {
+  if (!dateStr) return 0;
+  let d = typeof dateStr === "string" ? dateStr.replace(" ", "T") : dateStr;
+  if (typeof d === "string" && !d.includes("Z") && !d.includes("+") && d.length <= 23) {
+    d += "Z";
+  }
+  return new Date(d).getTime();
+};
+
+const formatDuration = (mins) => {
+  if (!mins) return "---";
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h > 0 ? h + "h " : ""}${m}m`;
+};
+
+// Real-time Countdown Hook Component
+const CountdownTimer = ({ targetDateStr, format = "full" }) => {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const target = getUnixTime(targetDateStr);
+    
+    const tick = () => {
+      const now = Date.now();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setTimeLeft(format === "days" ? "0d 00h 00m 00s" : "00:00:00");
+        return;
+      }
+
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (format === "days" && h >= 24) {
+        const d = Math.floor(h / 24);
+        const remainingHours = h % 24;
+        
+        // Zero-padding prevents layout jitter in tables
+        setTimeLeft(
+          `${d}d ${String(remainingHours).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`
+        );
+      } else {
+        setTimeLeft(
+          `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+        );
+      }
+    };
+
+    tick(); // Initial call
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [targetDateStr, format]);
+
+  return <span className="font-mono text-[11px] font-semibold text-orange-600 dark:text-orange-400">{timeLeft}</span>;
+};
+
 export default function Contests() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -35,14 +109,9 @@ export default function Contests() {
       return `M0,${y} L120,${y}`;
     }
 
-    // Map history ratings to SVG coordinates (ViewBox 120x60)
-    // Ratings usually range between 800 and 3000.
-    // normalize them so the line fits nicely in the HUD.
     const widthPerPoint = 120 / (history.length - 1 || 1);
-
     const points = history.map((entry, i) => {
       const x = i * widthPerPoint;
-      // Inverse Y: Higher rating = lower Y value in SVG
       const y = 60 - ((entry.rating_after / 3000) * 50 + 5);
       return `${x},${y}`;
     });
@@ -50,7 +119,8 @@ export default function Contests() {
     return `M${points.join(" L")}`;
   }, [history]);
 
-  const getMilitaryRank = (rating) => {
+    const getMilitaryRank = (rating) => {
+
     if (!rating || rating < 1200) return "Trainee";
     if (rating >= 1200 && rating <= 1399) return "Soldier";
     if (rating >= 1400 && rating <= 1599) return "Lieutenant";
@@ -63,7 +133,6 @@ export default function Contests() {
   async function loadArenaData() {
     setLoading(true);
     try {
-      // Parallel fetch for Contests and User HUD Stats
       const [u, r, p, userStats, userHistory] = await Promise.all([
         api.get("/contests?status=upcoming"),
         api.get("/contests?status=running"),
@@ -74,11 +143,10 @@ export default function Contests() {
 
       setUpcoming(u.data);
       setRunning(r.data);
-      setPast(p.data.slice(-5));
+      setPast(p.data.slice(-15)); // Expanded list for tabular view
       setStats(userStats.data);
       setHistory(userHistory.data.history);
 
-      // Handle Registration Status
       const allActive = [...u.data, ...r.data];
       const status = {};
       for (const c of allActive) {
@@ -105,612 +173,413 @@ export default function Contests() {
     }
   }, [authLoading, user, navigate]);
 
-  /* =========================
-      Load contests
-  ========================= */
   async function loadContests() {
     setLoading(true);
-
     const [u, r, p] = await Promise.all([
       api.get("/contests?status=upcoming"),
       api.get("/contests?status=running"),
       api.get("/contests?status=past"),
     ]);
-
     setUpcoming(u.data);
     setRunning(r.data);
-    setPast(p.data.slice(p.data.length - 5)); // last 5 only
+    setPast(p.data.slice(-15));
 
     const all = [...u.data, ...r.data];
     const status = {};
-
     for (const c of all) {
       const res = await api.get(`/contests/${c.id}/registration-status`);
       status[c.id] = res.data.registered;
     }
-
     setRegistered(status);
     setLoading(false);
   }
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      loadContests();
-    }
-  }, [authLoading, user]);
-
-  /* =========================
-      Register
-  ========================= */
   async function register(contestId) {
     await api.post(`/contests/${contestId}/register`);
     alert("Registered successfully");
     loadContests();
   }
 
-  /* =========================
-      Create contest
-  ========================= */
   async function createContest(e) {
     e.preventDefault();
-
     await api.post("/contests", {
       name: form.name,
-      start_time: form.start_time,
-      end_time: form.end_time,
+      start_time: form.start_time ? new Date(form.start_time).toISOString() : "",
+      end_time: form.end_time ? new Date(form.end_time).toISOString() : "",
       duration_minutes: Number(form.duration_minutes),
       problems: form.problems.split(",").map((x) => Number(x.trim())),
     });
-
     alert("Contest created");
-    setForm({
-      name: "",
-      start_time: "",
-      end_time: "",
-      duration_minutes: "",
-      problems: "",
-    });
-
+    setForm({ name: "", start_time: "", end_time: "", duration_minutes: "", problems: "" });
     loadContests();
   }
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0a0c10] flex flex-col items-center justify-center transition-colors duration-300">
-        <div className="flex flex-col items-center gap-5">
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full border-[3px] border-slate-200 dark:border-slate-800"></div>
-            <div className="absolute inset-0 rounded-full border-[3px] border-blue-600 dark:border-blue-500 border-t-transparent border-r-transparent animate-[spin_0.8s_linear_infinite]"></div>
-            <div className="absolute inset-0 rounded-full bg-blue-500/10 dark:bg-blue-500/20 blur-md"></div>
-          </div>
-          <div className="text-center">
-            <h3 className="text-slate-900 dark:text-white font-bold tracking-tight uppercase">
-              {authLoading ? "Authenticating" : "Loading Arena"}
-            </h3>
-            <p className="text-sm font-medium text-blue-500 dark:text-blue-400 mt-1 animate-pulse uppercase tracking-widest">
-              Initializing Protocols...
-            </p>
-          </div>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] flex items-center justify-center">
+        <div className="text-sm font-semibold text-slate-500 uppercase tracking-widest animate-pulse">
+          Loading Arena Data...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f9fa] dark:bg-[#0a0c10] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-[#0a0c10] text-slate-900 dark:text-slate-100 font-sans">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 md:py-12">
         
-        {/* --- HERO HEADER --- */}
-        <header className="mb-16 relative">
-          <div className="absolute -left-4 top-0 w-1.5 h-16 bg-blue-600 dark:bg-blue-500 rounded-full"></div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter transition-colors">
-            CONTEST <span className="text-blue-600 dark:text-blue-500 uppercase">Arena</span>
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-bold uppercase text-xs tracking-[0.3em] mt-2 ml-1 transition-colors">
-            Algorhythm Contest Engine v2.0
+        {/* --- PAGE HEADER --- */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">Contests</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Competitive programming rounds — register, compete, and track your rating.
           </p>
-        </header>
+        </div>
 
-        {/* --- CREATE CONTEST (ADMIN) --- */}
-        <section className="mb-20 relative p-1 rounded-[3rem] bg-gradient-to-tr from-blue-400 to-sky-200 dark:from-blue-600 dark:to-blue-900 overflow-hidden shadow-2xl shadow-blue-500/20 dark:shadow-none transition-all duration-300">
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[2.9rem] p-8 md:p-10 lg:p-14 transition-colors">
-            <div className="flex flex-col lg:flex-row gap-12">
-              <div className="lg:w-1/3">
-                <span className="inline-block bg-blue-600 dark:bg-blue-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest mb-6 shadow-md shadow-blue-500/20">
-                  Admin Command Center
-                </span>
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4 uppercase leading-tight tracking-tight transition-colors">
-                  Launch New
-                  <br />
-                  <span className="text-blue-600 dark:text-blue-500">Contest</span>
-                </h2>
-                <p className="text-slate-500 dark:text-slate-400 font-bold text-xs leading-relaxed uppercase tracking-tight opacity-80 italic transition-colors">
-                  Authorized personnel only. Trespassers will be shot. Ensure all
-                  problem IDs are synced with the database before deployment.
-                </p>
-              </div>
-
-              <div className="lg:w-2/3">
-                <form
-                  onSubmit={createContest}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                >
-                  <div className="md:col-span-2">
-                    <input
-                      className="w-full bg-slate-50 dark:bg-slate-800/50 px-6 py-4 rounded-2xl border-2 border-transparent focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all font-bold placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white shadow-inner dark:shadow-none"
-                      placeholder="Contest name"
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <span className="ml-4 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest transition-colors">
-                      Start Time
-                    </span>
-                    <input
-                      type="datetime-local"
-                      className="w-full bg-slate-50 dark:bg-slate-800/50 px-6 py-4 rounded-2xl border-2 border-transparent focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all font-bold text-slate-900 dark:text-white shadow-inner dark:shadow-none"
-                      value={form.start_time}
-                      onChange={(e) =>
-                        setForm({ ...form, start_time: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <span className="ml-4 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest transition-colors">
-                      End Time
-                    </span>
-                    <input
-                      type="datetime-local"
-                      className="w-full bg-slate-50 dark:bg-slate-800/50 px-6 py-4 rounded-2xl border-2 border-transparent focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all font-bold text-slate-900 dark:text-white shadow-inner dark:shadow-none"
-                      value={form.end_time}
-                      onChange={(e) =>
-                        setForm({ ...form, end_time: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <input
-                    className="w-full bg-slate-50 dark:bg-slate-800/50 px-6 py-4 rounded-2xl border-2 border-transparent focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all font-bold placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white shadow-inner dark:shadow-none"
-                    placeholder="Duration (minutes)"
-                    value={form.duration_minutes}
-                    onChange={(e) =>
-                      setForm({ ...form, duration_minutes: e.target.value })
-                    }
-                  />
-
-                  <input
-                    className="w-full bg-slate-50 dark:bg-slate-800/50 px-6 py-4 rounded-2xl border-2 border-transparent focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all font-bold placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white shadow-inner dark:shadow-none"
-                    placeholder="Problem IDs (1,2,3)"
-                    value={form.problems}
-                    onChange={(e) =>
-                      setForm({ ...form, problems: e.target.value })
-                    }
-                  />
-
-                  <button className="md:col-span-2 bg-slate-900 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-500 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-slate-900/20 dark:shadow-none dark:hover:shadow-blue-500/20 uppercase tracking-widest text-sm mt-2 transform active:scale-[0.98]">
-                    Initialize Deployment Sequence
-                  </button>
-                </form>
-              </div>
-            </div>
+        {/* --- PROFILE STRIP --- */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 mb-8 flex flex-wrap items-center gap-6 shadow-sm">
+          <div className="w-12 h-12 rounded bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-xl uppercase shadow-sm">
+            {user.username?.substring(0, 1)}
           </div>
-        </section>
-
-        <section className="mb-20 grid grid-cols-1 lg:grid-cols-4 gap-6">
           
-          {/* Profile Card */}
-          <div className="lg:col-span-2 bg-slate-900 dark:bg-slate-950 rounded-[2.5rem] p-8 border border-slate-800 shadow-2xl shadow-slate-900/20 dark:shadow-none relative overflow-hidden group transition-colors duration-300">
-            <div className="relative flex items-center gap-6 z-10">
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center p-1 shadow-lg shadow-blue-500/20">
-                <div className="w-full h-full rounded-[1.4rem] bg-slate-900 dark:bg-slate-950 flex items-center justify-center font-black text-3xl text-white italic tracking-tighter">
-                  {user.username?.substring(0, 1).toUpperCase()}
-                </div>
+          <div className="flex-1 min-w-[200px]">
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white tracking-tight leading-tight">
+              {user.username}
+            </h2>
+            <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400 mb-3">
+              {stats?.is_banned ? "BANNED" : getMilitaryRank(stats?.contest_rating)}
+            </p>
+            
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] text-slate-500 uppercase font-semibold tracking-wider">Rating</span>
+                <span className="text-sm font-mono font-bold text-slate-900 dark:text-white">{stats?.contest_rating || 0}</span>
               </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-1">
-                  <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight truncate">
-                    {user.username}
-                  </h3>
-                </div>
-
-                <p className="text-blue-400 font-black text-[11px] md:text-xs uppercase tracking-[0.2em] mb-4">
-                  RANK:{" "}
-                  {stats?.is_banned ? (
-                    <span className="text-rose-500">TERMINATED</span>
-                  ) : (
-                    getMilitaryRank(stats?.contest_rating)
-                  )}
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {!stats?.is_banned ? (
-                    <>
-                      <span className="px-3 py-1 bg-slate-800 text-slate-300 text-[9px] font-black uppercase tracking-widest rounded-lg border border-slate-700">
-                        GLOBAL RANK: {stats?.contest_global_rank || "---"}
-                      </span>
-                      <span className="px-3 py-1 bg-slate-800 text-slate-300 text-[9px] font-black uppercase tracking-widest rounded-lg border border-slate-700">
-                        MISSIONS: {stats?.contests_solved || 0}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="px-3 py-1 bg-slate-800 text-slate-300 text-[9px] font-black uppercase tracking-widest rounded-lg border border-slate-700">
-                        GLOBAL RANK: None
-                      </span>
-                      <span className="px-3 py-1 bg-slate-800 text-slate-300 text-[9px] font-black uppercase tracking-widest rounded-lg border border-slate-700">
-                        MISSIONS: None
-                      </span>
-                    </>
-                  )}
-                </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] text-slate-500 uppercase font-semibold tracking-wider">Contests</span>
+                <span className="text-sm font-mono font-bold text-slate-900 dark:text-white">{stats?.contests_solved || 0}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] text-slate-500 uppercase font-semibold tracking-wider">Acceptance</span>
+                <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400">{stats?.contest_acceptance_rate || "0.0"}%</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] text-slate-500 uppercase font-semibold tracking-wider">Global Rank</span>
+                <span className="text-sm font-mono font-bold text-slate-900 dark:text-white">#{stats?.contest_global_rank || "---"}</span>
               </div>
             </div>
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
           </div>
 
-          {/* Tactical Altitude Graph (Live History) */}
-          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] overflow-hidden shadow-sm group h-full min-h-[180px] transition-colors duration-300">
-            <div className="relative z-20 p-8">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest transition-colors">
-                  Rating Altitude
-                </span>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-slate-900 dark:text-white italic tracking-tighter leading-none transition-colors">
-                  {stats?.contest_rating || 0}
-                </span> 
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 italic transition-colors">(max. 1200)</span>
-              </div>
-              <p className="text-[10px] font-bold text-emerald-500 dark:text-emerald-400 uppercase mt-2 leading-none transition-colors">
-                {history.length > 0
-                  ? `↑ ${history[history.length - 1].rating_change} Gain`
-                  : ""}
-              </p>
-            </div>
-
-            {/* GRAPH LAYER */}
-            <svg
-              viewBox="0 0 120 60"
-              className="w-full h-full absolute inset-0 z-10"
-              preserveAspectRatio="none"
-            >
+          <div className="w-[140px] h-[52px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded flex-shrink-0 relative overflow-hidden">
+            <svg viewBox="0 0 120 60" className="w-full h-full absolute inset-0" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="altitudeGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2563eb" stopOpacity="0.15" />
+                <linearGradient id="minigraph" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#2563eb" stopOpacity="0.2" />
                   <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
-
-              {/* Shaded Area */}
-              <path
-                d={`${altitudePath} L120,60 L0,60 Z`}
-                fill="url(#altitudeGradient)"
-                className="transition-all duration-1000"
-              />
-              
-              {/* Stroke */}
-              <path
-                d={altitudePath}
-                fill="none"
-                stroke="#2563eb"
-                strokeWidth="0.5"
-                strokeLinecap="round"
-                vectorEffect="non-scaling-stroke"
-              />
+              <path d={`${altitudePath} L120,60 L0,60 Z`} fill="url(#minigraph)" />
+              <path d={altitudePath} fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
             </svg>
           </div>
+        </div>
 
-          {/* Efficiency Card (Live Stats) */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 flex flex-col justify-between shadow-sm transition-colors duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest transition-colors">
-                Kill Efficiency
-              </span>
-              <div className="w-2 h-2 bg-emerald-500 dark:bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-            </div>
-            <div>
-              <span className="text-4xl font-black text-slate-900 dark:text-white italic tracking-tighter transition-colors">
-                {stats?.contest_acceptance_rate || "0.0"}%
-              </span>
-              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-4 overflow-hidden transition-colors duration-300">
-                <div
-                  className="h-full bg-blue-500 transition-all duration-1000"
-                  style={{ width: `${stats?.contest_acceptance_rate || 0}%` }}
-                ></div>
-              </div>
-            </div>
+        {/* --- ADMIN FORM --- */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 mb-10 shadow-sm">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100 dark:border-slate-800/60">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Create Contest</h3>
+            <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider text-white bg-blue-600 rounded uppercase">Admin</span>
           </div>
-        </section>
+          
+          <form onSubmit={createContest} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2 flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Contest Name</label>
+              <input 
+                required
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                placeholder="e.g. Algorhythm Round #19 (Div. 2)"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Start Time</label>
+              <input 
+                required
+                type="datetime-local"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                value={form.start_time}
+                onChange={(e) => setForm({ ...form, start_time: e.target.value })}
+              />
+            </div>
 
-        {/* --- ONGOING SECTION --- */}
-        <section className="mb-20">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-2xl font-black flex items-center gap-3 italic text-slate-900 dark:text-white uppercase transition-colors tracking-tight">
-              <span className="flex h-3 w-3 rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)] animate-pulse"></span>
-              Live Missions
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">End Time</label>
+              <input 
+                required
+                type="datetime-local"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                value={form.end_time}
+                onChange={(e) => setForm({ ...form, end_time: e.target.value })}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Duration (minutes)</label>
+              <input 
+                required
+                type="number"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                placeholder="135"
+                value={form.duration_minutes}
+                onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Problem IDs (1,2,3)</label>
+              <input 
+                required
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                placeholder="e.g. 101, 102, 103"
+                value={form.problems}
+                onChange={(e) => setForm({ ...form, problems: e.target.value })}
+              />
+            </div>
+
+            <div className="sm:col-span-2 mt-2">
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 rounded transition-colors">
+                Initialize Deployment Sequence
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* --- LIVE CONTESTS --- */}
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="text-[13px] font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              Running Now
             </h2>
-            <div className="h-px flex-grow mx-4 md:mx-8 bg-slate-200 dark:bg-slate-800 transition-colors"></div>
+            <span className="px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
+              {running.length}
+            </span>
           </div>
 
           {running.length === 0 ? (
-            <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-sm text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl transition-colors bg-white/50 dark:bg-slate-900/50">
+            <div className="py-8 text-center bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-500">
               No active deployments detected.
-            </p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {running.map((c) => (
-                <div
-                  key={c.id}
-                  className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 md:p-10 hover:border-blue-500 dark:hover:border-blue-500 transition-all shadow-lg hover:shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden"
-                >
-                  <div className="relative z-10">
-                    <span className="px-3 py-1 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg mb-5 inline-block shadow-sm">
-                      Realtime Active
-                    </span>
-                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-8 max-w-sm leading-tight tracking-tight transition-colors">
-                      {c.name}
-                    </h3>
-                    {registered[c.id] ? (
-                      <button
-                        onClick={() => navigate(`/contests/${c.id}/problems`)}
-                        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-4 rounded-xl transition-all shadow-md shadow-blue-600/20 active:scale-95 uppercase tracking-widest text-xs"
-                      >
-                        Enter Arena
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => register(c.id)}
-                        disabled={stats?.is_banned}
-                        className="w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:border-blue-600 hover:text-white font-black px-10 py-4 rounded-xl transition-all uppercase tracking-widest text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Enlist Now
-                      </button>
-                    )}
-                  </div>
-                  {/* Decorative background element */}
-                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-50 dark:bg-blue-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-100 dark:group-hover:bg-blue-500/10 transition-colors"></div>
-                </div>
-              ))}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-x-auto shadow-sm">
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                  <tr>
+                    <th className="w-2/5 px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Contest</th>
+                    <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Started</th>
+                    <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Duration</th>
+                    <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Time Left</th>
+                    <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {running.map((c) => (
+                    <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-b border-slate-100 dark:border-slate-800/50 last:border-0">
+                      <td className="px-4 py-3">
+                        <span className="block text-[13px] font-semibold text-slate-900 dark:text-white mb-0.5">{c.name}</span>
+                        <span className="text-[10px] font-mono text-slate-500">Active participants: {c.participants || 0}</span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">
+                        {formatIST(c.start_time)}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                        {formatDuration(c.duration_minutes)}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <CountdownTimer targetDateStr={c.end_time} format="full" />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {registered[c.id] ? (
+                          <button onClick={() => navigate(`/contests/${c.id}/problems`)} className="px-3 py-1.5 text-[11px] font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors whitespace-nowrap">
+                            Enter
+                          </button>
+                        ) : (
+                          <button onClick={() => register(c.id)} disabled={stats?.is_banned} className="px-3 py-1.5 text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-600 rounded transition-colors whitespace-nowrap disabled:opacity-50">
+                            Register
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
-        </section>
+        </div>
 
-        {/* --- UPCOMING SECTION --- */}
-        <section className="mb-24">
-          <h2 className="text-xl font-black mb-8 text-slate-400 dark:text-slate-500 italic uppercase tracking-tight transition-colors">
-            Scheduled Ops
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {upcoming.map((c) => (
-              <div
-                key={c.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 hover:shadow-lg hover:border-blue-200 dark:hover:border-slate-700 transition-all group"
-              >
-                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-3 tracking-tight transition-colors">
-                  {c.name}
-                </h3>
-                <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase mb-8 flex items-center gap-2 tracking-wider transition-colors">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2.5"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  {new Date(c.start_time).toLocaleString()}
-                </p>
-                {registered[c.id] ? (
-                  <div className="w-full py-3.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl font-black text-[10px] text-center uppercase tracking-[0.2em] border border-emerald-200 dark:border-emerald-500/20 transition-colors">
-                    Ready for deployment
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => register(c.id)}
-                    className="w-full py-3.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:border-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:border-blue-600 font-black rounded-xl transition-all text-[10px] uppercase tracking-[0.2em] active:scale-95"
-                  >
-                    Join Mission
-                  </button>
-                )}
-              </div>
-            ))}
-            {upcoming.length === 0 && (
-              <div className="col-span-full py-8 text-center bg-white/50 dark:bg-slate-900/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 transition-colors">
-                <p className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                  No future operations scheduled.
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* --- PAST SECTION --- */}
-        <section className="mb-24">
-          <div className="flex items-center gap-4 mb-8">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500 whitespace-nowrap transition-colors">
-              Historical Logs
+        {/* --- UPCOMING CONTESTS --- */}
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="text-[13px] font-semibold text-slate-900 dark:text-white">Upcoming</h2>
+            <span className="px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
+              {upcoming.length}
             </span>
-            <div className="h-px flex-grow bg-slate-200 dark:bg-slate-800 transition-colors"></div>
           </div>
-          <div className="flex flex-wrap gap-4">
-            {past.length === 0 ? (
-               <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">No data available.</p>
-            ) : past.map((c) => (
-              <div
-                key={c.id}
-                className="px-6 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between min-w-[280px] shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-slate-700 transition-all group cursor-pointer active:scale-95"
-                onClick={() => navigate(`/contests/${c.id}`)}
-              >
-                <div>
-                  <h3 className="font-black text-slate-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors uppercase tracking-tight">
-                    {c.name}
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 tracking-wider uppercase transition-colors">
-                    Concluded: {new Date(c.end_time).toLocaleDateString()}
-                  </p>
-                </div>
-                <svg
-                  className="w-5 h-5 text-slate-300 dark:text-slate-600 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="3"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </div>
-            ))}
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-x-auto shadow-sm">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr>
+                  <th className="w-2/5 px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Contest</th>
+                  <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Starts</th>
+                  <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Duration</th>
+                  <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Starts In</th>
+                  <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-right">Registration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcoming.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="py-6 text-center text-xs text-slate-500 bg-white dark:bg-slate-900">
+                      No future operations scheduled.
+                    </td>
+                  </tr>
+                )}
+                {upcoming.map((c) => (
+                  <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-b border-slate-100 dark:border-slate-800/50 last:border-0">
+                    <td className="px-4 py-3">
+                      <span className="block text-[13px] font-semibold text-slate-900 dark:text-white mb-0.5">{c.name}</span>
+                      <span className="text-[10px] font-mono text-slate-500">Pre-registrations: {c.participants || 0}</span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">
+                      {formatIST(c.start_time)}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                      {formatDuration(c.duration_minutes)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <CountdownTimer targetDateStr={c.start_time} format="days" />
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {registered[c.id] ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded whitespace-nowrap">
+                          ✓ Registered
+                        </span>
+                      ) : (
+                        <button onClick={() => register(c.id)} className="px-3 py-1.5 text-[11px] font-semibold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-600 rounded transition-colors whitespace-nowrap shadow-sm">
+                          Register
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
+        </div>
+
+        {/* --- PAST CONTESTS --- */}
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="text-[13px] font-semibold text-slate-900 dark:text-white">Past Contests</h2>
+            <span className="px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
+              {past.length} recent
+            </span>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-x-auto shadow-sm">
+            <table className="w-full text-left border-collapse min-w-[500px]">
+              <thead>
+                <tr>
+                  <th className="w-3/5 px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Contest</th>
+                  <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">Date</th>
+                  <th className="px-4 py-2.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-right">Participants</th>
+                </tr>
+              </thead>
+              <tbody>
+                {past.length === 0 && (
+                  <tr>
+                    <td colSpan="3" className="py-6 text-center text-xs text-slate-500 bg-white dark:bg-slate-900">
+                      No historical data available.
+                    </td>
+                  </tr>
+                )}
+                {past.map((c) => (
+                  <tr 
+                    key={c.id} 
+                    onClick={() => navigate(`/contests/${c.id}`)}
+                    className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-b border-slate-100 dark:border-slate-800/50 last:border-0"
+                  >
+                    <td className="px-4 py-3">
+                      <span className="block text-[13px] font-semibold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{c.name}</span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">
+                      {formatIST(c.end_time, true)}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 font-mono text-right">
+                      {c.participants || 0} <span className="text-[10px] text-slate-400">👤</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {/* --- ENGAGEMENT PROTOCOLS (RULES) --- */}
-        <section className="mb-24">
-          <div className="flex items-center gap-4 mb-10">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter transition-colors">
-              Engagement Protocols
-            </h2>
-            <div className="h-px flex-grow bg-slate-200 dark:bg-slate-800 transition-colors"></div>
+        <div className="mb-16">
+          <div className="mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="text-[13px] font-semibold text-slate-900 dark:text-white">Contest Rules</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Rule 1: Format */}
-            <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] shadow-sm hover:shadow-md transition-all">
-              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-6 border border-blue-100 dark:border-blue-500/20">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                  />
-                </svg>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
+              <div className="w-8 h-8 rounded bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-3">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
               </div>
-              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase mb-3 tracking-tight transition-colors">
-                Standard Loadout
-              </h3>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed uppercase tracking-tight transition-colors">
-                Each official operation consists of exactly{" "}
-                <span className="text-blue-600 dark:text-blue-400 font-black">
-                  4 algorithmic challenges
-                </span>{" "}
-                of varying difficulty.
+              <h3 className="text-[11.5px] font-semibold text-slate-900 dark:text-white mb-1.5 uppercase tracking-wide">Format</h3>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                Each official operation consists of exactly <strong className="text-slate-900 dark:text-white font-semibold">4 algorithmic challenges</strong> of varying difficulty.
               </p>
             </div>
 
-            {/* Rule 2: Penalty */}
-            <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] shadow-sm hover:shadow-md transition-all">
-              <div className="w-10 h-10 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center mb-6 border border-amber-100 dark:border-amber-500/20">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
+              <div className="w-8 h-8 rounded bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
-              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase mb-3 tracking-tight transition-colors">
-                Penalty Logic
-              </h3>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed uppercase tracking-tight transition-colors">
-                Ranking is based on solved count. Ties are settled by time
-                penalty:{" "}
-                <span className="text-amber-500 dark:text-amber-400 font-black">10 mins</span> added
-                per failed submission.
+              <h3 className="text-[11.5px] font-semibold text-slate-900 dark:text-white mb-1.5 uppercase tracking-wide">Penalty Logic</h3>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                Ranking is based on solved count. Ties are settled by time penalty: <strong className="text-slate-900 dark:text-white font-semibold">10 mins</strong> added per failed submission.
               </p>
             </div>
 
-            {/* Rule 3: Cheating */}
-            <div className="p-8 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-[2rem] shadow-sm transition-colors">
-              <div className="w-10 h-10 bg-rose-500 dark:bg-rose-600 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg p-4 shadow-sm">
+              <div className="w-8 h-8 rounded bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800/50 flex items-center justify-center text-red-600 dark:text-red-400 mb-3">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4m0 4h.01" /></svg>
               </div>
-              <h3 className="text-sm font-black text-rose-700 dark:text-rose-400 uppercase mb-3 tracking-tight transition-colors">
-                Protocol Zero
-              </h3>
-              <p className="text-xs font-bold text-rose-600/80 dark:text-rose-400/80 leading-relaxed uppercase tracking-tight italic transition-colors">
-                Any detected plagiarism or external assistance will result in an{" "}
-                <span className="text-rose-700 dark:text-rose-400 font-black">
-                  immediate and permanent ban
-                </span>{" "}
-                from the Arena.
+              <h3 className="text-[11.5px] font-semibold text-red-700 dark:text-red-400 mb-1.5 uppercase tracking-wide">No Cheating</h3>
+              <p className="text-[11px] text-red-600 dark:text-red-400/80 leading-relaxed">
+                Any detected plagiarism will result in an <strong className="text-red-700 dark:text-red-400 font-semibold">immediate and permanent ban</strong> from the Arena.
               </p>
             </div>
 
-            {/* Rule 4: Comms */}
-            <div className="p-8 bg-slate-900 dark:bg-slate-950 border border-slate-800 rounded-[2rem] shadow-xl transition-colors">
-              <div className="w-10 h-10 bg-blue-600 dark:bg-blue-500 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
+              <div className="w-8 h-8 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 mb-3">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
               </div>
-              <h3 className="text-sm font-black text-white uppercase mb-3 tracking-tight">
-                Comms Blackout
-              </h3>
-              <p className="text-xs font-bold text-slate-400 leading-relaxed uppercase tracking-tight">
-                Solution disclosure is prohibited until the mission timer reaches{" "}
-                <span className="text-blue-400 font-black">zero</span>. Maintain
-                total operational silence.
+              <h3 className="text-[11.5px] font-semibold text-slate-900 dark:text-white mb-1.5 uppercase tracking-wide">Comms Blackout</h3>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                Solution disclosure is prohibited until the mission timer reaches <strong className="text-slate-900 dark:text-white font-semibold">zero</strong>. Maintain total silence.
               </p>
             </div>
-            
           </div>
-        </section>
+        </div>
 
-        <footer className="mt-20 pt-10 border-t border-slate-200 dark:border-slate-800 text-center opacity-40 transition-colors">
-          <p className="text-[9px] font-black uppercase tracking-[1.5em] text-slate-900 dark:text-white">
-            Algorhythm Contest Engine
+        <footer className="pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
+          <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+            Algorhythm Contest Engine v2.0
           </p>
         </footer>
       </div>
