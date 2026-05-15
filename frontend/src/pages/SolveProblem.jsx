@@ -360,7 +360,7 @@ export default function SolveProblem() {
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                 >
-                  {content.statement.replace(/\\n/g, '\n')}
+                  {content.statement}
                 </ReactMarkdown>
               </div>
 
