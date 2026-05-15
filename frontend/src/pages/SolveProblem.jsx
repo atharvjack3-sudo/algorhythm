@@ -245,6 +245,7 @@ export default function SolveProblem() {
   }
 
   const { problem, content, stats, topics, samples } = data;
+  console.log(content.statement);
 
   return (
     // FIX: Added overflow-y-auto for mobile scrolling, and hidden for desktop to rely on internal pane scrolling
