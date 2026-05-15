@@ -7,15 +7,16 @@ import { api } from "../api/client";
 import Editor from "@monaco-editor/react";
 import { InlineMath } from "react-katex";
 import ReactMarkdown from "react-markdown";
-import "highlight.js/styles/atom-one-dark.css";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
+
+import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 
-const DiscussionTab = lazy(
-  () => import("../components/discussion/DiscussionTab"),
+const DiscussionTab = lazy(() =>
+  import("../components/discussion/DiscussionTab")
 );
 
 const TABS = [
@@ -27,6 +28,53 @@ const TABS = [
   "Discussion",
 ];
 
+/* =========================
+   MARKDOWN RENDERER
+========================= */
+function MarkdownRenderer({ content, className = "" }) {
+  if (!content) return null;
+
+  return (
+    <div
+      className={`
+        prose dark:prose-invert max-w-none
+        prose-p:my-4
+        prose-headings:font-bold
+        prose-headings:text-slate-900
+        dark:prose-headings:text-white
+        prose-h1:text-3xl
+        prose-h2:text-xl
+        prose-h2:mb-4
+        prose-h3:text-lg
+        prose-h3:mt-6
+        prose-h3:mb-3
+        prose-ul:list-disc
+        prose-ul:pl-6
+        prose-ul:my-4
+        prose-ol:list-decimal
+        prose-ol:pl-6
+        prose-ol:my-4
+        prose-li:my-1
+        prose-pre:bg-slate-900
+        prose-pre:text-slate-100
+        prose-pre:rounded-xl
+        prose-code:text-blue-600
+        dark:prose-code:text-blue-400
+        prose-strong:text-slate-900
+        dark:prose-strong:text-white
+        ${className}
+      `}
+    >
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex, rehypeHighlight]}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
 export default function SolveProblem() {
   const { problemId } = useParams();
   const { user, loading: authLoading } = useAuth();
@@ -36,6 +84,7 @@ export default function SolveProblem() {
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
   const [openSubmission, setOpenSubmission] = useState(null);
+  
   const [runLoading, setRunLoading] = useState(false);
   const [runResults, setRunResults] = useState([]);
   const [runError, setRunError] = useState(null);
@@ -43,6 +92,7 @@ export default function SolveProblem() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [solved, setSolved] = useState(false);
@@ -50,7 +100,9 @@ export default function SolveProblem() {
   const [complexity, setComplexity] = useState(null);
   const [submissions, setSubmissions] = useState([]);
 
-  // --- Resizer State & Logic ---
+  /* =========================
+     RESIZER LOGIC
+  ========================= */
   const [leftWidth, setLeftWidth] = useState(45); // Start at 45%
   const [isDragging, setIsDragging] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
@@ -91,90 +143,15 @@ export default function SolveProblem() {
       document.body.style.userSelect = "auto";
     };
   }, [isDragging]);
-  // -----------------------------
 
-  async function handleSubmit() {
-    if (!user) return;
-
-    try {
-      setSubmitting(true);
-      setSubmitError(null);
-
-      const res = await api.post("/submissions", {
-        problemId: Number(problemId),
-        language,
-        code,
-      });
-
-      const result = res.data;
-
-      setLastResult(result);
-      setSubmissions((prev) => [
-        {
-          verdict: result.verdict,
-          submitted_at: new Date().toISOString(),
-          language,
-        },
-        ...prev,
-      ]);
-
-      setActiveTab("Result");
-    } catch (err) {
-      setSubmitError(err.response?.data?.error || "Submission failed");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  const handleRun = async () => {
-    if (!code.trim()) return;
-
-    try {
-      setRunLoading(true);
-      setRunError(null);
-      setRunResults([]);
-
-      const res = await api.post("/run", {
-        problemId,
-        language,
-        code,
-      });
-
-      setRunResults(res.data.samples);
-      setActiveTab("Run");
-    } catch (err) {
-      setRunError(err.response?.data?.error || "Run failed");
-    } finally {
-      setRunLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!user) return;
-
-    async function fetchSubmissions() {
-      try {
-        const res = await api.get(`/submissions/${problemId}`);
-        setSubmissions(res.data);
-      } catch (err) {
-        console.error("Failed to load submissions");
-      }
-    }
-
-    fetchSubmissions();
-  }, [problemId, user]);
-
-  useEffect(() => {
-    if (!submissions) return;
-    setSolved(submissions.some((s) => s.verdict === "AC"));
-  }, [submissions]);
-
+  /* =========================
+     API CALLS
+  ========================= */
   useEffect(() => {
     async function fetchProblem() {
       try {
         setLoading(true);
         setError(null);
-
         const res = await api.get(`/problems/${problemId}`);
         setData(res.data);
       } catch (err) {
@@ -187,9 +164,74 @@ export default function SolveProblem() {
         setLoading(false);
       }
     }
-
     fetchProblem();
   }, [problemId]);
+
+  useEffect(() => {
+    if (!user) return;
+    async function fetchSubmissions() {
+      try {
+        const res = await api.get(`/submissions/${problemId}`);
+        setSubmissions(res.data);
+      } catch (err) {
+        console.error("Failed to load submissions");
+      }
+    }
+    fetchSubmissions();
+  }, [problemId, user]);
+
+  useEffect(() => {
+    if (!submissions) return;
+    setSolved(submissions.some((s) => s.verdict === "AC"));
+  }, [submissions]);
+
+  async function handleSubmit() {
+    if (!user) return;
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+      const res = await api.post("/submissions", {
+        problemId: Number(problemId),
+        language,
+        code,
+      });
+      const result = res.data;
+      setLastResult(result);
+      setSubmissions((prev) => [
+        {
+          verdict: result.verdict,
+          submitted_at: new Date().toISOString(),
+          language,
+        },
+        ...prev,
+      ]);
+      setActiveTab("Result");
+    } catch (err) {
+      setSubmitError(err.response?.data?.error || "Submission failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const handleRun = async () => {
+    if (!code.trim()) return;
+    try {
+      setRunLoading(true);
+      setRunError(null);
+      setRunResults([]);
+      const res = await api.post("/run", {
+        problemId,
+        language,
+        code,
+      });
+      setRunResults(res.data.samples);
+      setActiveTab("Run");
+    } catch (err) {
+      setRunError(err.response?.data?.error || "Run failed");
+    } finally {
+      setRunLoading(false);
+    }
+  };
 
   async function evaluate_complexity(id) {
     try {
@@ -204,6 +246,9 @@ export default function SolveProblem() {
     }
   }
 
+  /* =========================
+     LOADING & ERROR STATES
+  ========================= */
   if (loading) {
     return (
       <div className="w-full h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-[#f8f9fa] dark:bg-slate-950 transition-colors duration-300">
@@ -229,12 +274,7 @@ export default function SolveProblem() {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <p className="text-slate-900 dark:text-white font-semibold text-lg">
             {error}
@@ -245,18 +285,17 @@ export default function SolveProblem() {
   }
 
   const { problem, content, stats, topics, samples } = data;
-  console.log(content.statement);
 
   return (
-    // FIX: Added overflow-y-auto for mobile scrolling, and hidden for desktop to rely on internal pane scrolling
     <div className="w-full h-[calc(100dvh-4rem)] overflow-y-auto md:overflow-hidden bg-[#f8f9fa] dark:bg-[#0a0c10] flex flex-col md:flex-row font-sans transition-colors duration-300 relative">
       {/* Invisible overlay while dragging to prevent Monaco Editor from swallowing mouse events */}
       {isDragging && (
         <div className="fixed inset-0 z-[200] cursor-col-resize" />
       )}
 
-      {/* ===== LEFT PANEL ===== */}
-      {/* FIX: Changed h-[...] to min-h-[...] and added shrink-0 so it forces full height on mobile */}
+      {/* =========================
+          LEFT PANEL
+      ========================= */}
       <section
         className="w-full min-h-[calc(100dvh-4rem)] shrink-0 md:shrink md:min-h-0 md:h-full bg-white dark:bg-slate-950 flex flex-col relative z-10 shadow-sm transition-colors overflow-hidden"
         style={isDesktop ? { width: `${leftWidth}%` } : {}}
@@ -273,8 +312,8 @@ export default function SolveProblem() {
                 problem?.difficulty === "easy"
                   ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
                   : problem?.difficulty === "medium"
-                    ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"
-                    : "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
+                  ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"
+                  : "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
               }`}
             >
               {problem?.difficulty}
@@ -286,16 +325,8 @@ export default function SolveProblem() {
 
             {solved && (
               <span className="flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-wider">
-                <svg
-                  className="w-3 h-3 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
                 Solved
               </span>
@@ -305,10 +336,7 @@ export default function SolveProblem() {
           {topics?.length > 0 && (
             <div className="mt-3 flex gap-2 flex-wrap">
               {topics.map((t) => (
-                <span
-                  key={t}
-                  className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-600 dark:text-slate-300 transition-colors"
-                >
+                <span key={t} className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-600 dark:text-slate-300 transition-colors">
                   {t}
                 </span>
               ))}
@@ -339,6 +367,7 @@ export default function SolveProblem() {
 
         {/* Tab Content - Scrolls internally */}
         <div className="flex-1 overflow-y-auto px-6 py-6 text-sm text-slate-700 dark:text-slate-300 custom-scrollbar">
+          
           {/* Discussion */}
           {activeTab === "Discussion" && (
             <Suspense
@@ -355,15 +384,9 @@ export default function SolveProblem() {
           {/* ===== PROBLEM ===== */}
           {activeTab === "Problem" && (
             <div className="space-y-8 leading-relaxed">
-              <div className=" prose dark:prose-invert max-w-none prose-headings:font-bold prose-h2:text-xl prose-h2:mb-4 prose-p:my-4 prose-ul:list-disc
-                                prose-ul:pl-6 prose-ul:my-4 prose-li:my-1">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeKatex]}
-                >
-                  {content.statement}
-                </ReactMarkdown>
-              </div>
+              
+              {/* Statement using clean renderer */}
+              <MarkdownRenderer content={content.statement} />
 
               {content.constraints && (
                 <div>
@@ -371,14 +394,10 @@ export default function SolveProblem() {
                     Constraints
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
-                    <div className="prose prose-sm dark:prose-invert max-w-none font-mono text-[13px] text-slate-700 dark:text-slate-300 whitespace-pre-line">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                      >
-                        {content.constraints}
-                      </ReactMarkdown>
-                    </div>
+                    <MarkdownRenderer 
+                      content={content.constraints} 
+                      className="font-mono text-[13px] whitespace-pre-line" 
+                    />
                   </div>
                 </div>
               )}
@@ -389,14 +408,10 @@ export default function SolveProblem() {
                     Input Format
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl h-full">
-                    <pre className="text-[13px] whitespace-pre-line text-slate-700 dark:text-slate-300 font-sans">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                      >
-                        {content.input_format}
-                      </ReactMarkdown>
-                    </pre>
+                    <MarkdownRenderer 
+                      content={content.input_format}
+                      className="text-[13px] whitespace-pre-line font-sans"
+                    />
                   </div>
                 </div>
 
@@ -405,14 +420,10 @@ export default function SolveProblem() {
                     Output Format
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl h-full">
-                    <pre className="text-[13px] whitespace-pre-line text-slate-700 dark:text-slate-300 font-sans">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                      >
-                        {content.output_format}
-                      </ReactMarkdown>
-                    </pre>
+                    <MarkdownRenderer 
+                      content={content.output_format}
+                      className="text-[13px] whitespace-pre-line font-sans"
+                    />
                   </div>
                 </div>
               </div>
@@ -454,14 +465,7 @@ export default function SolveProblem() {
 
           {/* ===== EDITORIAL ===== */}
           {activeTab === "Editorial" && (
-            <div className="prose prose-slate dark:prose-invert prose-sm max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex, rehypeHighlight]}
-              >
-                {data.content.editorial}
-              </ReactMarkdown>
-            </div>
+            <MarkdownRenderer content={content.editorial} />
           )}
 
           {/* ===== RUN ===== */}
@@ -469,18 +473,8 @@ export default function SolveProblem() {
             <div className="space-y-4">
               {runError && (
                 <div className="p-4 text-sm bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400 rounded-xl flex items-start gap-3">
-                  <svg
-                    className="w-5 h-5 flex-shrink-0 mt-0.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="font-medium">{runError}</span>
                 </div>
@@ -488,24 +482,9 @@ export default function SolveProblem() {
 
               {runResults.length === 0 ? (
                 <div className="text-center py-16 flex flex-col items-center">
-                  <svg
-                    className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
+                  <svg className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-slate-500 dark:text-slate-400 font-medium">
                     Run your code to evaluate sample test cases
@@ -514,10 +493,7 @@ export default function SolveProblem() {
               ) : (
                 <div className="space-y-6">
                   {runResults.map((r) => (
-                    <div
-                      key={r.sample}
-                      className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-colors"
-                    >
+                    <div key={r.sample} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-colors">
                       <div className="bg-slate-50 dark:bg-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                         <span className="font-bold text-slate-800 dark:text-slate-200">
                           Test Case {r.sample}
@@ -553,18 +529,8 @@ export default function SolveProblem() {
             <div className="space-y-4">
               {!lastResult ? (
                 <div className="text-center py-16 flex flex-col items-center">
-                  <svg
-                    className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
+                  <svg className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <p className="text-slate-500 dark:text-slate-400 font-medium">
                     No active submission found.
@@ -580,35 +546,17 @@ export default function SolveProblem() {
                     }`}
                   >
                     {lastResult.verdict === "AC" ? (
-                      <svg
-                        className="w-8 h-8"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
+                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                     ) : (
-                      <svg
-                        className="w-8 h-8"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                          clipRule="evenodd"
-                        />
+                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                       </svg>
                     )}
                     <div>
                       <h2 className="text-xl font-bold">
-                        {lastResult.verdict === "AC"
-                          ? "Accepted"
-                          : "Wrong Answer / Error"}
+                        {lastResult.verdict === "AC" ? "Accepted" : "Wrong Answer / Error"}
                       </h2>
                       <p className="text-sm opacity-90 font-medium">
                         Verdict: {lastResult.verdict}
@@ -624,16 +572,11 @@ export default function SolveProblem() {
                     </div>
                     <ul className="divide-y divide-slate-200 dark:divide-slate-800">
                       {lastResult.samples.map((s) => (
-                        <li
-                          key={s.index}
-                          className="px-4 py-3 flex items-center justify-between"
-                        >
+                        <li key={s.index} className="px-4 py-3 flex items-center justify-between">
                           <span className="text-[13px] font-medium text-slate-700 dark:text-slate-300">
                             Sample #{s.index}
                           </span>
-                          <span
-                            className={`text-[13px] font-bold ${s.verdict === "AC" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
-                          >
+                          <span className={`text-[13px] font-bold ${s.verdict === "AC" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                             {s.verdict}
                           </span>
                         </li>
@@ -661,18 +604,8 @@ export default function SolveProblem() {
             <div className="space-y-3">
               {submissions.length === 0 ? (
                 <div className="text-center py-16 flex flex-col items-center">
-                  <svg
-                    className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
+                  <svg className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <p className="text-slate-500 dark:text-slate-400 font-medium">
                     No past submissions
@@ -699,15 +632,12 @@ export default function SolveProblem() {
                             #{submissions.length - i}
                           </td>
                           <td className="px-4 py-3 text-[13px] text-slate-600 dark:text-slate-400">
-                            {new Date(s.submitted_at).toLocaleString(
-                              undefined,
-                              {
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )}
+                            {new Date(s.submitted_at).toLocaleString(undefined, {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </td>
                           <td className="px-4 py-3 text-right">
                             <span
@@ -743,8 +673,8 @@ export default function SolveProblem() {
       </div>
 
       {/* ===== RIGHT PANEL EDITOR ===== */}
-      {/* FIX: Changed h-[...] to min-h-[...] and added shrink-0 so it forces full height on mobile */}
       <section className="w-full min-h-[calc(100dvh-4rem)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800">
+        
         {/* Editor Toolbar */}
         <div className="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shadow-sm z-10 flex-shrink-0 transition-colors">
           <div className="flex items-center gap-4">
@@ -786,10 +716,7 @@ export default function SolveProblem() {
             ) : (
               <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                 Please{" "}
-                <a
-                  href="/auth"
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
-                >
+                <a href="/auth" className="text-blue-600 dark:text-blue-400 hover:underline">
                   sign in
                 </a>{" "}
                 to submit.
@@ -800,24 +727,14 @@ export default function SolveProblem() {
 
         {submitError && (
           <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 px-4 py-2.5 text-sm font-medium border-b border-rose-200 dark:border-rose-500/20 flex-shrink-0 flex items-center gap-2">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {submitError}
           </div>
         )}
 
-        {/* Monaco Editor Container - Scrolls internally */}
+        {/* Monaco Editor Container */}
         <div className="flex-1 w-full relative">
           <Editor
             height="100%"
@@ -849,6 +766,7 @@ export default function SolveProblem() {
       {openSubmission && (
         <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 flex items-center justify-center z-[150] backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-slate-900 w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 transition-colors">
+            
             {/* Modal Header */}
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 transition-colors">
               <div className="flex items-center gap-4">
@@ -873,22 +791,10 @@ export default function SolveProblem() {
                     disabled={complexity?.id === openSubmission.id}
                     className="text-[13px] font-bold px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 transition-colors shadow-sm active:scale-95 flex items-center gap-2"
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    {complexity?.id === openSubmission.id
-                      ? "Analyzed"
-                      : "AI Analysis"}
+                    {complexity?.id === openSubmission.id ? "Analyzed" : "AI Analysis"}
                   </button>
                 )}
 
@@ -896,18 +802,8 @@ export default function SolveProblem() {
                   onClick={() => setOpenSubmission(null)}
                   className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
@@ -923,11 +819,7 @@ export default function SolveProblem() {
             >
               <div className="px-6 py-4 bg-blue-50 dark:bg-blue-500/10 text-sm flex flex-col gap-2 transition-colors">
                 <div className="flex items-center gap-2 mb-1">
-                  <svg
-                    className="w-5 h-5 text-blue-600 dark:text-blue-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
+                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                   </svg>
                   <span className="font-bold tracking-tight text-blue-700 dark:text-blue-400">
@@ -937,17 +829,13 @@ export default function SolveProblem() {
 
                 <div className="flex flex-wrap gap-x-8 gap-y-3 pl-7">
                   <p className="flex items-center gap-2">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">
-                      Time:
-                    </span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">Time:</span>
                     <span className="bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
                       <InlineMath math={complexity?.time} />
                     </span>
                   </p>
                   <p className="flex items-center gap-2">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">
-                      Space:
-                    </span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">Space:</span>
                     <span className="bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
                       <InlineMath math={complexity?.space} />
                     </span>
