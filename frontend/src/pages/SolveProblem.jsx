@@ -356,7 +356,7 @@ export default function SolveProblem() {
             <div className="space-y-8 leading-relaxed">
               <div className="prose prose-slate dark:prose-invert prose-sm max-w-none text-slate-800 dark:text-slate-200">
                 <ReactMarkdown
-                  remarkPlugins={[remarkMath]}
+                  remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                 >
                   {content.statement.replace(/\\n/g, '\n')}
