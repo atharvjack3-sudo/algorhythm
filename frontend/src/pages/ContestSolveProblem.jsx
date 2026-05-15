@@ -75,7 +75,7 @@ export default function ContestSolveProblem() {
   useEffect(() => {
     async function loadProblem() {
       try {
-        const res = await api.get(`/problems/${problemId}`);
+        const res = await api.get(`/contests/problems/${problemId}`);
         setData(res.data);
       } catch (err) { console.error("Problem fetch failed"); }
     }

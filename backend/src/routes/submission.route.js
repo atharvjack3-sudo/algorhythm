@@ -60,6 +60,25 @@ router.post("/submissions", authMiddleware, async (req, res) => {
 
   const conn = await db.connect();
 
+  const { rows: problemRows } = await conn.query(
+  `SELECT is_hidden FROM problems WHERE id = $1`,
+  [problemId]
+);
+
+if (problemRows.length === 0) {
+  conn.release();
+  return res.status(404).json({ error: "Problem not found" });
+}
+
+const problem = problemRows[0];
+
+if (problem.is_hidden) {
+  conn.release();
+  return res.status(404).json({ error: "Problem not found" });
+}
+
+  
+
   try {
     const { rows: testcases } = await conn.query(
       `SELECT * FROM problem_testcases WHERE problem_id = $1 ORDER BY id`,
@@ -362,6 +381,25 @@ router.post("/run", authMiddleware, async (req, res) => {
   if (!LANGUAGE_MAP[language] || !code || !problemId) {
     return res.status(400).json({ error: "Invalid run data" });
   }
+
+    const conn = await db.connect();
+
+  const { rows: problemRows } = await conn.query(
+  `SELECT is_hidden FROM problems WHERE id = $1`,
+  [problemId]
+);
+
+if (problemRows.length === 0) {
+  conn.release();
+  return res.status(404).json({ error: "Problem not found" });
+}
+
+const problem = problemRows[0];
+
+if (problem.is_hidden) {
+  conn.release();
+  return res.status(404).json({ error: "Problem not found" });
+}
 
   try {
     const { rows: samples } = await db.query(

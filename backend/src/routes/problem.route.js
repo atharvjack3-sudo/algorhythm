@@ -203,6 +203,7 @@ router.get("/problems/:problemId", async (req, res) => {
         p.title,
         p.difficulty,
         p.created_at,
+        p.is_hidden,
 
         pc.statement,
         pc.constraints,
@@ -223,6 +224,9 @@ router.get("/problems/:problemId", async (req, res) => {
     const problem = problemRows[0];
 
     if (!problem) {
+      return res.status(404).json({ error: "Problem not found" });
+    }
+    if (problem.is_hidden) {
       return res.status(404).json({ error: "Problem not found" });
     }
 
@@ -309,7 +313,7 @@ router.get("/problem-list", async (req, res) => {
           .filter(d => ["easy", "medium", "hard"].includes(d))
       : [];
 
-    let whereClauses = [];
+    let whereClauses = ["p.is_hidden = false"];
     let params = [];
     let pIdx = 1; // Tracks parameter positioning ($1, $2, etc.)
 

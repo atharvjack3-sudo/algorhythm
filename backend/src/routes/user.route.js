@@ -13,6 +13,11 @@ router.get("/me", authMiddleware, async (req, res) => {
   res.json(rows[0]);
 });
 
+router.get("/ping", async (req, res) => {
+    await db.query("SELECT 1");
+    res.send("ok");
+});
+
 router.get("/userdetails", authMiddleware, async (req, res) => {
   const { rows } = await db.query(
     `SELECT * FROM user_stats WHERE user_id = $1`,
