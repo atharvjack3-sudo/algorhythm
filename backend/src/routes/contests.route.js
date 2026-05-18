@@ -422,12 +422,33 @@ router.get(
       }
 
       //  Fetch problems
+      // const { rows } = await db.query(
+      //   `
+      //   SELECT problem_id, problem_index, difficulty
+      //   FROM contest_problems
+      //   WHERE contest_id = $1
+      //   ORDER BY problem_index
+      //   `,
+      //   [contestId]
+      // );
       const { rows } = await db.query(
         `
-        SELECT problem_id, problem_index, difficulty
-        FROM contest_problems
-        WHERE contest_id = $1
-        ORDER BY problem_index
+        SELECT 
+          cp.problem_id, 
+          cp.problem_index, 
+          cp.difficulty,
+          p.title,
+          (
+            SELECT COUNT(DISTINCT cps.user_id)
+            FROM contest_problem_status cps
+            WHERE cps.contest_id = cp.contest_id 
+              AND cps.problem_id = cp.problem_id 
+              AND cps.solved = 1
+          ) AS solved_count
+        FROM contest_problems cp
+        JOIN problems p ON p.id = cp.problem_id
+        WHERE cp.contest_id = $1
+        ORDER BY cp.problem_index
         `,
         [contestId]
       );
