@@ -526,7 +526,30 @@ router.post(
     const { contestId } = req.params;
 
     const conn = await db.connect();
+    
     try {
+      // 1. Fetch contest end_time to validate registration window
+      const { rows } = await conn.query(
+        `SELECT end_time FROM contests WHERE id = $1`,
+        [contestId]
+      );
+      const contest = rows[0];
+
+      if (!contest) {
+        return res.status(404).json({ error: "Contest not found" });
+      }
+
+      // 2. Enforce the time constraint 
+      const now = new Date();
+      const endTime = toUTC(contest.end_time);
+
+      if (now > endTime) {
+        return res.status(403).json({ 
+          error: "Registration is closed. The contest has already ended." 
+        });
+      }
+
+      // 3. Proceed with registration transaction
       await conn.query('BEGIN');
 
       await conn.query(
@@ -557,6 +580,76 @@ router.post(
       console.error(err);
       res.status(500).json({ error: "Contest registration failed" });
     } finally {
+      // Safely release connection regardless of success, failure, or early return
+      conn.release();
+    }
+  }
+);
+// unregister
+router.post(
+  "/contests/:contestId/unregister",
+  authMiddleware,
+  async (req, res) => {
+    const userId = req.user.id;
+    const { contestId } = req.params;
+
+    const conn = await db.connect();
+
+    try {
+      // 1. Fetch contest start time
+      const { rows } = await conn.query(
+        `SELECT start_time FROM contests WHERE id = $1`,
+        [contestId]
+      );
+      const contest = rows[0];
+
+      if (!contest) {
+        return res.status(404).json({ error: "Contest not found" });
+      }
+
+      // 2. Enforce the time constraint
+      const now = new Date();
+      const startTime = toUTC(contest.start_time);
+
+      if (now >= startTime) {
+        return res.status(403).json({ 
+          error: "Unregistration is only allowed before the contest starts." 
+        });
+      }
+
+      // 3. Proceed with deletion transaction
+      await conn.query("BEGIN");
+
+      await conn.query(
+        `
+        DELETE FROM contest_problem_status
+        WHERE contest_id = $1
+          AND user_id = $2
+        `,
+        [contestId, userId]
+      );
+
+      await conn.query(
+        `
+        DELETE FROM contest_scores
+        WHERE contest_id = $1
+          AND user_id = $2
+        `,
+        [contestId, userId]
+      );
+
+      await conn.query("COMMIT");
+
+      res.json({ success: true });
+    } catch (err) {
+      await conn.query("ROLLBACK");
+      console.error(err);
+
+      res.status(500).json({
+        error: "Contest unregistration failed",
+      });
+    } finally {
+      // Releases the connection regardless of success, failure, or early returns
       conn.release();
     }
   }
