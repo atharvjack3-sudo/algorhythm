@@ -679,34 +679,85 @@ router.post(
 /* ============================================================
    GET /api/contests/:contestId/leaderboard
 ============================================================ */
+// router.get("/contests/:contestId/leaderboard", async (req, res) => {
+//   const { contestId } = req.params;
+
+//   const { rows: contestRows } = await db.query(
+//     `SELECT end_time FROM contests WHERE id = $1`,
+//     [contestId]
+//   );
+//   const contest = contestRows[0];
+
+//   const now = new Date();
+//   const endtime = toUTC(contest.end_time);
+
+//   const table =
+//     contest && now > endtime
+//       ? "contest_results"
+//       : "contest_scores";
+
+//   const { rows } = await db.query(
+//     `
+//     SELECT user_id, solved_count, penalty
+//     FROM ${table}
+//     WHERE contest_id = $1
+//     ORDER BY solved_count DESC, penalty ASC
+//     `,
+//     [contestId]
+//   );
+
+//   res.json(rows);
+// });
+
 router.get("/contests/:contestId/leaderboard", async (req, res) => {
   const { contestId } = req.params;
 
-  const { rows: contestRows } = await db.query(
-    `SELECT end_time FROM contests WHERE id = $1`,
-    [contestId]
-  );
-  const contest = contestRows[0];
+  try {
+    const { rows: contestRows } = await db.query(
+      `SELECT end_time FROM contests WHERE id = $1`,
+      [contestId]
+    );
+    const contest = contestRows[0];
 
-  const now = new Date();
-  const endtime = toUTC(contest.end_time);
+    const now = new Date();
+    // Assuming toUTC is defined in your file as previously shown
+    const endtime = toUTC(contest?.end_time);
 
-  const table =
-    contest && now > endtime
-      ? "contest_results"
-      : "contest_scores";
+    // Determine whether to fetch from live scores or frozen final results
+    const table = contest && now > endtime ? "contest_results" : "contest_scores";
 
-  const { rows } = await db.query(
-    `
-    SELECT user_id, solved_count, penalty
-    FROM ${table}
-    WHERE contest_id = $1
-    ORDER BY solved_count DESC, penalty ASC
-    `,
-    [contestId]
-  );
+    const { rows } = await db.query(
+      `
+      SELECT 
+        t.user_id, 
+        u.username,
+        t.solved_count, 
+        t.penalty,
+        (
+          SELECT json_agg(
+            json_build_object(
+              'problem_id', cps.problem_id,
+              'solved', cps.solved,
+              'wrong_attempts', cps.wrong_attempts,
+              'first_ac_time_minutes', cps.first_ac_time_minutes
+            )
+          )
+          FROM contest_problem_status cps
+          WHERE cps.contest_id = t.contest_id AND cps.user_id = t.user_id
+        ) AS problem_stats
+      FROM ${table} t
+      JOIN users u ON u.id = t.user_id
+      WHERE t.contest_id = $1
+      ORDER BY t.solved_count DESC, t.penalty ASC
+      `,
+      [contestId]
+    );
 
-  res.json(rows);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch leaderboard" });
+  }
 });
 
 
