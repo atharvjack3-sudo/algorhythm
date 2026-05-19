@@ -441,52 +441,66 @@ export default function ContestProblems() {
             </div>
           )}
 
-          {/* Problems Table */}
+          {/* --- CF STYLE PROBLEMS TABLE --- */}
           {!isEnded && problems.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-[16px] mb-2 font-normal text-[#3b5998] dark:text-[#8ab4f8]">Problems</h2>
-              <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden">
-                <table className="w-full text-center border-collapse text-[12px]">
+              <div className="border border-[#b9b9b9] dark:border-[#444] rounded-[3px] bg-white dark:bg-[#1e1e1e]">
+                {/* CF Style Gray Title Bar */}
+                <div className="bg-[#e1e1e1] dark:bg-[#2d2d30] border-b border-[#b9b9b9] dark:border-[#444] p-[5px_10px] flex justify-between items-center">
+                  <div className="text-[14px] font-bold text-[#222] dark:text-[#d4d4d4]">
+                    Problems
+                  </div>
+                </div>
+                
+                <table className="w-full text-center border-collapse text-[13px]">
                   <thead>
                     <tr>
-                      <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[40px]">#</th>
-                      <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] text-left">Name</th>
-                      <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8]">Difficulty</th>
-                      <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[80px]">
-                        <svg className="w-3 h-3 inline-block" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                        </svg>
-                      </th>
+                      <th className="border-b border-[#e1e1e1] dark:border-[#444] p-[6px] w-[50px] font-bold text-[#222] dark:text-[#d4d4d4]">#</th>
+                      <th className="border-b border-l border-[#e1e1e1] dark:border-[#444] p-[6px] text-left font-bold text-[#222] dark:text-[#d4d4d4]">Name</th>
+                      <th className="border-b border-l border-[#e1e1e1] dark:border-[#444] p-[6px] w-[140px]"></th>
+                      <th className="border-b border-l border-[#e1e1e1] dark:border-[#444] p-[6px] w-[80px]"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {problems.map((p, i) => (
                       <tr key={p.problem_id} className={i % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-[#f8f8f8] dark:bg-[#252526]"}>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
-                          <span className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer" onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}>
+                        {/* Index */}
+                        <td className="p-[8px] border-t border-[#e1e1e1] dark:border-[#444]">
+                          <span 
+                            className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer text-[14px]" 
+                            onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
+                          >
                             {p.problem_index}
                           </span>
                         </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-left">
-                          <span className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer" onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}>
+                        
+                        {/* Title */}
+                        <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-left">
+                          <span 
+                            className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer" 
+                            onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
+                          >
                             {p.title || `Problem ${p.problem_index}`}
                           </span>
                         </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
-                          <span className={`text-[11px] px-1.5 py-0.5 border ${
-                            p.difficulty === 'hard' ? 'text-[#ff0000] dark:text-[#ff6666] border-[#ff0000] dark:border-[#ff6666]' :
-                            p.difficulty === 'medium' ? 'text-[#ff8c00] dark:text-[#ffcc88] border-[#ff8c00] dark:border-[#ffcc88]' :
-                            'text-[#008000] dark:text-[#00cc00] border-[#008000] dark:border-[#00cc00]'
-                          }`}>
+                        
+                        {/* Difficulty (styled like the time-limit in CF) */}
+                        <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-right text-[11px] text-[#888] dark:text-[#aaa]">
+                          <div className="leading-tight uppercase tracking-wide">
                             {p.difficulty}
-                          </span>
+                          </div>
                         </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-[11px]">
-                          <span className="text-[#1874cd] dark:text-[#5ea2f0] flex items-center justify-center gap-1">
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        
+                        {/* Solved Count (x12345 format) */}
+                        <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-[12px]">
+                          <span 
+                            className="text-[#1874cd] dark:text-[#5ea2f0] flex items-center justify-center gap-1 hover:text-[#0000a0] dark:hover:text-[#8ab4f8]" 
+                            title="Participants solved"
+                          >
+                            <svg className="w-[14px] h-[14px]" fill="currentColor" viewBox="0 0 20 20">
                               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                             </svg>
-                            {p.solved_count || 0}
+                            x{p.solved_count || 0}
                           </span>
                         </td>
                       </tr>
@@ -497,7 +511,7 @@ export default function ContestProblems() {
             </div>
           )}
 
-          {/* Standings Table */}
+          {/* Standings Table (Mini view on the Problems page) */}
           <div>
             <h2 className="text-[16px] mb-2 font-normal text-[#3b5998] dark:text-[#8ab4f8]">Standings</h2>
             <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden overflow-x-auto">
