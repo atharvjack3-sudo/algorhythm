@@ -517,49 +517,64 @@ export default function ContestProblems() {
                     </tr>
                   </thead>
                   <tbody>
-                    {problems.map((p, i) => (
-                      <tr key={p.problem_id} className={i % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-[#f8f8f8] dark:bg-[#252526]"}>
-                        {/* Index */}
-                        <td className="p-[8px] border-t border-[#e1e1e1] dark:border-[#444]">
-                          <span 
-                            className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer text-[14px]" 
-                            onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
-                          >
-                            {p.problem_index}
-                          </span>
-                        </td>
-                        
-                        {/* Title */}
-                        <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-left">
-                          <span 
-                            className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer" 
-                            onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
-                          >
-                            {p.title || `Problem ${p.problem_index}`}
-                          </span>
-                        </td>
-                        
-                        {/* Difficulty (styled like the time-limit in CF) */}
-                        <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-right text-[11px] text-[#888] dark:text-[#aaa]">
-                          <div className="leading-tight uppercase tracking-wide">
-                            {p.difficulty}
-                          </div>
-                        </td>
-                        
-                        {/* Solved Count (x12345 format) */}
-                        <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-[12px]">
-                          <span 
-                            className="text-[#1874cd] dark:text-[#5ea2f0] flex items-center justify-center gap-1 hover:text-[#0000a0] dark:hover:text-[#8ab4f8]" 
-                            title="Participants solved"
-                          >
-                            <svg className="w-[14px] h-[14px]" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                            </svg>
-                            x{p.solved_count || 0}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {problems.map((p, i) => {
+                      // 1. Find the current user's stats from the leaderboard data
+                      const myData = leaderboard.find(row => row.user_id === user?.id);
+                      const myStat = myData?.problem_stats?.find(s => String(s.problem_id) === String(p.problem_id));
+
+                      // 2. Determine the background color based on solved status
+                      let rowBg = i % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-[#f8f8f8] dark:bg-[#252526]";
+                      
+                      if (myStat?.solved) {
+                        rowBg = "bg-[#d4edc9] dark:bg-[#1a381a]"; // Solved (Green)
+                      } else if (myStat?.wrong_attempts > 0) {
+                        rowBg = "bg-[#ffe3e3] dark:bg-[#3d1818]"; // Attempted but Failed (Red)
+                      }
+
+                      return (
+                        <tr key={p.problem_id} className={rowBg}>
+                          {/* Index */}
+                          <td className="p-[8px] border-t border-[#e1e1e1] dark:border-[#444]">
+                            <span 
+                              className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer text-[14px]" 
+                              onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
+                            >
+                              {p.problem_index}
+                            </span>
+                          </td>
+                          
+                          {/* Title */}
+                          <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-left">
+                            <span 
+                              className="text-[#1874cd] dark:text-[#5ea2f0] hover:text-[#0000a0] dark:hover:text-[#8ab4f8] cursor-pointer" 
+                              onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
+                            >
+                              {p.title || `Problem ${p.problem_index}`}
+                            </span>
+                          </td>
+                          
+                          {/* Difficulty */}
+                          <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-right text-[11px] text-[#888] dark:text-[#aaa]">
+                            <div className="leading-tight uppercase tracking-wide">
+                              {p.difficulty}
+                            </div>
+                          </td>
+                          
+                          {/* Solved Count */}
+                          <td className="p-[8px] border-t border-l border-[#e1e1e1] dark:border-[#444] text-[12px]">
+                            <span 
+                              className="text-[#1874cd] dark:text-[#5ea2f0] flex items-center justify-center gap-1 hover:text-[#0000a0] dark:hover:text-[#8ab4f8]" 
+                              title="Participants solved"
+                            >
+                              <svg className="w-[14px] h-[14px]" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                              </svg>
+                              x{p.solved_count || 0}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
