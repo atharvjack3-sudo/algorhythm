@@ -461,6 +461,38 @@ router.get(
   }
 );
 
+router.get("/contests/:contestId/my-submissions", authMiddleware, async (req, res) => {
+  const { contestId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const { rows } = await db.query(
+      `
+      SELECT 
+        s.id AS submission_id,
+        s.submitted_at,
+        cp.problem_index,
+        p.title AS problem_title,
+        p.id AS problem_id,
+        s.language,
+        s.verdict,
+        s.time_ms,
+        s.memory_kb
+      FROM contest_submissions s
+      JOIN contest_problems cp ON cp.problem_id = s.problem_id AND cp.contest_id = s.contest_id
+      JOIN problems p ON p.id = s.problem_id
+      WHERE s.contest_id = $1 AND s.user_id = $2
+      ORDER BY s.submitted_at DESC
+      `,
+      [contestId, userId]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Failed to fetch user contest submissions:", err);
+    res.status(500).json({ error: "Failed to fetch submissions" });
+  }
+});
 
 router.get("/contests/:contestId/results", async (req, res) => {
   const { contestId } = req.params;
