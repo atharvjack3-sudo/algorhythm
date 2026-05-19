@@ -334,11 +334,62 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
+// Helper to format minutes into HH:MM (Codeforces style)
+const formatCFTime = (mins) => {
+  if (mins === undefined || mins === null) return "";
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
+// Helper to safely parse UTC timestamps for the timer
+const getUnixTime = (dateStr) => {
+  if (!dateStr) return 0;
+  let d = typeof dateStr === "string" ? dateStr.replace(" ", "T") : dateStr;
+  if (typeof d === "string" && !d.includes("Z") && !d.includes("+") && d.length <= 23) {
+    d += "Z";
+  }
+  return new Date(d).getTime();
+};
+
+// Auto-refreshing Countdown Component
+const LiveTimer = ({ targetDateStr, onZero }) => {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    if (!targetDateStr) return;
+    const target = getUnixTime(targetDateStr);
+    
+    const tick = () => {
+      const now = Date.now();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setTimeLeft("00:00:00");
+        if (onZero) onZero();
+        return;
+      }
+
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      setTimeLeft(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [targetDateStr, onZero]);
+
+  return <span className="font-mono font-bold tracking-wide">{timeLeft}</span>;
+};
+
 export default function ContestProblems() {
   const { contestId } = useParams();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  const [contest, setContest] = useState(null);
   const [problems, setProblems] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -354,7 +405,7 @@ export default function ContestProblems() {
   }, [authLoading, user, navigate]);
 
   /* =========================
-      Load problems + leaderboard
+      Load problems + leaderboard + contest details
   ========================= */
   useEffect(() => {
     if (authLoading || !user) return;
@@ -364,15 +415,14 @@ export default function ContestProblems() {
     async function load() {
       try {
         setLoading(true);
-        const [pRes, lRes] = await Promise.all([
-          api.get(`/contests/${contestId}/problems`, {
-            signal: controller.signal,
-          }),
-          api.get(`/contests/${contestId}/leaderboard`, {
-            signal: controller.signal,
-          }),
+        // Fetch contest core details (for the timer), problems, and leaderboard
+        const [cRes, pRes, lRes] = await Promise.all([
+          api.get(`/contests/${contestId}`, { signal: controller.signal }),
+          api.get(`/contests/${contestId}/problems`, { signal: controller.signal }),
+          api.get(`/contests/${contestId}/leaderboard`, { signal: controller.signal }),
         ]);
 
+        setContest(cRes.data.contest);
         setProblems(pRes.data);
         setLeaderboard(lRes.data);
         setIsEnded(false);
@@ -381,10 +431,15 @@ export default function ContestProblems() {
           const msg = err.response?.data?.error;
 
           if (msg === "Contest not active") {
-            const lRes = await api.get(`/contests/${contestId}/leaderboard`, {
-              signal: controller.signal,
-            });
-            setProblems([]);
+            // If ended, fetch the public contest details + final leaderboard
+            const [cRes, lRes] = await Promise.all([
+              api.get(`/contests/${contestId}`, { signal: controller.signal }),
+              api.get(`/contests/${contestId}/leaderboard`, { signal: controller.signal }),
+            ]);
+            
+            setContest(cRes.data.contest);
+            // We use the public problems array (from /contests/:id) just to render the A,B,C table headers
+            setProblems(cRes.data.problems); 
             setLeaderboard(lRes.data);
             setIsEnded(true);
           } else {
@@ -431,7 +486,7 @@ export default function ContestProblems() {
           </div>
 
           {/* Locked / Ended Banner */}
-          {isEnded && problems.length === 0 && (
+          {isEnded && (
             <div className="mb-6 border border-[#b9b9b9] dark:border-[#444] bg-[#f8f8f8] dark:bg-[#252526] p-4 text-[13px] text-center">
               <span className="font-bold text-[#008000] dark:text-[#00cc00]">Contest has concluded.</span>
               <br />
@@ -511,23 +566,30 @@ export default function ContestProblems() {
             </div>
           )}
 
-          {/* Standings Table (Mini view on the Problems page) */}
+          {/* --- STANDINGS MATRIX TABLE --- */}
           <div>
             <h2 className="text-[16px] mb-2 font-normal text-[#3b5998] dark:text-[#8ab4f8]">Standings</h2>
-            <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden overflow-x-auto">
-              <table className="w-full text-center border-collapse text-[12px] min-w-[500px]">
+            <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden overflow-x-auto shadow-sm">
+              <table className="w-full text-center border-collapse text-[12px] min-w-[600px]">
                 <thead>
                   <tr>
                     <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[40px]">#</th>
-                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] text-left">Who</th>
-                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[60px]">=</th>
-                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[80px]">Penalty</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] text-left min-w-[150px]">Who</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[40px]">=</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[60px]">Penalty</th>
+                    
+                    {/* Dynamic Problem Headers (A, B, C...) */}
+                    {problems.map((p) => (
+                      <th key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#1874cd] dark:text-[#5ea2f0] w-[50px] cursor-pointer hover:underline" onClick={() => !isEnded && navigate(`/contests/${contestId}/solve/${p.problem_id}`)}>
+                        {p.problem_index}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {leaderboard.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="border border-[#e1e1e1] dark:border-[#444] p-4 text-[#888] dark:text-[#aaa]">
+                      <td colSpan={4 + problems.length} className="border border-[#e1e1e1] dark:border-[#444] p-4 text-[#888] dark:text-[#aaa]">
                         No users have registered or submitted yet.
                       </td>
                     </tr>
@@ -542,20 +604,53 @@ export default function ContestProblems() {
                           <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
                             {idx + 1}
                           </td>
+                          
                           <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-left">
                             <span className={`font-bold ${isCurrentUser ? "text-[#1874cd] dark:text-[#8ab4f8]" : "text-[#222] dark:text-[#d4d4d4]"}`}>
-                              User {row.user_id}
+                              {row.username}
                             </span>
                             {isCurrentUser && <span className="ml-2 text-[10px] text-[#888] dark:text-[#aaa]">(You)</span>}
                           </td>
+                          
                           <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
                             <span className="font-bold text-[#00a900] dark:text-[#00cc00]">
                               {row.solved_count}
                             </span>
                           </td>
+                          
                           <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-[#888] dark:text-[#aaa]">
                             {row.penalty}
                           </td>
+
+                          {/* Problem Breakdown Cells */}
+                          {problems.map((p) => {
+                            const stat = row.problem_stats?.find(s => String(s.problem_id) === String(p.problem_id));
+                            
+                            if (!stat || (!stat.solved && stat.wrong_attempts === 0)) {
+                              return <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-2"></td>;
+                            }
+
+                            if (stat.solved) {
+                              return (
+                                <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-1.5 leading-tight text-center">
+                                  <div className="font-bold text-[#00a900] dark:text-[#00cc00]">
+                                    +{stat.wrong_attempts > 0 ? stat.wrong_attempts : ""}
+                                  </div>
+                                  <div className="text-[10px] text-[#888] dark:text-[#aaa]">
+                                    {formatCFTime(stat.first_ac_time_minutes)}
+                                  </div>
+                                </td>
+                              );
+                            } else {
+                              return (
+                                <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-2 text-center">
+                                  <div className="font-bold text-[#ff0000] dark:text-[#ff6666]">
+                                    -{stat.wrong_attempts}
+                                  </div>
+                                </td>
+                              );
+                            }
+                          })}
                         </tr>
                       );
                     })
@@ -582,8 +677,16 @@ export default function ContestProblems() {
                 </div>
               ) : (
                 <div>
-                  <div className="font-bold text-[#008000] dark:text-[#00cc00] mb-1">Running</div>
-                  <div className="text-[#222] dark:text-[#d4d4d4]">Good luck, have fun!</div>
+                  <div className="font-bold text-[#008000] dark:text-[#00cc00] mb-1">
+                    Running
+                  </div>
+                  {/* Timer forces a reload when it zeroes out to update state securely */}
+                  {contest?.end_time && (
+                    <div className="text-[#222] dark:text-[#d4d4d4] text-[13px] mb-2 font-mono">
+                      <LiveTimer targetDateStr={contest.end_time} onZero={() => window.location.reload()} />
+                    </div>
+                  )}
+                  <div className="text-[#888] dark:text-[#aaa] text-[11px]">Good luck, have fun!</div>
                 </div>
               )}
             </div>
