@@ -462,78 +462,64 @@ router.get(
 );
 
 
-router.get(
-  "/contests/:contestId/results",
-  async (req, res) => {
-    const { contestId } = req.params;
+router.get("/contests/:contestId/results", async (req, res) => {
+  const { contestId } = req.params;
 
-    try {
-      //  Contest existence
-      const { rows: contestRows } = await db.query(
-        `SELECT start_time, end_time FROM contests WHERE id = $1`,
-        [contestId]
-      );
-      const contest = contestRows[0];
+  try {
+    // 1. Fetch contest problems config
+    const { rows: problems } = await db.query(
+      `
+      SELECT
+        p.id AS problem_id,
+        cp.problem_index,
+        p.title,
+        p.difficulty
+      FROM contest_problems cp
+      JOIN problems p ON p.id = cp.problem_id
+      WHERE cp.contest_id = $1::INT
+      ORDER BY cp.problem_index
+      `,
+      [contestId]
+    );
 
-      if (!contest) {
-        return res.status(404).json({ error: "Contest not found" });
-      }
+    // 2. Fetch leaderboard rows with embedded problem status subqueries
+    const { rows: leaderboard } = await db.query(
+      `
+      SELECT
+        cr.user_id,
+        u.username,
+        cr.solved_count,
+        cr.penalty,
+        (
+          SELECT json_agg(
+            json_build_object(
+              'problem_id', cps.problem_id,
+              'solved', cps.solved,
+              'wrong_attempts', cps.wrong_attempts,
+              'first_ac_time_minutes', cps.first_ac_time_minutes
+            )
+          )
+          FROM contest_problem_status cps
+          WHERE cps.contest_id = cr.contest_id AND cps.user_id = cr.user_id
+        ) AS problem_stats
+      FROM contest_results cr
+      JOIN users u ON u.id = cr.user_id
+      WHERE cr.contest_id = $1::INT
+      ORDER BY cr.solved_count DESC, cr.penalty ASC
+      `,
+      [contestId]
+    );
 
-      const now = new Date();
-      const end = toUTC(contest.end_time);
-
-      //  only AFTER contest ends
-      if (now <= end) {
-        return res.status(403).json({
-          error: "Results not available yet",
-        });
-      }
-
-      //  Fetch problems (public after end)
-      const { rows: problems } = await db.query(
-  `
-  SELECT
-    p.id        AS problem_id,
-    cp.problem_index,
-    p.title,
-    p.difficulty
-  FROM contest_problems cp
-  JOIN problems p ON p.id = cp.problem_id
-  WHERE cp.contest_id = $1::INT
-  ORDER BY cp.problem_index
-  `,
-  [contestId]
-);
-
-
-      //  Fetch final leaderboard ONLY from contest_results
-      const { rows: leaderboard } = await db.query(
-        `
-        SELECT
-  u.id AS user_id,
-  u.username,
-  cr.solved_count,
-  cr.penalty
-FROM contest_results cr
-JOIN users u ON u.id = cr.user_id
-WHERE cr.contest_id = $1::INT
-ORDER BY cr.solved_count DESC, cr.penalty ASC
-
-        `,
-        [contestId]
-      );
-
-      res.json({
-        contestId,
-        problems,
-        leaderboard,
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to fetch contest results" });
-    }
+    res.json({
+      contestId,
+      problems,
+      leaderboard
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch contest results" });
   }
-);
+});
 
 
 /* ============================================================
