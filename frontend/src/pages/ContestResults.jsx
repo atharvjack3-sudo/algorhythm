@@ -245,6 +245,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
+// Helper to format minutes into HH:MM (Codeforces style)
+const formatCFTime = (mins) => {
+  if (mins === undefined || mins === null) return "";
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
 export default function ContestResults() {
   const { contestId } = useParams();
   const navigate = useNavigate();
@@ -253,10 +261,6 @@ export default function ContestResults() {
   const [problems, setProblems] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupUser, setPopupUser] = useState(null);
-  const [popupData, setPopupData] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -294,7 +298,7 @@ export default function ContestResults() {
               Final Standings - Contest #{contestId}
             </h2>
             <div className="text-[12px] text-[#888] dark:text-[#aaa] mt-1">
-              The contest has concluded.
+              The contest has concluded. Final standings, open hacking phase finished.
             </div>
           </div>
           <button 
@@ -305,67 +309,30 @@ export default function ContestResults() {
           </button>
         </div>
 
-        {/* --- PROBLEM SUMMARY --- */}
-        <div>
-          <h2 className="text-[16px] mb-2 font-normal text-[#3b5998] dark:text-[#8ab4f8]">Problem Set</h2>
-          <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden">
-            <table className="w-full text-center border-collapse text-[12px]">
-              <thead>
-                <tr>
-                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[40px]">#</th>
-                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] text-left">Name</th>
-                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8]">Difficulty</th>
-                </tr>
-              </thead>
-              <tbody>
-                {problems.map((p, i) => (
-                  <tr key={p.problem_id} className={i % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-[#f8f8f8] dark:bg-[#252526]"}>
-                    <td className="border border-[#e1e1e1] dark:border-[#444] p-2 font-bold">
-                      {p.problem_index}
-                    </td>
-                    <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-left">
-                      {p.title}
-                    </td>
-                    <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
-                      <span className={`text-[11px] px-1.5 py-0.5 border ${
-                        p.difficulty === "hard" ? "text-[#ff0000] dark:text-[#ff6666] border-[#ff0000] dark:border-[#ff6666]" :
-                        p.difficulty === "medium" ? "text-[#ff8c00] dark:text-[#ffcc88] border-[#ff8c00] dark:border-[#ffcc88]" :
-                        "text-[#008000] dark:text-[#00cc00] border-[#008000] dark:border-[#00cc00]"
-                      }`}>
-                        {p.difficulty}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {problems.length === 0 && (
-                  <tr>
-                    <td colSpan="3" className="border border-[#e1e1e1] dark:border-[#444] p-4 text-[#888] dark:text-[#aaa]">
-                      No problems found for this contest.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* --- LEADERBOARD --- */}
+        {/* --- LEADERBOARD MATRIX --- */}
         <div>
           <h2 className="text-[16px] mb-2 font-normal text-[#3b5998] dark:text-[#8ab4f8]">Standings</h2>
-          <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden overflow-x-auto">
-            <table className="w-full text-center border-collapse text-[12px] min-w-[500px]">
+          <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden overflow-x-auto shadow-sm">
+            <table className="w-full text-center border-collapse text-[12px] min-w-[700px]">
               <thead>
                 <tr>
                   <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[40px]">#</th>
-                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] text-left">Who</th>
-                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[60px]">=</th>
-                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[80px]">Penalty</th>
+                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] text-left min-w-[150px]">Who</th>
+                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[40px]">=</th>
+                  <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8] w-[60px]">Penalty</th>
+                  
+                  {/* Dynamic Problem Headers (A, B, C...) */}
+                  {problems.map((p) => (
+                    <th key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#1874cd] dark:text-[#5ea2f0] w-[60px] cursor-pointer hover:underline" onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}>
+                      {p.problem_index}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {leaderboard.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="border border-[#e1e1e1] dark:border-[#444] p-6 text-[#888] dark:text-[#aaa]">
+                    <td colSpan={4 + problems.length} className="border border-[#e1e1e1] dark:border-[#444] p-6 text-[#888] dark:text-[#aaa]">
                       No participants recorded.
                     </td>
                   </tr>
@@ -377,35 +344,59 @@ export default function ContestResults() {
                         key={row.user_id} 
                         className={isCurrentUser ? "bg-[#e0efff] dark:bg-[#203a55]" : (idx % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-[#f8f8f8] dark:bg-[#252526]")}
                       >
+                        {/* Rank */}
                         <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
                           {idx + 1}
                         </td>
+                        
+                        {/* Username */}
                         <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-left">
                           <span className={`font-bold ${isCurrentUser ? "text-[#1874cd] dark:text-[#8ab4f8]" : "text-[#222] dark:text-[#d4d4d4]"}`}>
                             {row.username}
                           </span>
                         </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
-                          <button
-                            onClick={async () => {
-                              try {
-                                const res = await api.get(`/contests/${contestId}/results/${row.user_id}`);
-                                setPopupData(res.data);
-                                setPopupUser(row.username);
-                                setShowPopup(true);
-                              } catch {
-                                alert("Unable to load problem breakdown");
-                              }
-                            }}
-                            className="font-bold text-[#00a900] dark:text-[#00cc00] hover:underline cursor-pointer"
-                            title="View submissions breakdown"
-                          >
-                            {row.solved_count}
-                          </button>
+
+                        {/* Total Solved */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 font-bold text-[#00a900] dark:text-[#00cc00]">
+                          {row.solved_count}
                         </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-[#888] dark:text-[#aaa]">
+
+                        {/* Total Penalty */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">
                           {row.penalty}
                         </td>
+
+                        {/* Problem Breakdown Cells */}
+                        {problems.map((p) => {
+                          // Find this user's stats for this specific problem column
+                          const stat = row.problem_stats?.find(s => s.problem_id === p.problem_id);
+                          
+                          if (!stat || (!stat.solved && stat.wrong_attempts === 0)) {
+                            // Empty cell (not attempted)
+                            return <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-2"></td>;
+                          }
+
+                          if (stat.solved) {
+                            return (
+                              <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-1.5 leading-tight">
+                                <div className="font-bold text-[#00a900] dark:text-[#00cc00]">
+                                  +{stat.wrong_attempts > 0 ? stat.wrong_attempts : ""}
+                                </div>
+                                <div className="text-[10px] text-[#888] dark:text-[#aaa]">
+                                  {formatCFTime(stat.first_ac_time_minutes)}
+                                </div>
+                              </td>
+                            );
+                          } else {
+                            return (
+                              <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-2">
+                                <div className="font-bold text-[#ff0000] dark:text-[#ff6666]">
+                                  -{stat.wrong_attempts}
+                                </div>
+                              </td>
+                            );
+                          }
+                        })}
                       </tr>
                     );
                   })
@@ -414,66 +405,6 @@ export default function ContestResults() {
             </table>
           </div>
         </div>
-
-        {/* --- USER BREAKDOWN MODAL --- */}
-        {showPopup && (
-          <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-[100] p-4">
-            <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-[500px] border border-[#b9b9b9] dark:border-[#444] rounded-[3px] shadow-[0_0_10px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden">
-              
-              {/* Modal Header */}
-              <div className="border-b border-[#b9b9b9] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-[8px_10px] flex items-center justify-between">
-                <h3 className="text-[13px] font-bold text-[#3b5998] dark:text-[#8ab4f8]">
-                  Results for {popupUser}
-                </h3>
-                <button 
-                  onClick={() => setShowPopup(false)}
-                  className="text-[#888] dark:text-[#aaa] hover:text-[#222] dark:hover:text-[#fff] text-[16px] font-bold leading-none cursor-pointer"
-                >
-                  &times;
-                </button>
-              </div>
-
-              {/* Modal Body / Table */}
-              <div className="max-h-[60vh] overflow-y-auto p-2">
-                <table className="w-full text-center border-collapse text-[12px]">
-                  <thead>
-                    <tr>
-                      <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#f8f8f8] dark:bg-[#252526] p-2 font-bold text-[#888] dark:text-[#aaa]">Problem</th>
-                      <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#f8f8f8] dark:bg-[#252526] p-2 font-bold text-[#888] dark:text-[#aaa]">Status</th>
-                      <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#f8f8f8] dark:bg-[#252526] p-2 font-bold text-[#888] dark:text-[#aaa]">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {popupData.map((p, i) => (
-                      <tr key={p.problem_index} className={i % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-[#f8f8f8] dark:bg-[#252526]"}>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
-                          <span className="font-bold text-[#1874cd] dark:text-[#5ea2f0] mr-2">{p.problem_index}</span>
-                          <span className="text-[#222] dark:text-[#d4d4d4]">{p.title}</span>
-                        </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 font-bold">
-                          {p.solved ? (
-                            <span className="text-[#00a900] dark:text-[#00cc00]">
-                              +{p.wrong_attempts > 0 ? p.wrong_attempts : ""}
-                            </span>
-                          ) : p.wrong_attempts > 0 ? (
-                            <span className="text-[#ff0000] dark:text-[#ff6666]">
-                              -{p.wrong_attempts}
-                            </span>
-                          ) : (
-                            <span className="text-[#888] dark:text-[#666]">—</span>
-                          )}
-                        </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-[#888] dark:text-[#aaa]">
-                          {p.solved ? `${p.first_ac_time_minutes}` : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
 
       </div>
     </div>
