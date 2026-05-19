@@ -476,6 +476,8 @@ export default function ContestSolveProblem() {
   const [lastResult, setLastResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
 
+  const [viewCode, setViewCode] = useState(null);
+
   const formatCFDate = (dateStr) => {
   if (!dateStr) return "";
   const d = new Date(dateStr);
@@ -838,7 +840,11 @@ export default function ContestSolveProblem() {
                       >
                         {/* ID */}
                         <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
-                          <span className="text-[#1874cd] dark:text-[#5ea2f0] hover:underline cursor-pointer">
+                          <span 
+                            className="text-[#1874cd] dark:text-[#5ea2f0] hover:underline cursor-pointer font-bold"
+                            onClick={() => setViewCode(s)}
+                            title="Click to view source code"
+                          >
                             {s.submission_id}
                           </span>
                         </td>
@@ -889,6 +895,35 @@ export default function ContestSolveProblem() {
             </div>
           </div>
         )}
+
+            {/* --- SOURCE CODE MODAL --- */}
+      {viewCode && (
+        <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-3xl rounded shadow-2xl border border-[#ccc] dark:border-[#444] flex flex-col max-h-[90vh]">
+            
+            {/* Modal Header */}
+            <div className="p-3 border-b border-[#ccc] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] flex justify-between items-center text-[13px]">
+              <div className="font-bold text-[#3b5998] dark:text-[#8ab4f8]">
+                Submission #{viewCode.submission_id} - {viewCode.problem_index} ({viewCode.language})
+              </div>
+              <button 
+                onClick={() => setViewCode(null)} 
+                className="text-[#ff0000] dark:text-[#ff6666] font-bold hover:underline cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Modal Body (Code Viewer) */}
+            <div className="flex-1 overflow-auto p-4 bg-[#f8f8f8] dark:bg-[#121212]">
+              <pre className="text-[13px] font-mono text-[#222] dark:text-[#d4d4d4] whitespace-pre-wrap m-0">
+                {viewCode.code}
+              </pre>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       </div>
     </div>
