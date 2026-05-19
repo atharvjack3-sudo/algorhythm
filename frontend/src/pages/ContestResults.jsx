@@ -391,7 +391,7 @@ export default function ContestResults() {
                         {/* Problem Breakdown Cells */}
 {problems.map((p) => {
   // Find this user's stats for this specific problem column
-  const stat = row.problem_stats?.find(s => s.problem_id === p.problem_id);
+  const stat = row.problem_stats?.find(s => s.problem_id === p.problem_id)
   
   // ==================== DEBUG LOG 2 ====================
   // This will log for every cell. Let's filter it for user 'test' to avoid spam
