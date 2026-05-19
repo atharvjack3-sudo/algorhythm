@@ -587,7 +587,7 @@
 //   );
 // }
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -658,6 +658,75 @@ const CountdownTimer = ({ targetDateStr, format = "full" }) => {
   return <span>{timeLeft}</span>;
 };
 
+// Codeforces Authentic Rating Graph Component
+const RatingGraph = ({ history }) => {
+  if (!history || history.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-[#888] text-[10px]">
+        No rated contests
+      </div>
+    );
+  }
+
+  const w = 240;
+  const h = 120;
+  
+  // Dynamically calculate view boundaries based on user rating history
+  const minVal = Math.min(1000, ...history.map(x => x.rating_after)) - 100;
+  const maxVal = Math.max(2000, ...history.map(x => x.rating_after)) + 100;
+  const yRange = maxVal - minVal;
+
+  const getY = (val) => h - ((val - minVal) / yRange) * h;
+  const getX = (idx) => history.length === 1 ? w / 2 : (idx / (history.length - 1)) * w;
+
+  // Codeforces Rank Color Bands
+  const CF_BANDS = [
+    { min: 0, max: 1199, color: "#cccccc" }, // Gray (Newbie)
+    { min: 1200, max: 1399, color: "#77ff77" }, // Green (Pupil)
+    { min: 1400, max: 1599, color: "#77ddbb" }, // Cyan (Specialist)
+    { min: 1600, max: 1899, color: "#aaaaff" }, // Blue (Expert)
+    { min: 1900, max: 2099, color: "#ff88ff" }, // Violet (Candidate Master)
+    { min: 2100, max: 2399, color: "#ffcc88" }, // Orange (Master)
+    { min: 2400, max: 4000, color: "#ffbbbb" }, // Red (Grandmaster)
+  ];
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full block cursor-crosshair">
+      {/* Draw Background Bands */}
+      {CF_BANDS.map((band, i) => {
+        const topY = getY(band.max);
+        const bottomY = getY(band.min);
+        const y = Math.max(0, topY);
+        const bandHeight = Math.min(h, bottomY) - y;
+        if (bandHeight <= 0 || y >= h) return null;
+        return <rect key={i} x="0" y={y} width={w} height={bandHeight} fill={band.color} opacity="0.6" />;
+      })}
+
+      {/* Draw Horizontal Grid Lines at Rank Boundaries */}
+      {[1200, 1400, 1600, 1900, 2100, 2400].map((val) => {
+        const y = getY(val);
+        if (y < 0 || y > h) return null;
+        return <line key={val} x1="0" y1={y} x2={w} y2={y} stroke="#ffffff" strokeWidth="1" opacity="0.5" />;
+      })}
+
+      {/* Draw the Golden Trend Line */}
+      <path
+        d={history.length === 1 ? `M0,${getY(history[0].rating_after)} L${w},${getY(history[0].rating_after)}` : `M${history.map((hData, i) => `${getX(i)},${getY(hData.rating_after)}`).join(" L")}`}
+        fill="none"
+        stroke="#ffcc00"
+        strokeWidth="2.5"
+      />
+
+      {/* Draw the Data Points with Hover Tooltips */}
+      {history.map((entry, idx) => (
+        <circle key={idx} cx={getX(idx)} cy={getY(entry.rating_after)} r="3.5" fill="#ffffff" stroke="#ffcc00" strokeWidth="1.5">
+          <title>{`Rating: ${entry.rating_after} (${entry.rating_change > 0 ? '+' : ''}${entry.rating_change})\nRank: ${entry.final_rank}`}</title>
+        </circle>
+      ))}
+    </svg>
+  );
+};
+
 export default function Contests() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -679,21 +748,6 @@ export default function Contests() {
     duration_minutes: "",
     problems: "",
   });
-
-  const altitudePath = useMemo(() => {
-    if (history.length === 0) return "M0,45 L120,45";
-    if (history.length === 1) {
-      const y = 60 - ((history[0].rating_after / 3000) * 50 + 5);
-      return `M0,${y} L120,${y}`;
-    }
-    const widthPerPoint = 120 / (history.length - 1 || 1);
-    const points = history.map((entry, i) => {
-      const x = i * widthPerPoint;
-      const y = 60 - ((entry.rating_after / 3000) * 50 + 5);
-      return `${x},${y}`;
-    });
-    return `M${points.join(" L")}`;
-  }, [history]);
 
   // Codeforces color mapped ranks with adapted dark mode variants
   const getRatingColor = (rating) => {
@@ -963,11 +1017,9 @@ export default function Contests() {
                 Contest rating: <span className={`font-bold ${getRatingColor(stats?.contest_rating)}`}>{stats?.contest_rating || 0}</span>
               </div>
               
-              {/* Mini Graph (adapted) */}
-              <div className="mt-3 w-[120px] h-[60px] border border-[#ccc] dark:border-[#444] bg-white dark:bg-[#1e1e1e] relative">
-                <svg viewBox="0 0 120 60" className="w-full h-full absolute inset-0">
-                  <path d={altitudePath} fill="none" className="stroke-[#1874cd] dark:stroke-[#5ea2f0]" strokeWidth="1.5" />
-                </svg>
+              {/* Authentic Codeforces Style Rating Graph */}
+              <div className="mt-4 w-full h-[120px] border border-[#ccc] dark:border-[#444] bg-white dark:bg-[#1e1e1e] relative overflow-hidden">
+                <RatingGraph history={history} />
               </div>
             </div>
           </div>
