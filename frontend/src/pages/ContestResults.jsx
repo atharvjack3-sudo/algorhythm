@@ -319,7 +319,7 @@ export default function ContestResults() {
               Final Standings - Contest #{contestId}
             </h2>
             <div className="text-[12px] text-[#888] dark:text-[#aaa] mt-1">
-              The contest has concluded. Final standings, open hacking phase finished.
+              The contest has concluded. Final standings:
             </div>
           </div>
           <button 
