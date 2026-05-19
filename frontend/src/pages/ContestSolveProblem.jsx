@@ -476,6 +476,17 @@ export default function ContestSolveProblem() {
   const [lastResult, setLastResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
 
+  const formatCFDate = (dateStr) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = months[d.getMonth()];
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  return `${month}/${day}/${year} ${hours}:${mins}`;
+};
   /* =========================
       Logic & Backend Wiring
   ========================= */
@@ -499,8 +510,8 @@ export default function ContestSolveProblem() {
 
   async function loadSubmissions() {
     try {
-      const res = await api.get(`/contests/${contestId}/submissions`);
-      setSubmissions(res.data.filter((s) => s.problem_id === Number(problemId)));
+      const res = await api.get(`/contests/${contestId}/my-submissions`);
+      setSubmissions(res.data);
     } catch (err) { 
       console.error("Logs fetch failed"); 
     }
@@ -795,41 +806,80 @@ export default function ContestSolveProblem() {
         )}
 
         {/* --- SUBMISSIONS TAB --- */}
+{/* --- SUBMISSIONS TAB --- */}
         {activeTab === "Submissions" && (
           <div className="animate-in fade-in duration-300">
-            <h2 className="text-[16px] mb-4 font-normal text-[#3b5998] dark:text-[#8ab4f8]">My Submissions</h2>
-            
-            <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden">
-              <table className="w-full text-center border-collapse text-[12px]">
+            <div className="border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] overflow-hidden overflow-x-auto shadow-sm">
+              <table className="w-full text-center border-collapse text-[12px] min-w-[700px]">
                 <thead>
                   <tr>
-                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8]">When</th>
-                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8]">Lang</th>
-                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#3b5998] dark:text-[#8ab4f8]">Verdict</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">#</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">When</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">Problem</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">Lang</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">Verdict</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">Time</th>
+                    <th className="border border-[#e1e1e1] dark:border-[#444] bg-[#e1e1e1] dark:bg-[#2d2d30] p-2 font-bold text-[#222] dark:text-[#d4d4d4]">Memory</th>
                   </tr>
                 </thead>
                 <tbody>
                   {submissions.length === 0 ? (
                     <tr>
-                      <td colSpan="3" className="border border-[#e1e1e1] dark:border-[#444] p-4 text-[#888] dark:text-[#aaa]">
+                      <td colSpan="7" className="border border-[#e1e1e1] dark:border-[#444] p-6 text-[#888] dark:text-[#aaa]">
                         You haven't submitted anything yet.
                       </td>
                     </tr>
                   ) : (
                     submissions.map((s, i) => (
-                      <tr key={i} className={i % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-[#f8f8f8] dark:bg-[#252526]"}>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 whitespace-nowrap">
-                          {new Date(s.submitted_at).toLocaleString()}
+                      <tr 
+                        key={s.submission_id || i} 
+                        // Codeforces tints your own submissions with a light blue
+                        className={i % 2 === 0 ? "bg-[#f3f9ff] dark:bg-[#1a2333]" : "bg-white dark:bg-[#1e1e1e]"}
+                      >
+                        {/* ID */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
+                          <span className="text-[#1874cd] dark:text-[#5ea2f0] hover:underline cursor-pointer">
+                            {s.submission_id}
+                          </span>
                         </td>
-                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 uppercase">
+                        
+                        {/* When */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-[#888] dark:text-[#aaa] whitespace-nowrap">
+                          {formatCFDate(s.submitted_at)}
+                        </td>
+
+                        {/* Problem */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
+                          <span 
+                            className="text-[#1874cd] dark:text-[#5ea2f0] hover:underline cursor-pointer"
+                            onClick={() => navigate(`/contests/${contestId}/solve/${s.problem_id}`)}
+                          >
+                            {s.problem_index} - {s.problem_title}
+                          </span>
+                        </td>
+
+                        {/* Language */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2">
                           {s.language}
                         </td>
+
+                        {/* Verdict */}
                         <td className={`border border-[#e1e1e1] dark:border-[#444] p-2 font-bold ${
                           s.verdict === "AC" || s.verdict === "Accepted" 
                             ? "text-[#00a900] dark:text-[#00cc00]" 
                             : "text-[#ff0000] dark:text-[#ff6666]"
                         }`}>
-                          {s.verdict}
+                          {s.verdict === "AC" ? "Accepted" : s.verdict}
+                        </td>
+
+                        {/* Time */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-[#222] dark:text-[#d4d4d4]">
+                          {s.time_ms !== null && s.time_ms !== undefined ? `${s.time_ms} ms` : "0 ms"}
+                        </td>
+
+                        {/* Memory */}
+                        <td className="border border-[#e1e1e1] dark:border-[#444] p-2 text-[#222] dark:text-[#d4d4d4]">
+                          {s.memory_kb !== null && s.memory_kb !== undefined ? `${s.memory_kb} KB` : "0 KB"}
                         </td>
                       </tr>
                     ))
