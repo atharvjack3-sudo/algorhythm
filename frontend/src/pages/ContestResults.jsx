@@ -262,22 +262,43 @@ export default function ContestResults() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    async function load() {
-      try {
-        const res = await api.get(`/contests/${contestId}/results`);
-        setProblems(res.data.problems);
-        setLeaderboard(res.data.leaderboard);
-      } catch (err) {
-        console.error("Failed to fetch results", err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  // useEffect(() => {
+  //   if (!user) return;
+  //   async function load() {
+  //     try {
+  //       const res = await api.get(`/contests/${contestId}/results`);
+  //       setProblems(res.data.problems);
+  //       setLeaderboard(res.data.leaderboard);
+  //     } catch (err) {
+  //       console.error("Failed to fetch results", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
 
-    load();
-  }, [contestId, user]);
+  //   load();
+  // }, [contestId, user]);
+  useEffect(() => {
+  if (!user) return;
+  async function load() {
+    try {
+      const res = await api.get(`/contests/${contestId}/results`);
+      
+      // ==================== DEBUG LOG 1 ====================
+      console.log("=== BACKEND RAW RESPONSE ===", res.data);
+      // =====================================================
+
+      setProblems(res.data.problems);
+      setLeaderboard(res.data.leaderboard);
+    } catch (err) {
+      console.error("Failed to fetch results", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  load();
+}, [contestId, user]);
 
   if (loading || authLoading) {
     return (
@@ -367,14 +388,27 @@ export default function ContestResults() {
                         </td>
 
                         {/* Problem Breakdown Cells */}
-                        {problems.map((p) => {
-                          // Find this user's stats for this specific problem column
-                          const stat = row.problem_stats?.find(s => s.problem_id === p.problem_id);
-                          
-                          if (!stat || (!stat.solved && stat.wrong_attempts === 0)) {
-                            // Empty cell (not attempted)
-                            return <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-2"></td>;
-                          }
+                        {/* Problem Breakdown Cells */}
+{problems.map((p) => {
+  // Find this user's stats for this specific problem column
+  const stat = row.problem_stats?.find(s => s.problem_id === p.problem_id);
+  
+  // ==================== DEBUG LOG 2 ====================
+  // This will log for every cell. Let's filter it for user 'test' to avoid spam
+  if (row.username === "test") {
+    console.log(`Column ${p.problem_index} Matching:`, {
+      searchingForProblemId: p.problem_id,
+      userProblemStatsArray: row.problem_stats,
+      foundMatchResult: stat
+    });
+  }
+  // =====================================================
+
+  if (!stat || (!stat.solved && stat.wrong_attempts === 0)) {
+    return <td key={p.problem_id} className="border border-[#e1e1e1] dark:border-[#444] p-2"></td>;
+  }
+  
+  // ... rest of your cell rendering logic
 
                           if (stat.solved) {
                             return (
