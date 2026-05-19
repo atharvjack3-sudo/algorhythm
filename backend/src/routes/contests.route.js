@@ -475,8 +475,9 @@ router.get("/contests/:contestId/my-submissions", authMiddleware, async (req, re
         p.title AS problem_title,
         p.id AS problem_id,
         s.language,
+        s.code,
         s.verdict,
-        s.time_ms,
+        s.execution_time AS time_ms,
         s.memory_kb
       FROM contest_submissions s
       JOIN contest_problems cp ON cp.problem_id = s.problem_id AND cp.contest_id = s.contest_id
@@ -864,6 +865,7 @@ router.post(
       const sampleResults = [];
       let hiddenCount = 0;
       let maxRuntimeMs = 0;
+      let maxMemoryKb = 0;
       const codeBase64 = Buffer.from(code).toString("base64");
 
       for (let i = 0; i < testcases.length; i++) {
@@ -901,6 +903,8 @@ router.post(
           parseFloat(judgeRes.data.time || "0") * 1000
         );
         maxRuntimeMs = Math.max(maxRuntimeMs, runtimeMs);
+        const memoryKb = judgeRes.data.memory || 0; 
+        maxMemoryKb = Math.max(maxMemoryKb, memoryKb);
 
         let verdict = mapVerdict(judgeStatus);
         let passed = false;
@@ -945,10 +949,10 @@ router.post(
       await conn.query(
         `
         INSERT INTO contest_submissions
-          (contest_id, user_id, problem_id, verdict, submitted_at, execution_time)
-        VALUES ($1, $2, $3, $4, NOW(), $5)
+          (contest_id, user_id, problem_id, verdict, submitted_at, execution_time, language, code, memory_kb)
+        VALUES ($1, $2, $3, $4, NOW(), $5, $6, $7, $8)
         `,
-        [contestId, userId, problemId, finalVerdict, maxRuntimeMs]
+        [contestId, userId, problemId, finalVerdict, maxRuntimeMs, language, code, maxMemoryKb]
       );
 
       const { rows: stateRows } = await conn.query(
