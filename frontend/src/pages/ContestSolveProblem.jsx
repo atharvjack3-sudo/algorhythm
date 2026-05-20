@@ -565,7 +565,7 @@ export default function ContestSolveProblem() {
   const { problem, content, samples } = data;
 
   // Reusable Editor Component
-  const CodeEditorSection = () => (
+  const CodeEditorSection = (
     <div className="mt-8 border border-[#b9b9b9] dark:border-[#444] bg-white dark:bg-[#1e1e1e] rounded-[3px] shadow-sm">
       <div className="bg-[#e1e1e1] dark:bg-[#2d2d30] border-b border-[#b9b9b9] dark:border-[#444] p-[5px_10px] font-bold text-[13px] text-[#3b5998] dark:text-[#8ab4f8]">
         Submit Code
@@ -719,7 +719,7 @@ export default function ContestSolveProblem() {
             </div>
 
             {/* Injected Code Editor at Bottom of Problem Page */}
-            <CodeEditorSection />
+            {CodeEditorSection}
           </div>
         )}
 
@@ -756,7 +756,7 @@ export default function ContestSolveProblem() {
                 </div>
               ))
             )}
-            <CodeEditorSection />
+            {CodeEditorSection}
           </div>
         )}
 
