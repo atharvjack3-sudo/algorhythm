@@ -1207,4 +1207,65 @@ router.get("/users/:userId/contest-rating-history", async (req, res) => {
   }
 });
 
+// GET /api/arena-dashboard
+router.get("/arena-dashboard", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const { rows } = await db.query(`
+      WITH upcoming AS (
+        SELECT c.id, c.name, c.start_time, c.end_time, c.duration_minutes,
+               COUNT(cs.user_id) AS participants,
+               EXISTS(SELECT 1 FROM contest_scores my_cs WHERE my_cs.contest_id = c.id AND my_cs.user_id = $1) AS is_registered
+        FROM contests c
+        LEFT JOIN contest_scores cs ON cs.contest_id = c.id
+        WHERE c.start_time > NOW()
+        GROUP BY c.id
+        ORDER BY c.start_time ASC
+      ),
+      running AS (
+        SELECT c.id, c.name, c.start_time, c.end_time, c.duration_minutes,
+               COUNT(cs.user_id) AS participants,
+               EXISTS(SELECT 1 FROM contest_scores my_cs WHERE my_cs.contest_id = c.id AND my_cs.user_id = $1) AS is_registered
+        FROM contests c
+        LEFT JOIN contest_scores cs ON cs.contest_id = c.id
+        WHERE c.start_time <= NOW() AND c.end_time >= NOW()
+        GROUP BY c.id
+        ORDER BY c.start_time ASC
+      ),
+      past AS (
+        SELECT c.id, c.name, c.start_time, c.end_time, c.duration_minutes,
+               COUNT(cs.user_id) AS participants
+        FROM contests c
+        LEFT JOIN contest_scores cs ON cs.contest_id = c.id
+        WHERE c.end_time < NOW()
+        GROUP BY c.id
+        ORDER BY c.start_time DESC
+        LIMIT 15
+      ),
+      u_stats AS (
+        SELECT * FROM user_contest_stats WHERE user_id = $1
+      ),
+      r_hist AS (
+        SELECT json_agg(row_to_json(t)) AS data FROM (
+          SELECT contest_id, rating_before, rating_after, rating_change, final_rank, solved_count, created_at
+          FROM contest_rating_history WHERE user_id = $1 ORDER BY created_at ASC
+        ) t
+      )
+      
+      SELECT 
+        COALESCE((SELECT json_agg(row_to_json(upcoming.*)) FROM upcoming), '[]'::json) AS upcoming,
+        COALESCE((SELECT json_agg(row_to_json(running.*)) FROM running), '[]'::json) AS running,
+        COALESCE((SELECT json_agg(row_to_json(past.*)) FROM past), '[]'::json) AS past,
+        (SELECT row_to_json(u_stats.*) FROM u_stats) AS stats,
+        COALESCE((SELECT data FROM r_hist), '[]'::json) AS history;
+    `, [userId]);
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("Arena dashboard fetch failed:", err);
+    res.status(500).json({ error: "Failed to load arena data" });
+  }
+});
+
 export default router;
