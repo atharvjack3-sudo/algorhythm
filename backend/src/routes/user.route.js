@@ -248,8 +248,6 @@ router.get("/user-dashboard", authMiddleware, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Your Node.js backend does absolutely zero work now. 
-    // It just passes Postgres's masterpiece straight to React.
     res.json(rows[0]);
 
   } catch (err) {
