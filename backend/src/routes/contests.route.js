@@ -1268,4 +1268,80 @@ router.get("/arena-dashboard", authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/contests/:contestId/arena
+router.get("/contests/:contestId/arena", authMiddleware, async (req, res) => {
+  const { contestId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const { rows: contestRows } = await db.query(
+      `SELECT id, name, start_time, end_time, duration_minutes FROM contests WHERE id = $1`,
+      [contestId]
+    );
+    const contest = contestRows[0];
+    
+    if (!contest) {
+      return res.status(404).json({ error: "Contest not found" });
+    }
+
+    const now = new Date();
+    const start = toUTC(contest.start_time);
+    const end = toUTC(contest.end_time);
+
+    if (now < start) {
+      return res.status(403).json({ 
+        error: "Contest has not started", 
+        code: "UPCOMING" 
+      });
+    }
+
+    const isEnded = now > end;
+    const table = isEnded ? "contest_results" : "contest_scores";
+
+    const [problemsRes, leaderboardRes] = await Promise.all([
+      db.query(`
+        SELECT cp.problem_id, cp.problem_index, cp.difficulty, p.title,
+          (SELECT COUNT(DISTINCT cps.user_id) 
+           FROM contest_problem_status cps
+           WHERE cps.contest_id = cp.contest_id 
+             AND cps.problem_id = cp.problem_id 
+             AND cps.solved = 1) AS solved_count
+        FROM contest_problems cp
+        JOIN problems p ON p.id = cp.problem_id
+        WHERE cp.contest_id = $1
+        ORDER BY cp.problem_index
+      `, [contestId]),
+
+      db.query(`
+        SELECT t.user_id, u.username, t.solved_count, t.penalty,
+          (SELECT COALESCE(json_agg(
+            json_build_object(
+              'problem_id', cps.problem_id, 
+              'solved', cps.solved, 
+              'wrong_attempts', cps.wrong_attempts, 
+              'first_ac_time_minutes', cps.first_ac_time_minutes
+            )
+          ), '[]'::json)
+           FROM contest_problem_status cps
+           WHERE cps.contest_id = t.contest_id AND cps.user_id = t.user_id) AS problem_stats
+        FROM ${table} t
+        JOIN users u ON u.id = t.user_id
+        WHERE t.contest_id = $1
+        ORDER BY t.solved_count DESC, t.penalty ASC
+      `, [contestId])
+    ]);
+
+    res.json({
+      status: isEnded ? "ended" : "running",
+      contest,
+      problems: problemsRes.rows,
+      leaderboard: leaderboardRes.rows
+    });
+
+  } catch (err) {
+    console.error("Arena fetch failed:", err);
+    res.status(500).json({ error: "Failed to fetch arena data" });
+  }
+});
+
 export default router;
