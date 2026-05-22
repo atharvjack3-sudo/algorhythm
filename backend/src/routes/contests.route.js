@@ -1369,4 +1369,68 @@ router.get("/contests/:contestId/arena", authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/contests/:contestId/submissions/:targetUserId
+router.get("/contests/:contestId/submissions/:targetUserId", async (req, res) => {
+  const { contestId, targetUserId } = req.params;
+
+  try {
+    const { rows } = await db.query(`
+      WITH c_info AS (
+        SELECT name, end_time FROM contests WHERE id = $1
+      ),
+      u_info AS (
+        SELECT username FROM users WHERE id = $2
+      ),
+      subs AS (
+        SELECT 
+          cs.id AS submission_id,
+          cs.problem_id,
+          cs.submitted_at,
+          cp.problem_index,
+          p.title AS problem_title,
+          cs.language,
+          cs.verdict,
+          cs.execution_time AS time_ms,
+          cs.memory_kb
+        FROM contest_submissions cs
+        JOIN contest_problems cp ON cp.problem_id = cs.problem_id AND cp.contest_id = cs.contest_id
+        JOIN problems p ON p.id = cs.problem_id
+        WHERE cs.contest_id = $1 AND cs.user_id = $2
+        ORDER BY cs.submitted_at DESC
+      )
+      SELECT 
+        (SELECT name FROM c_info) AS contest_name,
+        (SELECT end_time FROM c_info) AS end_time,
+        (SELECT username FROM u_info) AS username,
+        COALESCE((SELECT json_agg(row_to_json(subs.*)) FROM subs), '[]'::json) AS submissions;
+    `, [contestId, targetUserId]);
+
+    const data = rows[0];
+
+    // If the contest doesn't exist
+    if (!data.contest_name) {
+      return res.status(404).json({ error: "Contest or user not found" });
+    }
+
+    // Determine if the contest has ended (for frontend caching)
+    const now = new Date();
+    let endTimeStr = data.end_time;
+    if (typeof endTimeStr === "string" && !endTimeStr.includes("Z") && !endTimeStr.includes("+")) {
+      endTimeStr = endTimeStr.replace(" ", "T") + "Z";
+    }
+    const isEnded = now > new Date(endTimeStr);
+
+    res.json({
+      contest_name: data.contest_name,
+      username: data.username,
+      is_ended: isEnded,
+      submissions: data.submissions
+    });
+
+  } catch (err) {
+    console.error("Failed to fetch user submissions:", err);
+    res.status(500).json({ error: "Failed to fetch submission history" });
+  }
+});
+
 export default router;
