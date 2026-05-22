@@ -1296,7 +1296,7 @@ router.get("/contests/:contestId/arena", authMiddleware, async (req, res) => {
     }
 
     const isEnded = now > end;
-    const table = isEnded ? "contest_results" : "contest_scores";
+    const table = "contest_scores";
 
     const [problemsRes, leaderboardRes] = await Promise.all([
       db.query(`
