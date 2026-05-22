@@ -495,11 +495,35 @@ router.get("/contests/:contestId/my-submissions", authMiddleware, async (req, re
   }
 });
 
+// GET /api/contests/:contestId/results
 router.get("/contests/:contestId/results", async (req, res) => {
   const { contestId } = req.params;
 
   try {
-    // 1. Fetch contest problems config
+    const { rows: contestRows } = await db.query(
+      `SELECT end_time FROM contests WHERE id = $1`,
+      [contestId]
+    );
+    const contest = contestRows[0];
+
+    // If contest doesn't exist, throw 404
+    if (!contest) {
+      return res.status(404).json({ error: "Contest not found" });
+    }
+
+    const now = new Date();
+    let endTime = contest.end_time;
+    if (typeof endTime === "string" && !endTime.includes("Z") && !endTime.includes("+")) {
+      endTime = endTime.replace(" ", "T") + "Z";
+    }
+    const end = new Date(endTime);
+
+    // If the contest is still running or upcoming, block access.
+    if (now <= end) {
+      return res.status(403).json({ error: "Results are not available yet. Contest has not ended." });
+    }
+
+    // 2. Fetch contest problems config
     const { rows: problems } = await db.query(
       `
       SELECT
@@ -515,7 +539,7 @@ router.get("/contests/:contestId/results", async (req, res) => {
       [contestId]
     );
 
-    // 2. Fetch leaderboard rows with embedded problem status subqueries
+    // 3. Fetch leaderboard rows with embedded problem status subqueries
     const { rows: leaderboard } = await db.query(
       `
       SELECT
@@ -524,14 +548,15 @@ router.get("/contests/:contestId/results", async (req, res) => {
         cr.solved_count,
         cr.penalty,
         (
-          SELECT json_agg(
+          -- Added COALESCE to ensure we always get an array [], never NULL
+          SELECT COALESCE(json_agg(
             json_build_object(
               'problem_id', cps.problem_id,
               'solved', cps.solved,
               'wrong_attempts', cps.wrong_attempts,
               'first_ac_time_minutes', cps.first_ac_time_minutes
             )
-          )
+          ), '[]'::json)
           FROM contest_problem_status cps
           WHERE cps.contest_id = cr.contest_id AND cps.user_id = cr.user_id
         ) AS problem_stats
@@ -549,7 +574,7 @@ router.get("/contests/:contestId/results", async (req, res) => {
       leaderboard
     });
   } catch (err) {
-    console.error(err);
+    console.error("Failed to fetch contest results:", err);
     res.status(500).json({ error: "Failed to fetch contest results" });
   }
 });
