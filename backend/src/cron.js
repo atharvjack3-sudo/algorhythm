@@ -3,37 +3,88 @@ import cron from "node-cron";
 import { db } from "./config/db.js";
 import { finalizeContest } from "./jobs/contestFinalize.job.js";
 
-let isRunning = false;
+// Separate execution locks
+let isContestRunning = false;
+let isRankRunning = false;
 
-cron.schedule("*/2 * * * *", async () => {
-  if (isRunning) {
-    console.log("Skipping cron run: previous execution still in progress");
+// ==========================================
+// 1. Contest Finalization (Runs at 12:00 AM / Midnight)
+// ==========================================
+cron.schedule("0 0 * * *", async () => {
+  if (isContestRunning) {
+    console.log("Skipping contest cron: previous execution still in progress");
     return;
   }
 
-  isRunning = true;
+  isContestRunning = true;
 
   try {
+    console.log(`[${new Date().toISOString()}] CRON: Starting daily contest finalization...`);
+    
+    // Removed LIMIT 10 so it processes ALL un-finalized contests for the day at once
     const { rows: contests } = await db.query(
       `
       SELECT id
       FROM contests
-      WHERE end_time < NOW() - INTERVAL '2 minutes' -- 2 min buffer
+      WHERE end_time < NOW() - INTERVAL '2 minutes'
         AND id NOT IN (SELECT DISTINCT contest_id FROM contest_results)
-      LIMIT 10 -- Process in small batches
       `
     );
 
     for (const c of contests) {
       try {
         await finalizeContest(c.id);
+        console.log(`Successfully finalized contest ${c.id}`);
       } catch (err) {
         console.error(`Failed to finalize contest ${c.id}`, err);
       }
     }
+    
+    console.log(`[${new Date().toISOString()}] CRON: Contest finalization complete.`);
   } catch (err) {
-    console.error("Cron job failed", err);
+    console.error("Contest cron job failed", err);
   } finally {
-    isRunning = false;
+    isContestRunning = false;
+  }
+});
+
+// ==========================================
+// 2. Global Rank Update (Runs at 1:00 AM)
+// ==========================================
+cron.schedule("0 1 * * *", async () => {
+  if (isRankRunning) {
+    console.log("Skipping rank cron: previous execution still in progress");
+    return;
+  }
+
+  isRankRunning = true;
+
+  try {
+    console.log(`[${new Date().toISOString()}] CRON: Starting global rank calculation...`);
+    
+    await db.query('BEGIN');
+
+    const result = await db.query(`
+      UPDATE user_stats u
+      SET global_rank = r.new_rank
+      FROM (
+        SELECT 
+          user_id, 
+          DENSE_RANK() OVER (
+            ORDER BY total_solved DESC, acceptance_rate DESC NULLS LAST, user_id ASC
+          ) AS new_rank
+        FROM user_stats
+      ) r 
+      WHERE r.user_id = u.user_id
+    `);
+
+    await db.query('COMMIT');
+    console.log(`[${new Date().toISOString()}] CRON: Successfully updated ranks for ${result.rowCount} users.`);
+    
+  } catch (err) {
+    await db.query('ROLLBACK');
+    console.error("Rank cron job failed", err);
+  } finally {
+    isRankRunning = false;
   }
 });

@@ -30,21 +30,29 @@ function difficultyToRating(difficulty) {
   }
 }
 
-function mapVerdict(status) {
-  switch (status) {
-    case "Accepted":
-      return "AC";
-    case "Wrong Answer":
-      return "WA";
-    case "Time Limit Exceeded":
-      return "TLE";
-    case "Memory Limit Exceeded":
-      return "MLE";
-    case "Compilation Error":
-      return "CE";
-    default:
-      return "RE";
-  }
+const BASE_TIME_LIMIT_SEC = 2.0; 
+const BASE_MEMORY_LIMIT_KB = 128 * 1024; // 128 MB
+
+// Language-specific scaling factors
+const LIMIT_MULTIPLIERS = {
+  cpp:        { time: 1.0, memory: 1.0 },
+  java:       { time: 2.0, memory: 4.0 }, 
+  python:     { time: 5.0, memory: 2.0 }, 
+  javascript: { time: 2.0, memory: 2.0 }, 
+};
+
+function mapVerdict(description) {
+  if (!description) return "WA";
+  if (description.includes("Time Limit")) return "TLE";
+  if (description.includes("Memory Limit")) return "MLE";
+  
+  // The OS OOM Killer uses SIGKILL (Exit code 137) when a container breaches memory limits
+  if (description.includes("SIGKILL") || description.includes("137")) return "MLE";
+  
+  if (description.includes("Compilation Error")) return "CE";
+  if (description.includes("Runtime Error")) return "RE";
+  
+  return "WA"; // Default to Wrong Answer for other failures
 }
 
 /**
@@ -60,26 +68,19 @@ router.post("/submissions", authMiddleware, async (req, res) => {
 
   const conn = await db.connect();
 
-  const { rows: problemRows } = await conn.query(
-  `SELECT is_hidden FROM problems WHERE id = $1`,
-  [problemId]
-);
-
-if (problemRows.length === 0) {
-  conn.release();
-  return res.status(404).json({ error: "Problem not found" });
-}
-
-const problem = problemRows[0];
-
-if (problem.is_hidden) {
-  conn.release();
-  return res.status(404).json({ error: "Problem not found" });
-}
-
-  
-
   try {
+    /* =======================
+       Problem & Validation
+    ======================= */
+    const { rows: problemRows } = await conn.query(
+      `SELECT is_hidden FROM problems WHERE id = $1`,
+      [problemId]
+    );
+
+    if (problemRows.length === 0 || problemRows[0].is_hidden) {
+      return res.status(404).json({ error: "Problem not found" });
+    }
+
     const { rows: testcases } = await conn.query(
       `SELECT * FROM problem_testcases WHERE problem_id = $1 ORDER BY id`,
       [problemId]
@@ -89,106 +90,83 @@ if (problem.is_hidden) {
       return res.status(400).json({ error: "No testcases found" });
     }
 
+    /* =======================
+       Judge0 Execution
+    ======================= */
     let finalVerdict = "AC";
     let hiddenFailedIndex = null;
     const sampleResults = [];
     let hiddenCount = 0;
+    
     let finalCO = null;
     let finalErr = null;
-
     let maxRuntimeMs = 0;
     let maxMemoryKb = 0;
     
-    // ENCODE SOURCE CODE
     const codeBase64 = Buffer.from(code).toString("base64");
+
+    // Calculate dynamic limits
+    const multipliers = LIMIT_MULTIPLIERS[language] || { time: 2.0, memory: 2.0 };
+    const timeLimit = BASE_TIME_LIMIT_SEC * multipliers.time;
+    const memoryLimit = BASE_MEMORY_LIMIT_KB * multipliers.memory;
 
     for (let i = 0; i < testcases.length; i++) {
       const tc = testcases[i];
 
-      const input = await fs.readFile(
-        path.join(process.cwd(), tc.input_path),
-        "utf-8"
-      );
-
-      const expectedOutput = await fs.readFile(
-        path.join(process.cwd(), tc.output_path),
-        "utf-8"
-      );
-      
-      // ENCODE INPUT
-      const inputBase64 = Buffer.from(input).toString("base64");
+      const input = await fs.readFile(path.join(process.cwd(), tc.input_path), "utf-8");
+      const expectedOutput = await fs.readFile(path.join(process.cwd(), tc.output_path), "utf-8");
 
       const judgeRes = await axios.post(
-        JUDGE0_URL,
+        JUDGE0_URL, 
         {
           source_code: codeBase64,
           language_id: LANGUAGE_MAP[language],
-          stdin: inputBase64,
-          cpu_time_limit: 2,
-          memory_limit: 128000,
-        },
-        {
-          headers: {
-            "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
-            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-          },
+          stdin: Buffer.from(input).toString("base64"),
+          expected_output: Buffer.from(expectedOutput).toString("base64"), // Let Judge0 compare
+          cpu_time_limit: timeLimit,
+          memory_limit: memoryLimit
         }
       );
 
-      const judgeStatus = judgeRes.data.status.description;
-      const compileOutputBase64 = judgeRes.data.compile_output || "";
-      const stderrBase64 = judgeRes.data.stderr || "";
+      const judgeStatus = judgeRes.data.status;
       const runtimeMs = Math.round(parseFloat(judgeRes.data.time || "0") * 1000);
       const memoryKb = judgeRes.data.memory || 0;
-
-      const compileOutput = compileOutputBase64
-  ? Buffer.from(compileOutputBase64, "base64").toString("utf-8")
-  : "";
-
-        const stderr = stderrBase64
-  ? Buffer.from(stderrBase64, "base64").toString("utf-8")
-  : "";
 
       maxRuntimeMs = Math.max(maxRuntimeMs, runtimeMs);
       maxMemoryKb = Math.max(maxMemoryKb, memoryKb);
 
-      let verdict = mapVerdict(judgeStatus);
-      let passed = false;
-
-      if (judgeStatus === "Accepted") {
-        // DECODE OUTPUT
-        const stdoutBase64 = judgeRes.data.stdout || "";
-        const actual = stdoutBase64 ? Buffer.from(stdoutBase64, "base64").toString("utf-8").trim() : "";
-        
-        const expected = expectedOutput.trim();
-        passed = actual === expected;
-        verdict = passed ? "AC" : "WA";
-      }
+      const isAccepted = judgeStatus.id === 3;
+      const currentVerdict = isAccepted ? "AC" : mapVerdict(judgeStatus.description);
 
       if (tc.is_sample) {
         sampleResults.push({
           index: sampleResults.length + 1,
-          verdict: passed ? "AC" : verdict,
+          verdict: currentVerdict,
         });
       } else {
         hiddenCount++;
       }
 
-      if (!tc.is_sample && !passed) {
-        finalVerdict = verdict;
-        finalCO = compileOutput;
-        finalErr = stderr;
-        hiddenFailedIndex = hiddenCount;
-        break;
-      }
+      if (!isAccepted) {
+        finalVerdict = currentVerdict;
+        
+        // Extract CE and RE data for the frontend debugger
+        if (judgeRes.data.compile_output) {
+          finalCO = Buffer.from(judgeRes.data.compile_output, "base64").toString("utf-8");
+        }
+        if (judgeRes.data.stderr) {
+          finalErr = Buffer.from(judgeRes.data.stderr, "base64").toString("utf-8");
+        }
 
-      if (tc.is_sample && !passed) {
-        finalVerdict = verdict;
+        if (!tc.is_sample) {
+          hiddenFailedIndex = hiddenCount;
+          break; // Stop on first hidden failure
+        }
       }
     }
 
     /* =======================
-        DB TRANSACTION
+       DB TRANSACTION
     ======================= */
     await conn.query('BEGIN');
 
@@ -243,11 +221,11 @@ if (problem.is_hidden) {
     const statusRow = statusRows[0];
 
     if (finalVerdict === "AC" && (!statusRow || statusRow.status !== "solved")) {
-      const { rows: problemRows } = await conn.query(
+      const { rows: probRows } = await conn.query(
         `SELECT difficulty FROM problems WHERE id = $1`,
         [problemId]
       );
-      const problem = problemRows[0];
+      const problem = probRows[0];
       const diffCol = `${problem.difficulty}_solved`;
 
       await conn.query(
@@ -265,18 +243,7 @@ if (problem.is_hidden) {
       );
     }
 
-    await conn.query(
-      `
-      UPDATE user_stats u
-      SET global_rank = r.new_rank
-      FROM (
-        SELECT user_id, DENSE_RANK() OVER (ORDER BY total_solved DESC, acceptance_rate DESC NULLS LAST, user_id ASC) AS new_rank
-        FROM user_stats
-      ) r 
-      WHERE r.user_id = u.user_id
-      `
-    );
-
+    // Streak Calculation
     if (finalVerdict === "AC") {
       await conn.query(
         `
@@ -291,6 +258,7 @@ if (problem.is_hidden) {
       );
     }
 
+    // Topic Ratings Update
     const { rows: topicRows } = await conn.query(
       `SELECT topic_id FROM problem_topics WHERE problem_id = $1`,
       [problemId]
@@ -313,14 +281,14 @@ if (problem.is_hidden) {
       );
       const utr = utrRows[0];
 
-      const { rows: probRows } = await conn.query(
+      const { rows: pRows } = await conn.query(
         `SELECT difficulty FROM problems WHERE id = $1`,
         [problemId]
       );
-      const problem = probRows[0];
+      const probData = pRows[0];
 
       const newRating = updateRating(
-        utr.rating, difficultyToRating(problem.difficulty), utr.attempts, solved, numTopics
+        utr.rating, difficultyToRating(probData.difficulty), utr.attempts, solved, numTopics
       );
 
       await conn.query(
@@ -341,15 +309,15 @@ if (problem.is_hidden) {
       hidden_failed: hiddenFailedIndex !== null ? `Hidden testcase #${hiddenFailedIndex}` : null,
       error: finalCO || finalErr || null
     });
+
   } catch (err) {
     await conn.query('ROLLBACK');
-    console.error("Judge0 Error:", err.response?.data || err.message);
+    console.error("Judge0/DB Error:", err.message);
     res.status(500).json({ error: "Submission failed" });
   } finally {
     conn.release();
   }
 });
-
 
 /**
  * GET /api/submissions/:problemId
