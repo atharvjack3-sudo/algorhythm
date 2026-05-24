@@ -190,6 +190,7 @@ const RatingGraph = ({ history }) => {
   );
 };
 
+
 export default function Contests() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
