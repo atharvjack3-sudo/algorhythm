@@ -51,6 +51,17 @@ export default function ContestSolveProblem() {
     return `${month}/${day}/${year} ${hours}:${mins}`;
   };
 
+  const formatCFDate = (dateStr) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = months[d.getMonth()];
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  return `${month}/${day}/${year} ${hours}:${mins}`;
+};
   /* =========================
       Logic & Backend Wiring
   ========================= */
