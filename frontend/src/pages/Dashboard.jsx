@@ -21,114 +21,52 @@ export default function Dashboard() {
   const [easyProblems, setEasyProblems] = useState(0);
   const [mediumProblems, setMediumProblems] = useState(0);
   const [hardProblems, setHardProblems] = useState(0);
-
-  // New State for Contest Ratings
   const [contestStats, setContestStats] = useState(null);
   const [ratingHistory, setRatingHistory] = useState([]);
   const [ratingLoading, setRatingLoading] = useState(true);
 
+  // The Unified Profile Hook
   useEffect(() => {
     if (!user?.id) return;
 
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const res = await api.get("/userdetails", {
-          params: { userId: user.id },
-        });
-        setStats(res.data);
+        const res = await api.get("/user-dashboard");
+        const data = res.data;
+
+        setStats(data.details);
+        setContestStats(data.contestStats);
+        setRatingHistory(data.ratingHistory);
+        setBadgeList(data.badges);
+        setRecentAC(data.recentAC);
+        setHeatmap(data.heatmap);
+        
+        if (data.platformStats) {
+          setEasyProblems(data.platformStats.easy_problems);
+          setMediumProblems(data.platformStats.medium_problems);
+          setHardProblems(data.platformStats.hard_problems);
+        }
+
       } catch (err) {
-        console.error("Error fetching user stats:", err);
-        setStats(null);
+        console.error("Error fetching unified dashboard:", err);
       } finally {
         setStatsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, [user]);
-
-  // Fetch Contest Rating Data
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const fetchContestData = async () => {
-      try {
-        const [statsRes, histRes] = await Promise.all([
-          api.get(`/users/${user.id}/contest-stats`),
-          api.get(`/users/${user.id}/contest-rating-history`),
-        ]);
-        setContestStats(statsRes.data);
-        setRatingHistory(histRes.data.history || []);
-      } catch (err) {
-        console.error("Error fetching contest data:", err);
-      } finally {
         setRatingLoading(false);
-      }
-    };
-
-    fetchContestData();
-  }, [user]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const fetchBadges = async () => {
-      try {
-        const res = await api.get("/userbadges");
-        setBadgeList(res.data);
-      } catch (err) {
-        console.error("Error fetching user badges:", err);
-        setBadgeList([]);
-      } finally {
         setBadgesLoading(false);
-      }
-    };
-
-    fetchBadges();
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (!user || loading) return;
-    const fetchHeatmap = async () => {
-      const res = await api.get("/activity-heatmap");
-      setHeatmap(res.data);
-    };
-
-    fetchHeatmap();
-  }, [user, loading]);
-
-  const activityMap = {};
-  heatmap.forEach((d) => {
-    activityMap[d.day.slice(0, 10)] = d.count;
-  });
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const fetchRecentAC = async () => {
-      try {
-        const res = await api.get("/recent-accepted");
-        setRecentAC(res.data);
-      } catch (err) {
-        console.error("Error fetching recent AC:", err);
-        setRecentAC([]);
-      } finally {
         setRecentLoading(false);
       }
     };
 
-    fetchRecentAC();
+    fetchDashboardData();
   }, [user]);
 
-  useEffect(() => {
-    const fetchProblemStats = async () => {
-      const res = await api.get("/get-platform-stats");
-      setEasyProblems(res.data[0].easy_problems);
-      setMediumProblems(res.data[0].medium_problems);
-      setHardProblems(res.data[0].hard_problems);
-    };
-    fetchProblemStats();
-  }, []);
+  const activityMap = {};
+  if (heatmap && heatmap.length > 0) {
+    heatmap.forEach((d) => {
+      // Safely slice the date string
+      activityMap[d.day.slice(0, 10)] = d.count;
+    });
+  }
 
   // Contest Rating Graph Calculation
   const altitudePath = useMemo(() => {

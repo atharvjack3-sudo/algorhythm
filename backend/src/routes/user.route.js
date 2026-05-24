@@ -181,4 +181,136 @@ router.get("/users/:id/performance", authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/user-dashboard
+router.get("/user-dashboard", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const { rows } = await db.query(`
+      WITH user_info AS (
+        SELECT * FROM user_stats WHERE user_id = $1
+      ),
+      c_stats AS (
+        SELECT user_id, contests_participated, contests_solved, 
+               contest_total_submissions, contest_successful_submissions, 
+               contest_acceptance_rate, contest_rating, contest_global_rank, 
+               is_banned, banned_reason, banned_at, last_contest_date, 
+               created_at, updated_at
+        FROM user_contest_stats WHERE user_id = $1
+      ),
+      r_history AS (
+        SELECT json_agg(row_to_json(t)) AS data FROM (
+          SELECT contest_id, rating_before, rating_after, rating_change, 
+                 final_rank, solved_count, created_at
+          FROM contest_rating_history WHERE user_id = $1 ORDER BY created_at ASC
+        ) t
+      ),
+      b_list AS (
+        SELECT json_agg(row_to_json(t)) AS data FROM (
+          SELECT ub.badge_id, b.name, b.description, ub.earned_at 
+          FROM user_badges ub JOIN badges b ON ub.badge_id = b.id 
+          WHERE ub.user_id = $1 ORDER BY ub.earned_at DESC
+        ) t
+      ),
+      ac_list AS (
+        SELECT json_agg(row_to_json(t)) AS data FROM (
+          SELECT s.id, s.problem_id, p.title AS problem_title, s.language, 
+                 s.runtime_ms, s.memory_kb, s.submitted_at
+          FROM submissions s JOIN problems p ON p.id = s.problem_id 
+          WHERE s.user_id = $1 AND s.verdict = 'AC' 
+          ORDER BY s.submitted_at DESC LIMIT 10
+        ) t
+      ),
+      h_map AS (
+        SELECT json_agg(row_to_json(t)) AS data FROM (
+          SELECT submitted_at::DATE AS day, COUNT(*)::INTEGER AS count 
+          FROM submissions WHERE user_id = $1 AND submitted_at >= CURRENT_DATE - INTERVAL '3 months' 
+          GROUP BY submitted_at::DATE ORDER BY day
+        ) t
+      ),
+      p_stats AS (
+        SELECT * FROM platform_stats LIMIT 1
+      )
+      
+      -- Assemble the final JSON object to send straight to the frontend
+      SELECT
+        (SELECT row_to_json(user_info.*) FROM user_info) AS details,
+        (SELECT row_to_json(c_stats.*) FROM c_stats) AS "contestStats",
+        COALESCE((SELECT data FROM r_history), '[]'::json) AS "ratingHistory",
+        COALESCE((SELECT data FROM b_list), '[]'::json) AS badges,
+        COALESCE((SELECT data FROM ac_list), '[]'::json) AS "recentAC",
+        COALESCE((SELECT data FROM h_map), '[]'::json) AS heatmap,
+        (SELECT row_to_json(p_stats.*) FROM p_stats) AS "platformStats";
+    `, [userId]);
+
+    // If the user doesn't exist, handle it safely
+    if (!rows[0].details) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(rows[0]);
+
+  } catch (err) {
+    console.error("Unified dashboard fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch user dashboard data" });
+  }
+});
+
+// GET /api/users/profile/:username
+router.get("/profile/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const { rows } = await db.query(`
+      WITH target_user AS (
+        SELECT id, username, created_at FROM users WHERE username = $1
+      ),
+      u_stats AS (
+        SELECT total_solved, global_rank, acceptance_rate, current_streak
+        FROM user_stats WHERE user_id = (SELECT id FROM target_user)
+      ),
+      c_stats AS (
+        SELECT contest_rating, contest_global_rank, contests_participated, is_banned
+        FROM user_contest_stats WHERE user_id = (SELECT id FROM target_user)
+      ),
+      r_hist AS (
+        SELECT json_agg(row_to_json(t)) AS data FROM (
+          SELECT contest_id, rating_before, rating_after, rating_change, final_rank, created_at
+          FROM contest_rating_history 
+          WHERE user_id = (SELECT id FROM target_user) 
+          ORDER BY created_at ASC
+        ) t
+      ),
+      h_map AS (
+        SELECT json_agg(row_to_json(t)) AS data FROM (
+          SELECT submitted_at::DATE AS day, COUNT(*)::INTEGER AS count 
+          FROM submissions 
+          WHERE user_id = (SELECT id FROM target_user) 
+            AND submitted_at >= CURRENT_DATE - INTERVAL '6 months' 
+          GROUP BY submitted_at::DATE 
+          ORDER BY day
+        ) t
+      )
+      
+      SELECT 
+        (SELECT row_to_json(target_user.*) FROM target_user) AS user_info,
+        (SELECT row_to_json(u_stats.*) FROM u_stats) AS general_stats,
+        (SELECT row_to_json(c_stats.*) FROM c_stats) AS contest_stats,
+        COALESCE((SELECT data FROM r_hist), '[]'::json) AS rating_history,
+        COALESCE((SELECT data FROM h_map), '[]'::json) AS heatmap;
+    `, [username]);
+
+    // If target_user CTE returned nothing, the user doesn't exist
+    if (!rows[0].user_info) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(rows[0]);
+
+  } catch (err) {
+    console.error("Public profile fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+});
+
 export default router;
