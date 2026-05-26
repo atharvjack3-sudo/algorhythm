@@ -162,8 +162,8 @@ const EmptyRow = ({ cols, text }) => (
 );
 
 const TableShell = ({ head, children }) => (
-  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
-    <div className="overflow-x-auto">
+  <div className="bg-white w-full dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+    <div className="overflow-x-auto w-full">
       <table className="w-full border-collapse whitespace-nowrap">
         <thead>
           <tr className="border-b border-slate-200 dark:border-slate-800">
@@ -289,15 +289,13 @@ export default function Contests() {
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap');
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .font-sans { font-family: 'DM Sans', sans-serif; }
-        @keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }
-        .animate-blink { animation: blink 1s infinite; }
       `}</style>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200">
         <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row gap-8 flex-wrap">
 
           {/* ── MAIN COLUMN ── */}
-          <div className="flex-1 min-w-0 flex flex-col gap-10">
+          <div className="flex-1 min-w-0 max-w-full flex flex-col gap-10">
 
             {/* ONGOING */}
             <section>
