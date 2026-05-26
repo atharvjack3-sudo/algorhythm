@@ -47,7 +47,7 @@ const LiveTimer = ({ targetDateStr, onZero }) => {
     return () => clearInterval(interval);
   }, [targetDateStr, onZero]);
 
-  return <span className="font-mono tabular-nums font-bold tracking-tight text-red-600 dark:text-red-400">{timeLeft}</span>;
+  return <span className="font-mono tabular-nums font-bold tracking-[0.1em] text-red-500">{timeLeft}</span>;
 };
 
 export default function ContestProblems() {
@@ -101,281 +101,306 @@ export default function ContestProblems() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center font-sans text-sm">
-        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium">
-          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-          Loading Dashboard...
-        </div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse">
+          Loading Contest Dashboard...
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans selection:bg-blue-100 dark:selection:bg-blue-900/50 pb-12">
-      <div className="max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row gap-8">
-        
-        {/* --- MAIN CONTENT COLUMN (LEFT) --- */}
-        <div className="flex-1 flex flex-col gap-8">
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-sans { font-family: 'DM Sans', sans-serif; }
+        @keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }
+        .animate-blink { animation: blink 1s infinite; }
+      `}</style>
+
+      <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 pb-12">
+        <div className="max-w-6xl mx-auto py-10 px-6 flex flex-col md:flex-row gap-8">
           
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <svg className="w-6 h-6 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-              Problems - {contest?.name || contestId}
-            </h1>
-          </div>
-
-          {/* Ended Banner */}
-          {isEnded && (
-            <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl p-5 text-center flex flex-col items-center gap-1.5 shadow-sm">
-              <span className="font-bold text-red-700 dark:text-red-400 text-base flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Contest has ended
-              </span>
-              <span className="text-red-600/80 dark:text-red-300/70 text-sm">
-                Submissions are no longer accepted. Problem statements remain available for practice.
-              </span>
+          {/* --- MAIN CONTENT COLUMN (LEFT) --- */}
+          <div className="flex-1 flex flex-col gap-10">
+            
+            {/* Header */}
+            <div className="border-b border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+              <div>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                  <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
+                    Problemset
+                  </span>
+                </div>
+                <h1 className="font-sans text-2xl font-bold text-slate-900 dark:text-white">
+                  {contest?.name || contestId}
+                </h1>
+              </div>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => navigate('/contests')}
+                  className="font-mono text-[11px] font-semibold tracking-[0.06em] rounded transition-all cursor-pointer bg-transparent text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 px-3.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"
+                >
+                  ← Back
+                </button>
+              </div>
             </div>
-          )}
 
-          {/* PROBLEMS TABLE */}
-          {problems.length > 0 && (
+            {/* Ended Banner */}
+            {isEnded && (
+              <div className="bg-red-50/50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-md p-4 flex flex-col gap-1.5 shadow-sm">
+                <span className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-2">
+                
+                  Contest Concluded
+                </span>
+                <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                  Submissions are no longer accepted. Problem statements remain available for practice.
+                </span>
+              </div>
+            )}
+
+            {/* PROBLEMS TABLE */}
+            {problems.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2.5 mb-3.5">
+                  <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                  <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
+                    Problems
+                  </span>
+                </div>
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse whitespace-nowrap">
+                      <thead>
+                        <tr className="border-b border-slate-200 dark:border-slate-800">
+                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12">#</th>
+                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-left">Name</th>
+                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">Difficulty</th>
+                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">Solved</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {problems.map((p) => {
+                          const myData = leaderboard.find(row => row.user_id === user?.id);
+                          const myStat = myData?.problem_stats?.find(s => String(s.problem_id) === String(p.problem_id));
+
+                          let rowBg = "border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/50 group";
+                          if (myStat?.solved) rowBg = "bg-green-50/60 dark:bg-green-900/20 hover:bg-green-100/60 dark:hover:bg-green-900/40 border-b border-green-100 dark:border-green-900/50 transition-colors group";
+                          else if (myStat?.wrong_attempts > 0) rowBg = "bg-red-50/60 dark:bg-red-900/20 hover:bg-red-100/60 dark:hover:bg-red-900/40 border-b border-red-100 dark:border-red-900/50 transition-colors group";
+
+                          return (
+                            <tr key={p.problem_id} className={rowBg}>
+                              <td className="px-4 py-3 text-center">
+                                <span 
+                                  className="font-mono text-[13px] font-bold text-blue-600 dark:text-blue-400 cursor-pointer transition-colors hover:opacity-75" 
+                                  onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
+                                >
+                                  {p.problem_index}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span 
+                                  className="font-sans text-[13px] font-semibold text-slate-800 dark:text-slate-200 cursor-pointer transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400" 
+                                  onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
+                                >
+                                  {p.title || `Problem ${p.problem_index}`}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-[3px] font-mono text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                  {p.difficulty}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-center font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                                <div className="inline-flex items-center gap-1.5">
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                                  </svg>
+                                  {p.solved_count || 0}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* STANDINGS MATRIX TABLE */}
             <section>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-5 bg-blue-500 rounded-full"></span>
-                Problems
-              </h2>
-              <div className="bg-white dark:bg-[#111827] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-3.5 gap-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="inline-block w-[3px] h-[14px] rounded-sm bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                  <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
+                    {isEnded ? "Tentative Final Standings" : "Live Standings"}
+                  </span>
+                </div>
+                {isEnded && (
+                  <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                    Final standings will be published <Link to={`/contests/${contestId}`} className="dark:text-orange-500 text-orange-600 hover:underline">here.</Link>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse whitespace-nowrap">
+                  <table className="w-full border-collapse whitespace-nowrap min-w-[600px]">
                     <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-                        <th className="p-4 w-12 text-center">#</th>
-                        <th className="p-4">Name</th>
-                        <th className="p-4 text-center">Difficulty</th>
-                        <th className="p-4 text-center">Solved</th>
+                      <tr className="border-b border-slate-200 dark:border-slate-800">
+                        <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12">#</th>
+                        <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-left min-w-[150px]">Who</th>
+                        <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12" title="Solved Count">=</th>
+                        <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-20">Penalty</th>
+                        
+                        {problems.map((p) => (
+                          <th 
+                            key={p.problem_id} 
+                            className="px-4 py-2.5 font-mono text-[11px] font-bold tracking-[0.1em] text-blue-600 dark:text-blue-400 uppercase text-center w-16 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors" 
+                            onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
+                            title={p.title}
+                          >
+                            {p.problem_index}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
-                    <tbody className="text-sm divide-y divide-slate-100 dark:divide-slate-800/60">
-                      {problems.map((p) => {
-                        const myData = leaderboard.find(row => row.user_id === user?.id);
-                        const myStat = myData?.problem_stats?.find(s => String(s.problem_id) === String(p.problem_id));
+                    <tbody>
+                      {leaderboard.length === 0 ? (
+                        <tr>
+                          <td colSpan={4 + problems.length} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400 font-mono text-xs tracking-[0.06em]">
+                            No recorded submissions yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        leaderboard.map((row, idx) => {
+                          const isCurrentUser = row.user_id === user?.id;
+                          const rowClass = isCurrentUser 
+                            ? "bg-blue-50/60 dark:bg-blue-900/20 hover:bg-blue-100/60 dark:hover:bg-blue-900/40 border-b border-blue-100 dark:border-blue-900/50 transition-colors" 
+                            : "border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/50";
 
-                        let rowBg = "hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group";
-                        if (myStat?.solved) rowBg = "bg-green-50/50 dark:bg-green-900/10 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors group";
-                        else if (myStat?.wrong_attempts > 0) rowBg = "bg-red-50/50 dark:bg-red-900/10 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group";
+                          return (
+                            <tr key={row.user_id} className={rowClass}>
+                              <td className="px-4 py-3 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                                {idx + 1}
+                              </td>
+                              <td className="px-4 py-3 text-left">
+                                <Link 
+                                  to={`/contests/${contestId}/${row.user_id}/submissions`}
+                                  className={`font-sans text-[13px] font-semibold ${isCurrentUser ? "text-blue-600 dark:text-blue-400" : "text-slate-800 dark:text-slate-200"} hover:underline`}
+                                >
+                                  {row.username}
+                                </Link>
+                              </td>
+                              <td className="px-4 py-3 text-center font-mono text-[11px] font-bold text-green-600 dark:text-green-500">
+                                {row.solved_count}
+                              </td>
+                              <td className="px-4 py-3 text-center font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                                {row.penalty}
+                              </td>
 
-                        return (
-                          <tr key={p.problem_id} className={rowBg}>
-                            <td className="p-4 text-center">
-                              <span 
-                                className="font-bold text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 cursor-pointer transition-colors" 
-                                onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
-                              >
-                                {p.problem_index}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <span 
-                                className="font-medium text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 cursor-pointer transition-colors" 
-                                onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
-                              >
-                                {p.title || `Problem ${p.problem_index}`}
-                              </span>
-                            </td>
-                            <td className="p-4 text-center">
-                              <span className="inline-flex px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                {p.difficulty}
-                              </span>
-                            </td>
-                            <td className="p-4 text-center">
-                              <div className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-400 text-xs font-medium">
-                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                                </svg>
-                                {p.solved_count || 0}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                              {problems.map((p) => {
+                                const stat = row.problem_stats?.find(s => String(s.problem_id) === String(p.problem_id));
+                                
+                                if (!stat || (!stat.solved && stat.wrong_attempts === 0)) {
+                                  return <td key={p.problem_id} className="px-4 py-2 text-center"></td>;
+                                }
+
+                                if (stat.solved) {
+                                  return (
+                                    <td key={p.problem_id} className="px-4 py-2 text-center align-middle">
+                                      <div className="font-mono font-bold text-green-600 dark:text-green-500 text-[11px]">
+                                        +{stat.wrong_attempts > 0 ? stat.wrong_attempts : ""}
+                                      </div>
+                                      <div className="font-mono text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                        {formatCFTime(stat.first_ac_time_minutes)}
+                                      </div>
+                                    </td>
+                                  );
+                                } else {
+                                  return (
+                                    <td key={p.problem_id} className="px-4 py-2 text-center align-middle">
+                                      <div className="font-mono font-bold text-red-500 dark:text-red-400 text-[11px]">
+                                        -{stat.wrong_attempts}
+                                      </div>
+                                    </td>
+                                  );
+                                }
+                              })}
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
             </section>
-          )}
+          </div>
 
-          {/* STANDINGS MATRIX TABLE */}
-          <section>
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-2">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                <span className="w-1.5 h-5 bg-indigo-500 rounded-full"></span>
-                {isEnded ? "Tentative Final Standings" : "Live Standings"}
-              </h2>
-              {isEnded && (
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  Final standings will be published <Link to={`/contests/${contestId}`} className="text-blue-600 dark:text-blue-400 font-medium hover:underline">here</Link>.
-                </div>
-              )}
-            </div>
-
-            <div className="bg-white dark:bg-[#111827] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse whitespace-nowrap min-w-[600px]">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-                      <th className="p-3 text-center w-12">#</th>
-                      <th className="p-3 min-w-[150px]">Who</th>
-                      <th className="p-3 text-center w-12" title="Solved Count">=</th>
-                      <th className="p-3 text-center w-20">Penalty</th>
-                      
-                      {problems.map((p) => (
-                        <th 
-                          key={p.problem_id} 
-                          className="p-3 text-center w-16 text-blue-600 dark:text-blue-400 cursor-pointer hover:underline transition-all" 
-                          onClick={() => navigate(`/contests/${contestId}/solve/${p.problem_id}`)}
-                          title={p.title}
-                        >
-                          {p.problem_index}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm divide-y divide-slate-100 dark:divide-slate-800/60">
-                    {leaderboard.length === 0 ? (
-                      <tr>
-                        <td colSpan={4 + problems.length} className="p-8 text-center text-slate-400 dark:text-slate-500">
-                          No submissions yet. The arena is quiet.
-                        </td>
-                      </tr>
-                    ) : (
-                      leaderboard.map((row, idx) => {
-                        const isCurrentUser = row.user_id === user?.id;
-                        const rowClass = isCurrentUser 
-                          ? "bg-blue-50/60 dark:bg-blue-900/20" 
-                          : "hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors";
-
-                        return (
-                          <tr key={row.user_id} className={rowClass}>
-                            <td className="p-3 text-center font-medium text-slate-500 dark:text-slate-400">
-                              {idx + 1}
-                            </td>
-                            <td className="p-3 text-left">
-                              <Link 
-                                to={`/contests/${contestId}/${row.user_id}/submissions`}
-                                className={`font-semibold ${isCurrentUser ? "text-blue-600 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"} hover:underline`}
-                              >
-                                {row.username}
-                              </Link>
-                            </td>
-                            <td className="p-3 text-center font-bold text-slate-800 dark:text-slate-100">
-                              {row.solved_count}
-                            </td>
-                            <td className="p-3 text-center text-slate-500 dark:text-slate-400 tabular-nums">
-                              {row.penalty}
-                            </td>
-
-                            {problems.map((p) => {
-                              const stat = row.problem_stats?.find(s => String(s.problem_id) === String(p.problem_id));
-                              
-                              if (!stat || (!stat.solved && stat.wrong_attempts === 0)) {
-                                return <td key={p.problem_id} className="p-3 text-center"></td>;
-                              }
-
-                              if (stat.solved) {
-                                return (
-                                  <td key={p.problem_id} className="p-2 text-center align-middle">
-                                    <div className="font-bold text-green-600 dark:text-green-500 text-sm">
-                                      +{stat.wrong_attempts > 0 ? stat.wrong_attempts : ""}
-                                    </div>
-                                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
-                                      {formatCFTime(stat.first_ac_time_minutes)}
-                                    </div>
-                                  </td>
-                                );
-                              } else {
-                                return (
-                                  <td key={p.problem_id} className="p-2 text-center align-middle">
-                                    <div className="font-bold text-red-500 dark:text-red-400 text-sm">
-                                      -{stat.wrong_attempts}
-                                    </div>
-                                  </td>
-                                );
-                              }
-                            })}
-                          </tr>
-                        );
-                      })
+          {/* --- SIDEBAR COLUMN (RIGHT) --- */}
+          <div className="w-full md:w-[280px] shrink-0 flex flex-col gap-5">
+            
+            {/* CONTEST STATUS CARD */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+              <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800">
+                <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">Contest Status</span>
+              </div>
+              <div className="p-4 text-center flex flex-col items-center justify-center min-h-[120px]">
+                {isEnded ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="font-mono text-[11px] font-bold tracking-widest text-red-500 uppercase">
+                      FINISHED
+                    </span>
+                    <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">
+                      Tentative Final standings displayed
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3">
+                    <span className="font-mono text-[11px] font-bold tracking-widest text-green-500 uppercase flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-blink shadow-[0_0_6px_#22c55e]" />
+                      RUNNING
+                    </span>
+                    {contest?.end_time && (
+                      <div className="text-xl">
+                        <LiveTimer targetDateStr={contest.end_time} onZero={() => window.location.reload()} />
+                      </div>
                     )}
-                  </tbody>
-                </table>
+                    <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">
+                      Good luck, have fun!
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </section>
-        </div>
 
-        {/* --- SIDEBAR COLUMN (RIGHT) --- */}
-        <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-6">
-          
-          {/* CONTEST STATUS CARD */}
-          <div className="bg-white dark:bg-[#111827] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
-              <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Contest Status
-              </h3>
-            </div>
-            <div className="p-6 text-center flex flex-col items-center justify-center min-h-[120px]">
-              {isEnded ? (
-                <div className="flex flex-col items-center gap-2">
-                  <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-sm rounded-full tracking-wide ">
-                    Finished
-                  </span>
-                  <div className="text-slate-500 dark:text-slate-400 text-xs mt-1">
-                    Final standings are displayed.
+            {/* RULES BOX */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+              <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800">
+                <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">Rules & Info</span>
+              </div>
+              <div className="p-4 flex flex-col gap-2.5">
+                {[
+                  ["Navigation", "Click on a problem index to read the statement and submit code."],
+                  ["Scoring", "Penalty is calculated as 10 minutes per wrong submission on solved problems."],
+                  ["Data Sync", "Do not refresh the page rapidly; data syncs automatically."],
+                ].map(([title, body]) => (
+                  <div key={title} className="border-l-2 border-slate-300 dark:border-slate-700 pl-2.5">
+                    <div className="font-mono text-[10px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-[0.08em] mb-1">{title}</div>
+                    <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">{body}</div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3">
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-bold text-sm rounded-full tracking-wide flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Running
-                  </span>
-                  {contest?.end_time && (
-                    <div className="text-2xl text-slate-800 dark:text-slate-100">
-                      <LiveTimer targetDateStr={contest.end_time} onZero={() => window.location.reload()} />
-                    </div>
-                  )}
-                  <div className="text-slate-400 dark:text-slate-500 text-xs mt-1">
-                    Good luck, have fun!
-                  </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* RULES BOX */}
-          <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl shadow-sm border border-blue-100 dark:border-blue-800/30 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-blue-100 dark:border-blue-800/30 bg-blue-100/50 dark:bg-blue-900/20">
-              <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-300 flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Information
-              </h3>
-            </div>
-            <div className="p-5 text-xs leading-relaxed text-blue-800/80 dark:text-blue-200/70">
-              <ul className="list-disc pl-4 flex flex-col gap-2.5">
-                <li>Click on a problem index to read the statement and submit code.</li>
-                <li>Penalty is calculated as <strong className="font-semibold text-blue-900 dark:text-blue-200">10 minutes</strong> per wrong submission on solved problems.</li>
-                <li>Do not refresh the page rapidly; data syncs automatically.</li>
-              </ul>
-            </div>
           </div>
-
         </div>
       </div>
-    </div>
+    </>
   );
 }
