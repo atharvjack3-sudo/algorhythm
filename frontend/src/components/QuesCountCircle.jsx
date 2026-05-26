@@ -17,8 +17,8 @@ function QuesCountCircle({
   const stroke = 8;
   const circumference = 2 * Math.PI * radius;
   
-  // Increased gap to 24 to account for the 10px strokeWidth overlapping the ends (5px on each side)
-  const gap = 15; 
+  // Drastically reduced gap since we no longer use rounded caps that overlap
+  const gap = 7; 
   const available = circumference - 3 * gap;
 
   const easyLen = (easyTotal / totalQuestions) * available;
@@ -77,9 +77,9 @@ function QuesCountCircle({
           cy="100"
           r={radius}
           fill="none"
-          className="stroke-emerald-100 dark:stroke-emerald-500/20 transition-colors duration-300"
+          className="stroke-emerald-100 dark:stroke-emerald-900/30 transition-colors duration-300"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={`${easyLen} ${circumference - easyLen}`}
           strokeDashoffset={offsetFor(startEasy)}
         />
@@ -88,9 +88,9 @@ function QuesCountCircle({
           cy="100"
           r={radius}
           fill="none"
-          className="stroke-amber-100 dark:stroke-amber-500/20 transition-colors duration-300"
+          className="stroke-amber-100 dark:stroke-amber-900/30 transition-colors duration-300"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={`${medLen} ${circumference - medLen}`}
           strokeDashoffset={offsetFor(startMed)}
         />
@@ -99,9 +99,9 @@ function QuesCountCircle({
           cy="100"
           r={radius}
           fill="none"
-          className="stroke-rose-100 dark:stroke-rose-500/20 transition-colors duration-300"
+          className="stroke-red-100 dark:stroke-red-900/30 transition-colors duration-300"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={`${hardLen} ${circumference - hardLen}`}
           strokeDashoffset={offsetFor(startHard)}
         />
@@ -112,9 +112,9 @@ function QuesCountCircle({
           cy="100"
           r={radius}
           fill="none"
-          className="stroke-emerald-500 dark:stroke-emerald-400 transition-colors duration-300"
+          className="stroke-emerald-500 transition-colors duration-300"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={`${easySolvedLen} ${circumference - easySolvedLen}`}
           strokeDashoffset={offsetFor(startEasy)}
         />
@@ -123,9 +123,9 @@ function QuesCountCircle({
           cy="100"
           r={radius}
           fill="none"
-          className="stroke-amber-500 dark:stroke-amber-400 transition-colors duration-300"
+          className="stroke-amber-500 transition-colors duration-300"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={`${medSolvedLen} ${circumference - medSolvedLen}`}
           strokeDashoffset={offsetFor(startMed)}
         />
@@ -134,9 +134,9 @@ function QuesCountCircle({
           cy="100"
           r={radius}
           fill="none"
-          className="stroke-rose-500 dark:stroke-rose-400 transition-colors duration-300"
+          className="stroke-red-500 transition-colors duration-300"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={`${hardSolvedLen} ${circumference - hardSolvedLen}`}
           strokeDashoffset={offsetFor(startHard)}
         />
@@ -144,17 +144,17 @@ function QuesCountCircle({
 
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <div className="text-[12px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 transition-colors duration-300">
+        <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.12em] mb-1 transition-colors duration-300">
           Solved
         </div>
-        <div className="text-3xl font-bold text-slate-900 dark:text-white transition-colors duration-300 flex items-baseline">
+        <div className="font-sans text-4xl font-bold text-slate-900 dark:text-white transition-colors duration-300 flex items-baseline">
           {solvedCount}
-          <span className="text-sm font-semibold text-slate-400 dark:text-slate-500 ml-1 transition-colors duration-300">
-            / {totalQuestions}
+          <span className="font-mono text-xs font-bold text-slate-400 dark:text-slate-500 ml-1 transition-colors duration-300">
+            /{totalQuestions}
           </span>
         </div>
-        <div className="mt-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 transition-colors duration-300 flex flex-col">
-          <span className="font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 text-sm">
+        <div className="mt-1 font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em] transition-colors duration-300 flex flex-col">
+          <span className="text-[13px] font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300">
             {acceptanceRate}%
           </span>
           Acceptance
