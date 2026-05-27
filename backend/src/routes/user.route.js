@@ -63,6 +63,90 @@ router.get("/user-information/:username", authMiddleware, async (req, res) => {
   }
 });
 
+router.post("/update-user-information/:id", authMiddleware, async (req, res) => {
+  const conn = await db.connect();
+
+  try {
+    const targetUserId = req.params.id;
+    const { role, is_banned } = req.body;
+
+    const roleResult = await conn.query(
+      `SELECT role FROM users WHERE id = $1`,
+      [req.user.id]
+    );
+
+    if (roleResult.rows.length === 0 || roleResult.rows[0].role !== "owner") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const validRoles = ["user", "moderator", "owner"];
+    if (role && !validRoles.includes(role)) {
+      return res.status(400).json({ message: "Invalid role specified" });
+    }
+    if (String(req.user.id) === String(targetUserId) && (is_banned === true || role !== "owner")) {
+      return res.status(400).json({ 
+        message: "Action restricted: You cannot ban or demote your own account." 
+      });
+    }
+    let isBannedInt = null;
+    if (is_banned !== undefined) {
+      isBannedInt = is_banned ? 1 : 0;
+    }
+
+    await conn.query("BEGIN");
+
+    let updatedUser = null;
+    if (role !== undefined) {
+      const { rows } = await conn.query(
+        `
+        UPDATE users 
+        SET role = $1
+        WHERE id = $2 
+        RETURNING id, username, email, role;
+        `,
+        [role, targetUserId]
+      );
+      if (rows.length === 0) throw new Error("USER_NOT_FOUND");
+      updatedUser = rows[0];
+    }
+
+    let updatedStats = null;
+    if (isBannedInt !== null) {
+      const { rows } = await conn.query(
+        `
+        UPDATE user_contest_stats 
+        SET is_banned = $1::int2
+        WHERE user_id = $2
+        RETURNING is_banned;
+        `,
+        [isBannedInt, targetUserId]
+      );
+      if (rows.length > 0) updatedStats = rows[0];
+    }
+
+    await conn.query("COMMIT");
+
+    res.json({
+      message: "User context synchronized successfully",
+      user: {
+        ...updatedUser,
+        is_banned: updatedStats ? (updatedStats.is_banned === 1) : is_banned
+      }
+    });
+
+  } catch (err) {
+    await conn.query("ROLLBACK");
+    console.error("Administrative update loop tracking failure:", err);
+
+    if (err.message === "USER_NOT_FOUND") {
+      return res.status(404).json({ message: "Target account variant missing" });
+    }
+    res.status(500).json({ message: "An internal database error occurred" });
+  } finally {
+    conn.release();
+  }
+});
+
 router.get("/ping", async (req, res) => {
     await db.query("SELECT 1");
     res.send("ok");
