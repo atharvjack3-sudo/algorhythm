@@ -13,6 +13,56 @@ router.get("/me", authMiddleware, async (req, res) => {
   res.json(rows[0]);
 });
 
+router.get("/user-information/:username", authMiddleware, async (req, res) => {
+  try {
+    // Check if requester is owner
+    const roleResult = await db.query(
+      `SELECT role FROM users WHERE id = $1`,
+      [req.user.id]
+    );
+
+    if (roleResult.rows.length === 0 || roleResult.rows[0].role !== "owner") {
+      return res.status(403).json({
+        message: "Unauthorized"
+      });
+    }
+
+    const { rows } = await db.query(
+      `
+      SELECT 
+        u.id,
+        u.username,
+        u.email,
+        u.created_at,
+        u.role,
+        uc.contest_global_rank,
+        uc.contest_rating,
+        uc.is_banned
+      FROM users u
+      LEFT JOIN user_contest_stats uc
+        ON u.id = uc.user_id
+      WHERE u.username = $1
+      `,
+      [req.params.username]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "user not found"
+      });
+    }
+
+    res.json(rows[0]);
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      message: "An internal error occurred"
+    });
+  }
+});
+
 router.get("/ping", async (req, res) => {
     await db.query("SELECT 1");
     res.send("ok");
