@@ -12,7 +12,7 @@ function QuesCountCircle({
   ac_attempts = 0,
   user = {},
 }) {
-  const totalQuestions = easyTotal + medTotal + hardTotal;
+  const totalQuestions = Math.max(1, easyTotal + medTotal + hardTotal);
   const radius = 75;
   const stroke = 8;
   const circumference = 2 * Math.PI * radius;
