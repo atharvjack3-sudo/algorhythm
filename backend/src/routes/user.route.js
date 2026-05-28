@@ -2,8 +2,18 @@ import express from "express";
 import { db } from "../config/db.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { analyzeUserPerformance } from "../utils/google.js";
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const router = express.Router();
+const upload = multer();
 
 router.get("/me", authMiddleware, async (req, res) => {
   const { rows } = await db.query(
@@ -13,139 +23,57 @@ router.get("/me", authMiddleware, async (req, res) => {
   res.json(rows[0]);
 });
 
-router.get("/user-information/:username", authMiddleware, async (req, res) => {
-  try {
-    // Check if requester is owner
-    const roleResult = await db.query(
-      `SELECT role FROM users WHERE id = $1`,
-      [req.user.id]
-    );
+router.post(
+  "/upload-profile-picture",
+  authMiddleware,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided." });
+      }
 
-    if (roleResult.rows.length === 0 || roleResult.rows[0].role !== "owner") {
-      return res.status(403).json({
-        message: "Unauthorized"
-      });
-    }
+      const streamUpload = (fileBuffer) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "algorhythm_profiles", 
+              transformation: [{ width: 500, height: 500, crop: "fill" }] 
+            },
+            (error, result) => {
+              if (result) {
+                resolve(result);
+              } else {
+                reject(error);
+              }
+            }
+          );
+          streamifier.createReadStream(fileBuffer).pipe(stream);
+        });
+      };
+      const result = await streamUpload(req.file.buffer);
 
-    const { rows } = await db.query(
-      `
-      SELECT 
-        u.id,
-        u.username,
-        u.email,
-        u.created_at,
-        u.role,
-        uc.contest_global_rank,
-        uc.contest_rating,
-        uc.is_banned
-      FROM users u
-      LEFT JOIN user_contest_stats uc
-        ON u.id = uc.user_id
-      WHERE u.username = $1
-      `,
-      [req.params.username]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({
-        message: "user not found"
-      });
-    }
-
-    res.json(rows[0]);
-
-  } catch (err) {
-    console.error(err);
-
-    res.status(500).json({
-      message: "An internal error occurred"
-    });
-  }
-});
-
-router.post("/update-user-information/:id", authMiddleware, async (req, res) => {
-  const conn = await db.connect();
-
-  try {
-    const targetUserId = req.params.id;
-    const { role, is_banned } = req.body;
-
-    const roleResult = await conn.query(
-      `SELECT role FROM users WHERE id = $1`,
-      [req.user.id]
-    );
-
-    if (roleResult.rows.length === 0 || roleResult.rows[0].role !== "owner") {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    const validRoles = ["user", "moderator", "owner"];
-    if (role && !validRoles.includes(role)) {
-      return res.status(400).json({ message: "Invalid role specified" });
-    }
-    if (String(req.user.id) === String(targetUserId) && (is_banned === true || role !== "owner")) {
-      return res.status(400).json({ 
-        message: "Action restricted: You cannot ban or demote your own account." 
-      });
-    }
-    let isBannedInt = null;
-    if (is_banned !== undefined) {
-      isBannedInt = is_banned ? 1 : 0;
-    }
-
-    await conn.query("BEGIN");
-
-    let updatedUser = null;
-    if (role !== undefined) {
-      const { rows } = await conn.query(
+      const { rows } = await db.query(
         `
         UPDATE users 
-        SET role = $1
+        SET profile = $1
         WHERE id = $2 
-        RETURNING id, username, email, role;
+        RETURNING profile
         `,
-        [role, targetUserId]
+        [result.secure_url, req.user.id]
       );
-      if (rows.length === 0) throw new Error("USER_NOT_FOUND");
-      updatedUser = rows[0];
+
+      res.json({
+        message: "Profile picture updated successfully",
+        profile_url: rows[0].profile,
+      });
+
+    } catch (err) {
+      console.error("Profile picture upload error:", err);
+      res.status(500).json({ error: "Failed to upload profile picture. Please try again." });
     }
-
-    let updatedStats = null;
-    if (isBannedInt !== null) {
-      const { rows } = await conn.query(
-        `
-        UPDATE user_contest_stats 
-        SET is_banned = $1::int2
-        WHERE user_id = $2
-        RETURNING is_banned;
-        `,
-        [isBannedInt, targetUserId]
-      );
-      if (rows.length > 0) updatedStats = rows[0];
-    }
-
-    await conn.query("COMMIT");
-
-    res.json({
-      message: "User context synchronized successfully",
-      user: {
-        ...updatedUser,
-        is_banned: updatedStats ? (updatedStats.is_banned === 1) : is_banned
-      }
-    });
-
-  } catch (err) {
-    await conn.query("ROLLBACK");
-    console.error("Administrative update loop tracking failure:", err);
-
-    if (err.message === "USER_NOT_FOUND") {
-      return res.status(404).json({ message: "Target account variant missing" });
-    }
-    res.status(500).json({ message: "An internal database error occurred" });
-  } finally {
-    conn.release();
   }
-});
+);
 
 router.get("/ping", async (req, res) => {
     await db.query("SELECT 1");

@@ -93,8 +93,8 @@ router.post("/contests", authMiddleware, async (req, res) => {
     start_time,
     end_time,
     problems, // array of problem_ids
-    writers,  // array of usernames 
-    token     // for moderators
+    writers,  // array of usernames (e.g., ["tourist", "atharv"])
+    token     // required only for moderators
   } = req.body;
 
   // ---------- Basic Validation ----------
@@ -141,7 +141,10 @@ router.post("/contests", authMiddleware, async (req, res) => {
 
     await conn.query('BEGIN');
 
+    /* ---------- Token Consumption (Atomic Lock) ---------- */
     if (role === "moderator") {
+      // Deleting the token and checking rowCount in the same step prevents 
+      // a race condition where two moderators use the same token at the exact same millisecond.
       const { rowCount } = await conn.query(
         `DELETE FROM contest_creation_tokens WHERE token = $1`,
         [token]
@@ -152,12 +155,15 @@ router.post("/contests", authMiddleware, async (req, res) => {
       }
     }
 
+    /* ---------- Resolve Writer Usernames to IDs ---------- */
+    // Use an optimized bulk query instead of querying in a loop
     const { rows: writerRows } = await conn.query(
       `SELECT id, username FROM users WHERE username = ANY($1::text[])`,
       [writers]
     );
 
     if (writerRows.length !== writers.length) {
+      // Find exactly which usernames were invalid for a better error message
       const foundUsernames = writerRows.map(w => w.username);
       const missingUsernames = writers.filter(w => !foundUsernames.includes(w));
       throw new Error(`Usernames not found: ${missingUsernames.join(", ")}`);

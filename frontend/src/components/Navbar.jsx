@@ -505,7 +505,9 @@ export default function Navbar() {
                   aria-expanded={open}
                 >
                   <div className={`nb-avatar ${user?.is_premium ? "premium" : "standard"}`}>
-                    {user.username.charAt(0).toUpperCase()}
+                    {
+                  (!(user?.profile)) ? user.username.charAt(0).toUpperCase() : <img className="rounded-lg" src={user?.profile}></img>
+                }
                   </div>
                   <span className="nb-username">{user.username}</span>
                   <svg className="nb-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -519,7 +521,9 @@ export default function Navbar() {
                   {/* Header */}
                   <div className="nb-dd-header">
                     <div className={`nb-dd-avatar ${user?.is_premium ? "premium" : "standard"}`}>
-                      {user.username.charAt(0).toUpperCase()}
+                      {
+                  (!(user?.profile)) ? user.username.charAt(0).toUpperCase() : <img className="rounded-lg" src={user?.profile}></img>
+                }
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="nb-dd-name">{user.username}</div>

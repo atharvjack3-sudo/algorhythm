@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { api } from "../api/client";
 import QuesCountCircle from "../components/QuesCountCircle";
+import EditProfileModal from "../components/EditProfileModal";
 
 // ==========================================
 // 1. RATING GRAPH COMPONENT
@@ -191,7 +192,7 @@ export default function Dashboard() {
   const [fetchLoading, setFetchLoading] = useState(false);
   const [detailUpdateLoading, setDetailUpdateLoading] = useState(false);
   
-
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   // The Unified Profile Hook
   useEffect(() => {
     if (!user?.id) return;
@@ -401,7 +402,10 @@ export default function Dashboard() {
               <div
                 className={`w-28 h-28 rounded-md flex items-center justify-center font-sans text-5xl font-bold text-slate-900 dark:text-white shadow-sm flex-shrink-0 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800`}
               >
-                {user.username.charAt(0).toUpperCase()}
+                {
+                  (!(user?.profile)) ? user.username.charAt(0).toUpperCase() : <img className="rounded-lg" src={user?.profile}></img>
+                }
+                
               </div>
 
               {/* User Info & Primary Stats */}
@@ -438,7 +442,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <button
-                    disabled={true}
+                    onClick={() => setIsEditModalOpen(true)}
                     className="font-mono disabled:opacity-50 disabled:cursor-not-allowed text-[11px] font-semibold tracking-[0.06em] rounded-[3px] bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors uppercase"
                   >
                     Edit Profile
@@ -929,6 +933,14 @@ export default function Dashboard() {
           </div>
         </div>
       ) : null}
+      {/* Edit Profile Modal */}
+      <EditProfileModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+        user={user}
+        onUpdate={() => window.location.reload()} // Easy way to refresh the newly uploaded image
+      />
+  
     </>
   );
 }
