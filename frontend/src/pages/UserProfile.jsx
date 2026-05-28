@@ -287,6 +287,7 @@ export default function UserProfile() {
             
             {/* Identity Box */}
             <div className="bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-200 dark:border-slate-800 p-6 text-center">
+              
               <h1 className={`font-sans text-2xl font-bold ${ratingColor} mb-1.5`}>
                 {user_info.username}
               </h1>
