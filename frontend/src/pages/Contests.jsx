@@ -465,7 +465,7 @@ export default function Contests() {
                     {user.role === "moderator" && (
                       <InputField label="Creation Token" required value={form.token} onChange={e => setForm({...form, token: e.target.value})} placeholder="TOKEN_76" />
                     )}
-                    <button type="submit" className="dark:bg-orange-500 bg-blue-300 text-slate-950 border-none rounded p-2.5 font-mono text-[11px] font-bold tracking-[0.12em] cursor-pointer mt-1 hover:opacity-85 transition-opacity">
+                    <button type="submit" className="dark:bg-orange-500 bg-orange-400 text-slate-950 border-none rounded p-2.5 font-mono text-[11px] font-bold tracking-[0.12em] cursor-pointer mt-1 hover:opacity-85 transition-opacity">
                       SCHEDULE →
                     </button>
                   </form>
@@ -486,7 +486,7 @@ export default function Contests() {
                 ].map(([title, body]) => (
                   <div key={title} className="border-l-2 border-slate-300 dark:border-slate-700 pl-2.5">
                     <div className="font-mono text-[10px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-[0.08em] mb-1">{title}</div>
-                    <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">{body}</div>
+                    <div className="font-sans text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">{body}</div>
                   </div>
                 ))}
               </div>

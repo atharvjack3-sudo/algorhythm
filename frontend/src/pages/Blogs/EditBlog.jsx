@@ -58,194 +58,184 @@ export default function EditBlog() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0a0c10] flex flex-col items-center justify-center transition-colors duration-300">
-        <div className="flex flex-col items-center gap-5">
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full border-[3px] border-slate-200 dark:border-slate-800"></div>
-            <div className="absolute inset-0 rounded-full border-[3px] border-blue-600 dark:border-blue-500 border-t-transparent border-r-transparent animate-[spin_0.8s_linear_infinite]"></div>
-            <div className="absolute inset-0 rounded-full bg-blue-500/10 dark:bg-blue-500/20 blur-md"></div>
-          </div>
-          <div className="text-center">
-            <h3 className="text-slate-900 dark:text-white font-semibold tracking-tight">Loading Editor</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 animate-pulse">Fetching blog content...</p>
-          </div>
-        </div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-colors duration-200">
+        <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse uppercase">
+          LOADING EDITOR...
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0a0c10] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-sans { font-family: 'DM Sans', sans-serif; }
         
-        {/* Header */}
-        <div className="mb-8 md:mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Edit Blog</h1>
-          <p className="text-slate-500 dark:text-slate-400">Update your published content and refine your insights</p>
-        </div>
+        /* Markdown Overrides */
+        .cf-markdown p { margin-bottom: 1rem; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; }
+        .cf-markdown code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; padding: 0.15rem 0.3rem; background: var(--code-bg); border-radius: 0.25rem; }
+        .cf-markdown pre { background: var(--pre-bg); padding: 1rem; border-radius: 0.375rem; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; border: 1px solid var(--border-color); }
+        .cf-markdown pre code { background: transparent; padding: 0; white-space: pre-wrap; word-break: break-all; }
+        .cf-markdown ul, .cf-markdown ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+        .cf-markdown li { margin-bottom: 0.25rem; }
+        .cf-markdown h1, .cf-markdown h2, .cf-markdown h3 { font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.02em; margin-top: 2rem; margin-bottom: 1rem; }
+        
+        :root { --code-bg: #f1f5f9; --pre-bg: #f8fafc; --border-color: #e2e8f0; }
+        .dark { --code-bg: rgba(30, 41, 59, 0.5); --pre-bg: #0f172a; --border-color: #1e293b; }
+      `}</style>
 
-        {/* Title Input (Disabled) */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 mb-6 shadow-sm transition-colors group">
-          <label className="block text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
-            Blog Title
-          </label>
-          <input
-            className="w-full px-5 py-4 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-lg font-medium text-slate-500 dark:text-slate-400 cursor-not-allowed shadow-inner dark:shadow-none transition-all"
-            value={title}
-            disabled={true}
-            onChange={e => setTitle(e.target.value)}
-          />
-          <p className="text-[12px] font-medium text-amber-600 dark:text-amber-500 mt-3 flex items-center gap-1.5">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Title cannot be changed after publication
-          </p>
-        </div>
-
-        {/* Editor Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm mb-6 transition-colors">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 pb-16 transition-colors duration-200">
+        <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
           
-          {/* Tabs */}
-          <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 px-4 md:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
-            <div className="flex gap-2 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl inline-flex self-start">
-              <button
-                onClick={() => setMode("write")}
-                className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-                  mode === "write" 
-                    ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm" 
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Write
-              </button>
-              <button
-                onClick={() => setMode("preview")}
-                className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-                  mode === "preview" 
-                    ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm" 
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                Preview
-              </button>
+          {/* Header */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2.5">
+              <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+              <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
+                Editor
+              </span>
             </div>
-            <p className="text-[12px] font-medium text-slate-500 dark:text-slate-400">
-              {mode === "write" 
-                ? "Supports Markdown + LaTeX formatting" 
-                : "Preview how your changes will look"}
+            <h1 className="font-sans text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Edit Blog
+            </h1>
+            <p className="font-sans font-semibold text-[12px] text-slate-500 dark:text-slate-400 tracking-wide mt-1">
+              Update your published content and refine your insights
             </p>
           </div>
 
-          {/* Editor / Preview Content */}
-          {mode === "write" ? (
-            <div className="p-6">
-              <textarea
-                className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-[14px] text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-y min-h-[400px] shadow-inner dark:shadow-none"
-                placeholder="Write your content using Markdown...
-
-Examples:
-# Heading
-**bold** *italic*
-- List item
-```code```
-$$LaTeX$$"
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                rows="18"
-              />
-              <div className="flex justify-between items-center mt-4">
-                <p className="text-[12px] font-medium text-slate-500 dark:text-slate-400">
-                  {content.length > 0 ? `${content.length} characters • ${content.split(/\s+/).filter(w => w).length} words` : "0 words"}
-                </p>
-                <div className="flex gap-2">
-                  <button className="text-[13px] px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors font-semibold">
-                    Save Draft
-                  </button>
-                </div>
-              </div>
+          {/* Title Input (Disabled) */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-6 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+            <label className="block font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">
+              Blog Title
+            </label>
+            <input
+              className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-950/50 border border-slate-300 dark:border-slate-800 rounded-[3px] font-sans text-lg font-bold text-slate-500 dark:text-slate-500 cursor-not-allowed transition-colors"
+              value={title}
+              disabled={true}
+              onChange={e => setTitle(e.target.value)}
+            />
+            <div className="mt-2.5 font-mono text-[9px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Title cannot be changed after publication
             </div>
-          ) : (
-            <div className="p-8 md:p-10 min-h-[450px]">
-              {content.trim() ? (
-                <div className="prose prose-slate dark:prose-invert prose-lg max-w-none prose-headings:tracking-tight prose-a:text-blue-600 dark:prose-a:text-blue-400 hover:prose-a:text-blue-500">
-                  <MarkdownRenderer content={content} />
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-[350px] text-center">
-                  <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <svg className="w-8 h-8 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  </div>
-                  <p className="text-slate-500 dark:text-slate-400 font-medium">Nothing to preview yet</p>
-                  <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Switch to the Write tab and start typing to see your content here.</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons & Status */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm transition-colors">
-          
-          <div className="flex w-full sm:w-auto items-center gap-4">
-            <button
-              onClick={updateBlog}
-              disabled={updating || !content.trim()}
-              className="flex-1 sm:flex-none px-8 py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:shadow-none"
-            >
-              {updating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                  <span>Updating...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Update Blog</span>
-                </>
-              )}
-            </button>
-            
-            <button 
-              onClick={() => navigate(-1)} 
-              className="flex-1 sm:flex-none px-8 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold hover:border-rose-300 dark:hover:border-rose-500/50 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-all active:scale-95 text-center"
-            >
-              Cancel
-            </button>
           </div>
 
-          <div className="text-[13px] font-medium w-full sm:w-auto text-center sm:text-right">
-            {!content.trim() ? (
-              <span className="flex items-center justify-center sm:justify-end gap-2 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-500/20">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Content required
-              </span>
+          {/* Editor Card */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] flex flex-col overflow-hidden">
+            
+            {/* Tabs */}
+            <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 pt-6 sm:pt-0">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setMode("write")}
+                  className={`py-3 font-mono text-[11px] font-semibold tracking-[0.08em] uppercase transition-all duration-200 border-b-[3px] relative top-[1px] bg-transparent flex items-center gap-2 ${
+                    mode === "write" 
+                      ? "text-blue-600 dark:text-blue-500 border-blue-600 dark:border-blue-500" 
+                      : "text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Write
+                </button>
+                <button
+                  onClick={() => setMode("preview")}
+                  className={`py-3 font-mono text-[11px] font-semibold tracking-[0.08em] uppercase transition-all duration-200 border-b-[3px] relative top-[1px] bg-transparent flex items-center gap-2 ${
+                    mode === "preview" 
+                      ? "text-blue-600 dark:text-blue-500 border-blue-600 dark:border-blue-500" 
+                      : "text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  Preview
+                </button>
+              </div>
+              <p className="font-mono text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest pb-3 sm:pb-0">
+                {mode === "write" ? "Markdown & LaTeX supported" : "Live Render"}
+              </p>
+            </div>
+
+            {/* Editor / Preview Content */}
+            {mode === "write" ? (
+              <div className="p-6 flex flex-col h-full">
+                <textarea
+                  className="w-full px-4 py-4 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-[3px] font-sans tracking-wide text-[13px] leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-y min-h-[400px] break-words whitespace-pre-wrap"
+                  placeholder={`Write your content using Markdown...\n\nExamples:\n# Heading\n**bold** *italic*\n- List item\n\`\`\`code\`\`\`\n$$LaTeX$$`}
+                  value={content}
+                  onChange={e => setContent(e.target.value)}
+                  rows="18"
+                />
+                <div className="flex justify-between items-center mt-4">
+                  <p className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-widest">
+                    {content.length > 0 ? `${content.length} chars • ${content.split(/\s+/).filter(w => w).length} words` : "0 words"}
+                  </p>
+                </div>
+              </div>
             ) : (
-              <span className="flex items-center justify-center sm:justify-end gap-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                Ready to update
-              </span>
+              <div className="p-8 md:p-10 min-h-[450px]">
+                {content.trim() ? (
+                  <div className="font-sans text-[15px] text-slate-800 dark:text-slate-300 cf-markdown break-words">
+                    <MarkdownRenderer content={content} />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[350px] text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-950/50">
+                    <div className="font-mono text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                      Nothing to preview yet
+                    </div>
+                    <p className="font-sans text-sm text-slate-500 dark:text-slate-400 mt-2">
+                      Switch to the Write tab and start typing to see your content here.
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
+          {/* Action Buttons & Status */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+            
+            <div className="flex w-full sm:w-auto items-center gap-4">
+              <button
+                onClick={updateBlog}
+                disabled={updating || !content.trim()}
+                className="flex-1 sm:flex-none font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border-none px-8 py-2.5 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {updating ? "UPDATING..." : "UPDATE BLOG →"}
+              </button>
+              
+              <button 
+                onClick={() => navigate(-1)} 
+                className="flex-1 sm:flex-none font-mono text-[11px] font-semibold tracking-[0.06em] rounded-[3px] bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-6 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-500 hover:border-red-500 dark:hover:text-red-400 dark:hover:border-red-500 transition-colors uppercase text-center"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div className="w-full sm:w-auto text-center sm:text-right">
+              {!content.trim() ? (
+                <span className="inline-flex items-center justify-center sm:justify-end gap-2 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-[3px] border border-amber-200 dark:border-amber-800/30 font-mono text-[10px] font-bold uppercase tracking-widest">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  Content required
+                </span>
+              ) : (
+                <span className="inline-flex items-center justify-center sm:justify-end gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-[3px] border border-green-200 dark:border-green-800/30 font-mono text-[10px] font-bold uppercase tracking-widest">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
+                  Ready to update
+                </span>
+              )}
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
