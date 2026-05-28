@@ -458,7 +458,7 @@ router.get("/profile/:username", async (req, res) => {
   try {
     const { rows } = await db.query(`
       WITH target_user AS (
-        SELECT id, username, created_at FROM users WHERE username = $1
+        SELECT id, username, created_at, profile FROM users WHERE username = $1
       ),
       u_stats AS (
         SELECT total_solved, global_rank, acceptance_rate, current_streak

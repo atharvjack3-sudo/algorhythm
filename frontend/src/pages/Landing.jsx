@@ -490,8 +490,8 @@ export default function AlgorhythmLanding() {
         {/* HERO */}
         <div className="py-[120px] pb-20 text-center relative">
           <Reveal className="mb-7">
-            <span className="inline-flex select-none items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff]">
-              <span className="select-none w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
+            <span className="inline-flex select-none items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-orange-500/10 dark:bg-orange-600/10 text-orange-500 dark:text-orange-400">
+              <span className="select-none w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400 animate-pulse"></span>
               Now in Public Beta
             </span>
           </Reveal>
@@ -499,7 +499,7 @@ export default function AlgorhythmLanding() {
             <h1 className="select-none text-[clamp(48px,8vw,88px)] font-medium leading-[1.04] tracking-[-0.03em] mb-6">
               Think in algorithms.
               <br />
-              <em className="select-none not-italic text-blue-600 dark:text-blue-400">
+              <em className="select-none not-italic text-orange-600 dark:text-orange-400">
                 Execute in seconds.
               </em>
             </h1>
@@ -514,7 +514,7 @@ export default function AlgorhythmLanding() {
           <Reveal delay={300} className="flex gap-3 justify-center flex-wrap">
             <button
               onClick={() => navigate("/auth")}
-              className="bg-blue-600 select-none text-white border-none px-8 py-3.5 rounded-full text-[15px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
+              className="bg-orange-500 select-none text-white border-none px-8 py-3.5 rounded-full text-[15px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
             >
               Start Coding Free
             </button>
@@ -711,7 +711,7 @@ export default function AlgorhythmLanding() {
                     onClick={() => setActiveSolutionId(sol.id)}
                     className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border cursor-pointer transition-all ${
                       activeSolutionId === sol.id
-                        ? "bg-blue-600 text-white border-transparent"
+                        ? "bg-orange-500 text-white border-transparent"
                         : "border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8] hover:bg-[#f0efe9] dark:hover:bg-[#1a1c24]"
                     }`}
                   >
@@ -770,7 +770,7 @@ export default function AlgorhythmLanding() {
                 </thead>
                 <tbody>
                   <tr
-                    className={`transition-all duration-300 ${activeSolutionId === 2 || activeSolutionId === 3 ? "bg-[#eff4ff] dark:bg-[#4d8dff]/10" : "opacity-40 grayscale-[50%]"}`}
+                    className={`transition-all duration-300 ${activeSolutionId === 2 || activeSolutionId === 3 ? "bg-[#eff4ff] dark:bg-orange-500/10" : "opacity-40 grayscale-[50%]"}`}
                   >
                     <td className="text-[13px] p-2.5 px-3 border-b border-black/10 dark:border-white/10 text-[#555] dark:text-[#a0a0a8]">
                       <span className="inline-flex select-none items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">
@@ -1352,7 +1352,7 @@ export default function AlgorhythmLanding() {
         {/* SECTION 4: DISCUSSION */}
         <div className="pb-[100px]">
           <Reveal className="text-center mb-16">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff] border border-transparent">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-orange-400/20 dark:bg-orange-600/10 text-orange-600 dark:text-orange-500 border border-transparent">
               Community
             </span>
             <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] leading-[1.1] mt-4">
@@ -1449,10 +1449,10 @@ export default function AlgorhythmLanding() {
               <div className="grid grid-cols-[repeat(26,1fr)] gap-[3px] mt-5">
                 {hmLevels.map((l, i) => {
                   let bg = "bg-[#f0efe9] dark:bg-[#1a1c24]";
-                  if (l === 1) bg = "bg-blue-600/20";
-                  if (l === 2) bg = "bg-blue-600/45";
-                  if (l === 3) bg = "bg-blue-600/70";
-                  if (l === 4) bg = "bg-blue-600";
+                  if (l === 1) bg = "bg-orange-600/20";
+                  if (l === 2) bg = "bg-orange-600/45";
+                  if (l === 3) bg = "bg-orange-600/70";
+                  if (l === 4) bg = "bg-orange-600";
                   return (
                     <div
                       key={i}
@@ -1467,7 +1467,7 @@ export default function AlgorhythmLanding() {
                   Past 6 months
                 </div>
                 <div className="text-[13px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee]">
-                  148-day streak 🔥
+                  148-day streak
                 </div>
               </div>
             </Reveal>
@@ -1753,53 +1753,53 @@ export default function AlgorhythmLanding() {
                   {
                     icon: "🌱",
                     iconBg: "bg-[#f0efe9] dark:bg-[#1a1c24]",
-                    name: "Trainee",
+                    name: "Newbie",
                     req: "0 – 1199 rating",
-                    style: "border-[#888] dark:border-[#555] opacity-50",
+                    style: "border-gray-600 dark:border-gray-500",
                   },
                   {
                     icon: "⚡",
                     iconBg: "bg-[#f0fdf4] dark:bg-[#22c55e]/10",
-                    name: "Soldier",
+                    name: "Pupil",
                     req: "1200 – 1399",
-                    style: "border-black/10 dark:border-white/10",
+                    style: "border-green-600 dark:border-green-500",
                   },
                   {
                     icon: "🔷",
                     iconBg: "bg-[#eff4ff] dark:bg-[#4d8dff]/10",
-                    name: "Lieutenant",
+                    name: "Specialist",
                     req: "1400 – 1599",
                     style:
-                      "border-[#2563eb] dark:border-[#4d8dff] bg-[#eff4ff] dark:bg-[#4d8dff]/10",
+                      "border-cyan-600 bg-cyan-400/10 dark:border-cyan-500",
                     current: true,
                   },
                   {
                     icon: "🌀",
                     iconBg: "bg-[#f5f3ff] dark:bg-[#a78bfa]/10",
-                    name: "Colonel",
+                    name: "Expert",
                     req: "1600 – 1799",
-                    style: "border-black/10 dark:border-white/10",
+                    style: "border-blue-600 dark:border-blue-500",
                   },
                   {
                     icon: "🔥",
                     iconBg: "bg-[#fff1f2] dark:bg-[#fb7185]/10",
-                    name: "Brigadier",
+                    name: "Candidate Master",
                     req: "1800 - 1999",
-                    style: "border-black/10 dark:border-white/10",
+                    style: "border-violet-600 dark:border-violet-500",
                   },
                   {
                     icon: "🔱",
                     iconBg: "bg-[#fffbeb] dark:bg-[#fbbf24]/10",
-                    name: "Major General",
-                    req: "2000 - 2499",
-                    style: "border-black/10 dark:border-white/10",
+                    name: "Master",
+                    req: "2000 - 2399",
+                    style: "border-orange-600 dark:border-orange-500",
                   },
                   {
                     icon: "👑",
                     iconBg: "bg-[#fefce8] dark:bg-[#facc15]/10",
-                    name: "Commander-in-Chief",
-                    req: "2500+",
-                    style: "border-[#ca8a04] dark:border-[#facc15]",
+                    name: "Grandmaster",
+                    req: "2400+",
+                    style: "border-red-600 dark:border-red-500",
                   },
                 ].map((tier, i) => (
                   <div
@@ -1937,9 +1937,9 @@ export default function AlgorhythmLanding() {
 
         {/* CTA */}
         <div className="py-[60px] select-none pt-0">
-          <Reveal className="mb-12 bg-slate-900 flex flex-col justify-center items-center dark:bg-slate-800 rounded-3xl p-8 md:p-10 text-white shadow-xl dark:shadow-none border border-transparent dark:border-slate-700 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+          <Reveal className="mb-12 bg-orange-700 flex flex-col justify-center items-center dark:bg-orange-500/5 rounded-3xl p-8 md:p-10 text-white shadow-xl dark:shadow-none border border-transparent dark:border-orange-400/60 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-500/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
             <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] text-white mb-5">
               Ready to start your journey?
             </h2>
@@ -1949,7 +1949,7 @@ export default function AlgorhythmLanding() {
             </p>
             <button
               onClick={() => navigate("/auth")}
-              className="bg-white text-blue-600 border-none px-10 py-4 rounded-full text-[16px] font-medium cursor-pointer transition-all hover:scale-105"
+              className="bg-white text-orange-600 border-none px-10 py-4 rounded-full text-[16px] font-medium cursor-pointer transition-all"
             >
               Create a free account
             </button>

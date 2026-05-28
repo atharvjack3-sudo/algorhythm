@@ -1340,7 +1340,7 @@ router.get("/contests/:contestId/arena", authMiddleware, async (req, res) => {
     const isEnded = now > end;
     const table = "contest_scores";
 
-    const [problemsRes, leaderboardRes] = await Promise.all([
+    const [problemsRes, leaderboardRes, writersRes] = await Promise.all([
       db.query(`
         SELECT cp.problem_id, cp.problem_index, cp.difficulty, p.title,
           (SELECT COUNT(DISTINCT cps.user_id) 
@@ -1370,12 +1370,23 @@ router.get("/contests/:contestId/arena", authMiddleware, async (req, res) => {
         JOIN users u ON u.id = t.user_id
         WHERE t.contest_id = $1
         ORDER BY t.solved_count DESC, t.penalty ASC
+      `, [contestId]),
+
+    
+      db.query(`
+        SELECT cw.user_id, u.username, 
+               COALESCE(ucs.contest_rating, 1200) AS contest_rating
+        FROM contest_writers cw
+        JOIN users u ON u.id = cw.user_id
+        LEFT JOIN user_contest_stats ucs ON ucs.user_id = cw.user_id
+        WHERE cw.contest_id = $1
       `, [contestId])
     ]);
 
     res.json({
       status: isEnded ? "ended" : "running",
       contest,
+      writers: writersRes.rows,
       problems: problemsRes.rows,
       leaderboard: leaderboardRes.rows
     });

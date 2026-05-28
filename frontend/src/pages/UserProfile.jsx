@@ -288,8 +288,11 @@ export default function UserProfile() {
             {/* Identity Box */}
             <div className="bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-200 dark:border-slate-800 p-6 text-center">
               
-              <h1 className={`font-sans text-2xl font-bold ${ratingColor} mb-1.5`}>
-                {user_info.username}
+              <h1 className={`font-sans text-2xl font-bold ${ratingColor} flex flex-col justify-center items-center mb-1.5`}>
+                {
+                  (user_info?.profile != null) ? <img src={user_info?.profile} className="rounded-lg h-25" alt="user_profile" /> : <div className="h-25 w-25 rounded-lg bg-gray-300 dark:bg-slate-950 flex justify-center items-center uppercase text-5xl">{user_info.username[0]}</div>
+                }
+                 {user_info.username}
               </h1>
               <p className={`font-mono text-[11px] font-bold uppercase tracking-[0.08em] ${ratingColor}`}>
                 {rankTitle}
