@@ -37,31 +37,13 @@ function MarkdownRenderer({ content, className = "" }) {
   return (
     <div
       className={`
+        cf-markdown font-sans text-[14px] leading-relaxed text-slate-800 dark:text-slate-300
         prose dark:prose-invert max-w-none
-        prose-p:my-4
-        prose-headings:font-bold
-        prose-headings:text-slate-900
-        dark:prose-headings:text-white
-        prose-h1:text-3xl
-        prose-h2:text-xl
-        prose-h2:mb-4
-        prose-h3:text-lg
-        prose-h3:mt-6
-        prose-h3:mb-3
-        prose-ul:list-disc
-        prose-ul:pl-6
-        prose-ul:my-4
-        prose-ol:list-decimal
-        prose-ol:pl-6
-        prose-ol:my-4
-        prose-li:my-1
-        prose-pre:bg-slate-900
-        prose-pre:text-slate-100
-        prose-pre:rounded-xl
-        prose-code:text-blue-600
-        dark:prose-code:text-blue-400
-        prose-strong:text-slate-900
-        dark:prose-strong:text-white
+        prose-headings:font-sans prose-headings:font-bold prose-headings:tracking-tight
+        prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+        prose-a:text-blue-600 dark:prose-a:text-blue-400
+        prose-code:font-mono prose-code:text-[13px] prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-[3px]
+        prose-pre:font-mono prose-pre:text-[13px] prose-pre:bg-slate-50 dark:prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[3px] prose-pre:text-slate-800 dark:prose-pre:text-slate-200
         ${className}
       `}
     >
@@ -251,34 +233,20 @@ export default function SolveProblem() {
   ========================= */
   if (loading) {
     return (
-      <div className="w-full h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-[#f8f9fa] dark:bg-slate-950 transition-colors duration-300">
-        <div className="relative w-12 h-12 flex items-center justify-center mb-4">
-          <div className="absolute inset-0 rounded-full border-[3px] border-slate-200 dark:border-slate-800"></div>
-          <div className="absolute inset-0 rounded-full border-[3px] border-blue-600 dark:border-blue-500 border-t-transparent border-r-transparent animate-[spin_0.8s_linear_infinite]"></div>
-          <div className="absolute inset-0 rounded-full bg-blue-500/10 dark:bg-blue-500/20 blur-md"></div>
-        </div>
-        <p className="text-slate-500 dark:text-slate-400 font-medium">
-          Loading problem workspace...
-        </p>
+      <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse uppercase">
+          LOADING WORKSPACE...
+        </span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-[calc(100vh-4rem)] flex items-center justify-center bg-[#f8f9fa] dark:bg-[#0a0c10] transition-colors">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 text-center max-w-md">
-          <svg
-            className="w-12 h-12 text-rose-500 mx-auto mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-slate-900 dark:text-white font-semibold text-lg">
-            {error}
-          </p>
+      <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="bg-white dark:bg-slate-900 px-6 py-4 border border-slate-200 dark:border-slate-800 rounded-md text-center shadow-sm">
+          <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.1em] uppercase mb-1">Error</div>
+          <p className="font-sans text-[14px] text-slate-800 dark:text-slate-200">{error}</p>
         </div>
       </div>
     );
@@ -287,589 +255,563 @@ export default function SolveProblem() {
   const { problem, content, stats, topics, samples } = data;
 
   return (
-    <div className="w-full h-[calc(100dvh-4rem)] overflow-y-auto md:overflow-hidden bg-[#f8f9fa] dark:bg-[#0a0c10] flex flex-col md:flex-row font-sans transition-colors duration-300 relative">
-      {/* Invisible overlay while dragging to prevent Monaco Editor from swallowing mouse events */}
-      {isDragging && (
-        <div className="fixed inset-0 z-[200] cursor-col-resize" />
-      )}
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-sans { font-family: 'DM Sans', sans-serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+      `}</style>
 
-      {/* =========================
-          LEFT PANEL
-      ========================= */}
-      <section
-        className="w-full min-h-[calc(100dvh-4rem)] shrink-0 md:shrink md:min-h-0 md:h-full bg-white dark:bg-slate-950 flex flex-col relative z-10 shadow-sm transition-colors overflow-hidden"
-        style={isDesktop ? { width: `${leftWidth}%` } : {}}
-      >
-        {/* Header */}
-        <div className="px-6 pt-6 pb-2 flex-shrink-0">
-          <h1 className="text-2xl leading-tight font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
-            {problemId}. {problem.title}
-          </h1>
+      <div className="w-full h-[calc(100dvh-56px)] overflow-y-auto md:overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row font-sans transition-colors duration-200 relative">
+        {/* Invisible overlay while dragging to prevent Monaco Editor from swallowing mouse events */}
+        {isDragging && (
+          <div className="fixed inset-0 z-[200] cursor-col-resize" />
+        )}
 
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span
-              className={`px-2.5 py-0.5 rounded-md text-xs font-bold border uppercase tracking-wider ${
-                problem?.difficulty === "easy"
-                  ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
-                  : problem?.difficulty === "medium"
-                  ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"
-                  : "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
-              }`}
-            >
-              {problem?.difficulty}
-            </span>
+        {/* =========================
+            LEFT PANEL
+        ========================= */}
+        <section
+          className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full bg-white dark:bg-slate-950 flex flex-col relative z-10 transition-colors overflow-hidden border-r border-slate-200 dark:border-slate-800"
+          style={isDesktop ? { width: `${leftWidth}%` } : {}}
+        >
+          {/* Header */}
+          <div className="px-5 pt-6 pb-2 flex-shrink-0">
+            <h1 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+              {problemId}. {problem.title}
+            </h1>
 
-            <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-              Acceptance: {stats.acceptance_rate ?? "New"}%
-            </span>
-
-            {solved && (
-              <span className="flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-wider">
-                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                Solved
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-wider ${
+                  problem?.difficulty === "easy"
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                    : problem?.difficulty === "medium"
+                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+                    : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                }`}
+              >
+                {problem?.difficulty}
               </span>
+
+              <span className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                Acceptance: {stats.acceptance_rate ?? "N/A"}%
+              </span>
+
+              {solved && (
+                <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-[3px] border border-green-200 dark:border-green-800/30 uppercase tracking-widest">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
+                  Solved
+                </span>
+              )}
+            </div>
+
+            {topics?.length > 0 && (
+              <div className="mt-3 flex gap-2 flex-wrap">
+                {topics.map((t) => (
+                  <span key={t} className="px-2 py-0.5 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800">
+                    {t}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
 
-          {topics?.length > 0 && (
-            <div className="mt-3 flex gap-2 flex-wrap">
-              {topics.map((t) => (
-                <span key={t} className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-600 dark:text-slate-300 transition-colors">
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+          {/* Tabs */}
+          <div className="flex overflow-x-auto border-b border-slate-200 dark:border-slate-800 mt-2 custom-scrollbar px-2 flex-shrink-0 bg-slate-50 dark:bg-slate-950/50">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] transition-all relative whitespace-nowrap border-b-[3px] top-[1px]
+                  ${
+                    activeTab === tab
+                      ? "text-blue-600 dark:text-blue-500 border-blue-600 dark:border-blue-500"
+                      : "text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200"
+                  }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
-        {/* Tabs */}
-        <div className="flex overflow-x-auto border-b border-slate-200 dark:border-slate-800 mt-2 custom-scrollbar px-2 flex-shrink-0">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-5 py-3 text-sm font-semibold transition-colors relative whitespace-nowrap
-                ${
-                  activeTab === tab
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-t-md"
-                }`}
-            >
-              {tab}
-              {activeTab === tab && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-500 rounded-t-sm"></div>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content - Scrolls internally */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 text-sm text-slate-700 dark:text-slate-300 custom-scrollbar">
-          
-          {/* Discussion */}
-          {activeTab === "Discussion" && (
-            <Suspense
-              fallback={
-                <div className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-                  Loading discussions...
-                </div>
-              }
-            >
-              <DiscussionTab />
-            </Suspense>
-          )}
-
-          {/* ===== PROBLEM ===== */}
-          {activeTab === "Problem" && (
-            <div className="space-y-8 leading-relaxed">
-              
-              {/* Statement using clean renderer */}
-              <MarkdownRenderer content={content.statement} />
-
-              {content.constraints && (
-                <div>
-                  <h3 className="text-[15px] font-bold text-slate-900 dark:text-white mb-3">
-                    Constraints
-                  </h3>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
-                    <MarkdownRenderer 
-                      content={content.constraints} 
-                      className="font-mono text-[13px] whitespace-pre-line" 
-                    />
+          {/* Tab Content */}
+          <div className="flex-1 overflow-y-auto px-5 py-6 text-[14px] text-slate-800 dark:text-slate-200 custom-scrollbar bg-white dark:bg-slate-950">
+            
+            {/* ===== DISCUSSION ===== */}
+            {activeTab === "Discussion" && (
+              <Suspense
+                fallback={
+                  <div className="py-10 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
+                    Loading discussions...
                   </div>
-                </div>
-              )}
+                }
+              >
+                <DiscussionTab />
+              </Suspense>
+            )}
 
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-[15px] font-bold text-slate-900 dark:text-white mb-3">
-                    Input Format
-                  </h3>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl h-full">
-                    <MarkdownRenderer 
-                      content={content.input_format}
-                      className="text-[13px] whitespace-pre-line font-sans"
-                    />
-                  </div>
-                </div>
+            {/* ===== PROBLEM ===== */}
+            {activeTab === "Problem" && (
+              <div className="flex flex-col gap-8">
+                
+                <MarkdownRenderer content={content.statement} />
 
-                <div>
-                  <h3 className="text-[15px] font-bold text-slate-900 dark:text-white mb-3">
-                    Output Format
-                  </h3>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl h-full">
-                    <MarkdownRenderer 
-                      content={content.output_format}
-                      className="text-[13px] whitespace-pre-line font-sans"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6 pt-2">
-                {samples.map((s, i) => (
-                  <div
-                    key={i}
-                    className="border mt-4 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-colors"
-                  >
-                    <div className="bg-slate-50 dark:bg-slate-800/80 px-4 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                      <h3 className="text-[13px] font-bold text-slate-800 dark:text-slate-200">
-                        Example {i + 1}
-                      </h3>
-                    </div>
-                    <div className="flex flex-col md:flex-row">
-                      <div className="flex-1 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 p-4 bg-slate-50/50 dark:bg-slate-900/50">
-                        <div className="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-2">
-                          Input
-                        </div>
-                        <pre className="text-[13px] font-mono text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
-                          {s.input}
-                        </pre>
-                      </div>
-                      <div className="flex-1 p-4 bg-white dark:bg-slate-900">
-                        <div className="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-2">
-                          Output
-                        </div>
-                        <pre className="text-[13px] font-mono text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
-                          {s.output}
-                        </pre>
-                      </div>
+                {content.constraints && (
+                  <div>
+                    <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-2">
+                      Constraints
+                    </h3>
+                    <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
+                      <MarkdownRenderer 
+                        content={content.constraints} 
+                        className="font-mono text-[12px] whitespace-pre-line" 
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                )}
 
-          {/* ===== EDITORIAL ===== */}
-          {activeTab === "Editorial" && (
-            <MarkdownRenderer content={content.editorial} />
-          )}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <div className="flex flex-col h-full">
+                    <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-2">
+                      Input Format
+                    </h3>
+                    <div className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
+                      <MarkdownRenderer 
+                        content={content.input_format}
+                        className="text-[13px] whitespace-pre-line"
+                      />
+                    </div>
+                  </div>
 
-          {/* ===== RUN ===== */}
-          {activeTab === "Run" && (
-            <div className="space-y-4">
-              {runError && (
-                <div className="p-4 text-sm bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400 rounded-xl flex items-start gap-3">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="font-medium">{runError}</span>
+                  <div className="flex flex-col h-full">
+                    <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-2">
+                      Output Format
+                    </h3>
+                    <div className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
+                      <MarkdownRenderer 
+                        content={content.output_format}
+                        className="text-[13px] whitespace-pre-line"
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              {runResults.length === 0 ? (
-                <div className="text-center py-16 flex flex-col items-center">
-                  <svg className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-slate-500 dark:text-slate-400 font-medium">
-                    Run your code to evaluate sample test cases
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {runResults.map((r) => (
-                    <div key={r.sample} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-colors">
-                      <div className="bg-slate-50 dark:bg-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                        <span className="font-bold text-slate-800 dark:text-slate-200">
-                          Test Case {r.sample}
+                <div className="flex flex-col gap-5 pt-2">
+                  <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-0">
+                    Examples
+                  </h3>
+                  {samples.map((s, i) => (
+                    <div
+                      key={i}
+                      className="border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm"
+                    >
+                      <div className="bg-slate-100 dark:bg-slate-900 px-4 py-2 border-b border-slate-200 dark:border-slate-800">
+                        <span className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                          Example {i + 1}
                         </span>
                       </div>
-                      <div className="p-4 space-y-4">
-                        <div>
-                          <p className="text-[12px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                            Your Output
-                          </p>
-                          <pre className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-lg text-[13px] font-mono text-slate-800 dark:text-slate-200">
-                            {r.output || "(empty)"}
+                      <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
+                        <div className="flex-1 bg-slate-50 dark:bg-slate-950/50">
+                          <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                            Input
+                          </div>
+                          <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                            {s.input}
                           </pre>
                         </div>
-                        <div>
-                          <p className="text-[12px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                            Expected Output
-                          </p>
-                          <pre className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-lg text-[13px] font-mono text-slate-800 dark:text-slate-200">
-                            {r.expected}
+                        <div className="flex-1 bg-white dark:bg-slate-950">
+                          <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                            Output
+                          </div>
+                          <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                            {s.output}
                           </pre>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* ===== RESULT ===== */}
-          {activeTab === "Result" && (
-            <div className="space-y-4">
-              {!lastResult ? (
-                <div className="text-center py-16 flex flex-col items-center">
-                  <svg className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <p className="text-slate-500 dark:text-slate-400 font-medium">
-                    No active submission found.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div
-                    className={`p-5 rounded-xl border flex items-center gap-4 ${
-                      lastResult.verdict === "AC"
-                        ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400"
-                        : "bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400"
-                    }`}
-                  >
-                    {lastResult.verdict === "AC" ? (
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                    <div>
-                      <h2 className="text-xl font-bold">
-                        {lastResult.verdict === "AC" ? "Accepted" : "Wrong Answer / Error"}
-                      </h2>
-                      <p className="text-sm opacity-90 font-medium">
-                        Verdict: {lastResult.verdict}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 overflow-hidden transition-colors">
-                    <div className="bg-slate-50 dark:bg-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        Test Cases Breakdown
-                      </span>
-                    </div>
-                    <ul className="divide-y divide-slate-200 dark:divide-slate-800">
-                      {lastResult.samples.map((s) => (
-                        <li key={s.index} className="px-4 py-3 flex items-center justify-between">
-                          <span className="text-[13px] font-medium text-slate-700 dark:text-slate-300">
-                            Sample #{s.index}
-                          </span>
-                          <span className={`text-[13px] font-bold ${s.verdict === "AC" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-                            {s.verdict}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {lastResult.hidden_failed && (
-                    <div className="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-rose-700 dark:text-rose-400 text-sm font-medium">
-                      Hidden Test Failure: {lastResult.hidden_failed}
-                    </div>
-                  )}
-                  {lastResult.verdict !== "AC" && lastResult.error && (
-                    <div className="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-rose-700 dark:text-rose-400 text-sm font-mono whitespace-pre-wrap">
-                      {lastResult.error}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-
-          {/* ===== SUBMISSIONS ===== */}
-          {activeTab === "Submissions" && (
-            <div className="space-y-3">
-              {submissions.length === 0 ? (
-                <div className="text-center py-16 flex flex-col items-center">
-                  <svg className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <p className="text-slate-500 dark:text-slate-400 font-medium">
-                    No past submissions
-                  </p>
-                </div>
-              ) : (
-                <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden transition-colors">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[12px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        <th className="px-4 py-3">ID</th>
-                        <th className="px-4 py-3">Time Submitted</th>
-                        <th className="px-4 py-3 text-right">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                      {submissions.map((s, i) => (
-                        <tr
-                          key={i}
-                          onClick={() => setOpenSubmission(s)}
-                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
-                        >
-                          <td className="px-4 py-3 text-[13px] font-medium text-blue-600 dark:text-blue-400">
-                            #{submissions.length - i}
-                          </td>
-                          <td className="px-4 py-3 text-[13px] text-slate-600 dark:text-slate-400">
-                            {new Date(s.submitted_at).toLocaleString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider border ${
-                                s.verdict === "AC"
-                                  ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
-                                  : "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
-                              }`}
-                            >
-                              {s.verdict}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ===== DESKTOP DRAG RESIZER ===== */}
-      <div
-        className="hidden md:flex w-2 cursor-col-resize hover:bg-blue-500/50 dark:hover:bg-blue-500/50 active:bg-blue-500 transition-colors z-50 items-center justify-center flex-shrink-0 -mx-1"
-        onMouseDown={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-      >
-        <div className="w-[3px] h-8 bg-slate-300 dark:bg-slate-600 rounded-full" />
-      </div>
-
-      {/* ===== RIGHT PANEL EDITOR ===== */}
-      <section className="w-full min-h-[calc(100dvh-4rem)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800">
-        
-        {/* Editor Toolbar */}
-        <div className="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shadow-sm z-10 flex-shrink-0 transition-colors">
-          <div className="flex items-center gap-4">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer"
-            >
-              <option value="cpp">C++17</option>
-              <option value="java">Java</option>
-              <option value="python">Python 3</option>
-              <option value="javascript">JavaScript</option>
-            </select>
-          </div>
-
-          <div className="flex gap-3 items-center">
-            {authLoading ? (
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                Checking auth...
-              </span>
-            ) : user ? (
-              <>
-                <button
-                  onClick={handleRun}
-                  disabled={runLoading || submitting}
-                  className="px-5 py-1.5 text-[13px] font-bold rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-95 shadow-sm"
-                >
-                  {runLoading ? "Running..." : "Run Code"}
-                </button>
-
-                <button
-                  onClick={handleSubmit}
-                  disabled={submitting || runLoading}
-                  className="px-5 py-1.5 text-[13px] font-bold rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 disabled:opacity-60 disabled:shadow-none transition-all active:scale-95 border border-transparent"
-                >
-                  {submitting ? "Submitting..." : "Submit"}
-                </button>
-              </>
-            ) : (
-              <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                Please{" "}
-                <a href="/auth" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  sign in
-                </a>{" "}
-                to submit.
-              </span>
-            )}
-          </div>
-        </div>
-
-        {submitError && (
-          <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 px-4 py-2.5 text-sm font-medium border-b border-rose-200 dark:border-rose-500/20 flex-shrink-0 flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {submitError}
-          </div>
-        )}
-
-        {/* Monaco Editor Container */}
-        <div className="flex-1 w-full relative">
-          <Editor
-            height="100%"
-            language={language}
-            theme={theme === "dark" ? "vs-dark" : "vs-light"}
-            value={code}
-            onChange={(value) => setCode(value ?? "")}
-            options={{
-              fontSize: 14,
-              fontFamily: "'JetBrains Mono', 'Roboto Mono', monospace",
-              lineNumbers: "on",
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-              tabSize: 4,
-              wordWrap: "on",
-              cursorBlinking: "smooth",
-              renderLineHighlight: "all",
-              smoothScrolling: true,
-              padding: { top: 16 },
-              overviewRulerBorder: false,
-              hideCursorInOverviewRuler: true,
-            }}
-          />
-        </div>
-      </section>
-
-      {/* ===== SUBMISSION MODAL ===== */}
-      {openSubmission && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 flex items-center justify-center z-[150] backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 transition-colors">
-            
-            {/* Modal Header */}
-            <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <h2 className="text-[18px] font-bold text-slate-900 dark:text-white">
-                  Submission Details
-                </h2>
-                <span
-                  className={`text-[11px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider border ${
-                    openSubmission.verdict === "AC"
-                      ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
-                      : "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
-                  }`}
-                >
-                  {openSubmission.verdict}
-                </span>
               </div>
+            )}
 
-              <div className="flex items-center gap-4">
-                {openSubmission.verdict === "AC" && (
-                  <button
-                    onClick={() => evaluate_complexity(openSubmission.id)}
-                    disabled={complexity?.id === openSubmission.id}
-                    className="text-[13px] font-bold px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 transition-colors shadow-sm active:scale-95 flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    {complexity?.id === openSubmission.id ? "Analyzed" : "AI Analysis"}
-                  </button>
+            {/* ===== EDITORIAL ===== */}
+            {activeTab === "Editorial" && (
+              <MarkdownRenderer content={content.editorial} />
+            )}
+
+            {/* ===== RUN ===== */}
+            {activeTab === "Run" && (
+              <div className="flex flex-col gap-5">
+                {runError && (
+                  <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[3px] shadow-sm">
+                    <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">Runtime / Compilation Error</div>
+                    <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">{runError}</pre>
+                  </div>
                 )}
 
-                <button
-                  onClick={() => setOpenSubmission(null)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                {runResults.length === 0 ? (
+                  <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                    Run your code to evaluate sample test cases.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-5">
+                    {runResults.map((r, i) => {
+                      const isMatch = r.output?.trim() === r.expected?.trim();
+                      return (
+                        <div key={i} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
+                          <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                            <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">Test Case {r.sample || r.index || i + 1}</span>
+                            <span className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
+                              isMatch ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                            }`}>
+                              {isMatch ? "Matched" : "Mismatch"}
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
+                            <div>
+                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Your Output</div>
+                              <pre className={`p-4 m-0 font-mono text-[12px] whitespace-pre-wrap ${isMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {r.output || "(empty output)"}
+                              </pre>
+                            </div>
+                            <div>
+                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Expected Output</div>
+                              <pre className="p-4 m-0 font-mono text-[12px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap">
+                                {r.expected}
+                              </pre>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
+            )}
+
+            {/* ===== RESULT ===== */}
+            {activeTab === "Result" && (
+              <div className="flex flex-col gap-5">
+                {!lastResult ? (
+                  <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                    Submit code to view final verdict.
+                  </div>
+                ) : (
+                  <>
+                    <div className={`p-5 rounded-md border shadow-sm ${
+                      lastResult.verdict === "AC" || lastResult.verdict === "Accepted" 
+                      ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50" 
+                      : "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
+                    }`}>
+                      <h3 className={`font-mono text-[18px] font-bold tracking-wide uppercase ${lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}>
+                        {lastResult.verdict === "AC" ? "Accepted" : lastResult.verdict}
+                      </h3>
+                      <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Tested against all system cases</p>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
+                      <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
+                        <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">Test Cases Breakdown</span>
+                      </div>
+                      <div className="w-full overflow-x-auto custom-scrollbar">
+                        <table className="w-full border-collapse whitespace-nowrap text-left">
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            {lastResult.samples && lastResult.samples.map((s) => (
+                              <tr key={s.index} className="border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td className="px-4 py-3 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Test #{s.index}
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  <span className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
+                                    s.verdict === "AC" || s.verdict === "Accepted" 
+                                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
+                                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                  }`}>
+                                    {s.verdict === "AC" ? "Accepted" : s.verdict}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {lastResult.hidden_failed && (
+                      <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
+                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-1">Hidden Test Failure</div>
+                        <p className="font-sans text-[13px] text-slate-800 dark:text-slate-200">{lastResult.hidden_failed}</p>
+                      </div>
+                    )}
+                    
+                    {lastResult.verdict !== "AC" && lastResult.error && (
+                      <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
+                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">Error Details</div>
+                        <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">{lastResult.error}</pre>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ===== SUBMISSIONS ===== */}
+            {activeTab === "Submissions" && (
+              <div className="flex flex-col gap-4">
+                {submissions.length === 0 ? (
+                  <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                    No past submissions.
+                  </div>
+                ) : (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+                    <div className="w-full overflow-x-auto custom-scrollbar">
+                      <table className="w-full text-left border-collapse whitespace-nowrap">
+                        <thead className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
+                          <tr>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase w-20">ID</th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">Time Submitted</th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                          {submissions.map((s, i) => (
+                            <tr
+                              key={i}
+                              onClick={() => setOpenSubmission(s)}
+                              className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
+                            >
+                              <td className="px-5 py-3 font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 group-hover:text-blue-500 transition-colors">
+                                #{submissions.length - i}
+                              </td>
+                              <td className="px-5 py-3 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                                {new Date(s.submitted_at).toLocaleString(undefined, {
+                                  month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                                })}
+                              </td>
+                              <td className="px-5 py-3 text-right">
+                                <span className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
+                                  s.verdict === "AC"
+                                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                    : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                }`}>
+                                  {s.verdict}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ===== DESKTOP DRAG RESIZER ===== */}
+        <div
+          className="hidden md:flex w-[1px] bg-slate-200 dark:bg-slate-800 cursor-col-resize hover:bg-blue-500 dark:hover:bg-blue-500 transition-colors z-50 items-center justify-center flex-shrink-0 relative group"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+        >
+          <div className="absolute inset-y-0 -left-1 -right-1 z-10" />
+        </div>
+
+        {/* ===== RIGHT PANEL EDITOR ===== */}
+        <section className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800">
+          
+          {/* Editor Toolbar */}
+          <div className="h-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 z-10 flex-shrink-0 transition-colors">
+            <div className="flex items-center gap-2">
+              <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">Language</label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-mono outline-none focus:border-blue-500 transition-colors cursor-pointer uppercase tracking-widest"
+              >
+                <option value="cpp">C++17</option>
+                <option value="java">Java</option>
+                <option value="python">Python 3</option>
+                <option value="javascript">JavaScript</option>
+              </select>
             </div>
 
-            {/* AI Complexity Dropdown */}
-            <div
-              className={`flex-shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                complexity && complexity.id === openSubmission.id
-                  ? "max-h-40 opacity-100 border-b border-blue-100 dark:border-blue-900/30"
-                  : "max-h-0 opacity-0"
-              }`}
-            >
-              <div className="px-6 py-4 bg-blue-50 dark:bg-blue-500/10 text-sm flex flex-col gap-2 transition-colors">
-                <div className="flex items-center gap-2 mb-1">
-                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                  </svg>
-                  <span className="font-bold tracking-tight text-blue-700 dark:text-blue-400">
-                    AI Analysis Insight
+            <div className="flex gap-2.5 items-center">
+              {authLoading ? (
+                <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">
+                  AUTH...
+                </span>
+              ) : user ? (
+                <>
+                  <button
+                    onClick={handleRun}
+                    disabled={runLoading || submitting}
+                    className="font-mono text-[11px] font-semibold tracking-[0.06em] rounded-[3px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
+                  >
+                    {runLoading ? "RUNNING..." : "RUN CODE"}
+                  </button>
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={submitting || runLoading}
+                    className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-blue-600 text-white border-none px-6 py-1 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? "SUBMITTING..." : "SUBMIT →"}
+                  </button>
+                </>
+              ) : (
+                <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                  <a href="/auth" className="text-blue-600 dark:text-blue-400 hover:underline font-bold">SIGN IN</a> TO SUBMIT
+                </span>
+              )}
+            </div>
+          </div>
+
+          {submitError && (
+            <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-widest border-b border-red-200 dark:border-red-900/50 flex-shrink-0">
+              [ERROR] {submitError}
+            </div>
+          )}
+
+          {/* Monaco Editor Container */}
+          <div className="flex-1 w-full relative">
+            <Editor
+              height="100%"
+              language={language}
+              theme={theme === "dark" ? "vs-dark" : "light"}
+              value={code}
+              onChange={(value) => setCode(value ?? "")}
+              options={{
+                fontSize: 13,
+                fontFamily: "'JetBrains Mono', monospace",
+                lineNumbers: "on",
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                tabSize: 4,
+                wordWrap: "on",
+                cursorBlinking: "smooth",
+                renderLineHighlight: "all",
+                smoothScrolling: true,
+                padding: { top: 16 },
+                overviewRulerBorder: false,
+                hideCursorInOverviewRuler: true,
+              }}
+            />
+          </div>
+        </section>
+
+        {/* ===== SUBMISSION MODAL ===== */}
+        {openSubmission && (
+          <div className="fixed inset-0 bg-slate-900/80 z-[150] backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-950 w-full max-w-4xl h-[85vh] rounded-md shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 transition-colors">
+              
+              {/* Modal Header */}
+              <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className="font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    SUBMISSION DETAILS
+                  </div>
+                  <span
+                    className={`font-mono text-[10px] px-2 py-0.5 rounded-[3px] font-bold uppercase tracking-widest border ${
+                      openSubmission.verdict === "AC"
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/30"
+                        : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/30"
+                    }`}
+                  >
+                    {openSubmission.verdict}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-x-8 gap-y-3 pl-7">
-                  <p className="flex items-center gap-2">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">Time:</span>
-                    <span className="bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <InlineMath math={complexity?.time} />
-                    </span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">Space:</span>
-                    <span className="bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <InlineMath math={complexity?.space} />
-                    </span>
-                  </p>
+                <div className="flex items-center gap-3">
+                  {openSubmission.verdict === "AC" && (
+                    <button
+                      onClick={() => evaluate_complexity(openSubmission.id)}
+                      disabled={complexity?.id === openSubmission.id}
+                      className="font-mono text-[10px] font-bold tracking-[0.06em] rounded-[3px] bg-transparent text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700 px-3 py-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
+                    >
+                      {complexity?.id === openSubmission.id ? "ANALYZED ✓" : "AI ANALYSIS"}
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setOpenSubmission(null)}
+                    className="font-mono text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none p-1"
+                  >
+                    CLOSE [X]
+                  </button>
                 </div>
               </div>
-            </div>
 
-            {/* Readonly Editor */}
-            <div className="flex-1 relative bg-[#1e1e1e]">
-              <Editor
-                height="100%"
-                language={openSubmission.language || "cpp"}
-                value={openSubmission.code}
-                theme={theme === "dark" ? "vs-dark" : "vs-light"}
-                options={{
-                  readOnly: true,
-                  fontSize: 14,
-                  fontFamily: "'JetBrains Mono', 'Roboto Mono', monospace",
-                  minimap: { enabled: false },
-                  lineNumbers: "on",
-                  scrollBeyondLastLine: false,
-                  smoothScrolling: true,
-                  wordWrap: "on",
-                  renderLineHighlight: "all",
-                  cursorStyle: "line",
-                  contextmenu: false,
-                  padding: { top: 16 },
-                }}
-              />
+              {/* AI Complexity Dropdown */}
+              <div
+                className={`flex-shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                  complexity && complexity.id === openSubmission.id
+                    ? "max-h-40 opacity-100 border-b border-blue-200 dark:border-blue-900/30"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="px-5 py-4 bg-blue-50 dark:bg-slate-900/50 flex flex-col gap-2 transition-colors">
+                  <div className="font-mono text-[10px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase">
+                    AI Analysis Insight
+                  </div>
+                  <div className="flex flex-wrap gap-x-6 gap-y-3 font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold uppercase tracking-wider">Time:</span>
+                      <span className="bg-white dark:bg-slate-950 px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
+                        <InlineMath math={complexity?.time || "O(1)"} />
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold uppercase tracking-wider">Space:</span>
+                      <span className="bg-white dark:bg-slate-950 px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
+                        <InlineMath math={complexity?.space || "O(1)"} />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Readonly Editor */}
+              <div className="flex-1 relative bg-slate-50 dark:bg-[#0d1117]">
+                <Editor
+                  height="100%"
+                  language={openSubmission.language || "cpp"}
+                  value={openSubmission.code}
+                  theme={theme === "dark" ? "vs-dark" : "light"}
+                  options={{
+                    readOnly: true,
+                    fontSize: 13,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    minimap: { enabled: false },
+                    lineNumbers: "on",
+                    scrollBeyondLastLine: false,
+                    smoothScrolling: true,
+                    wordWrap: "on",
+                    renderLineHighlight: "all",
+                    cursorStyle: "line",
+                    contextmenu: false,
+                    padding: { top: 16 },
+                    overviewRulerBorder: false,
+                    hideCursorInOverviewRuler: true,
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }

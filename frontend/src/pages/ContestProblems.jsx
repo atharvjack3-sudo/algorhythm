@@ -155,8 +155,8 @@ export default function ContestProblems() {
                 
                   Contest Concluded
                 </span>
-                <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                  Submissions are no longer accepted. Problem statements remain available for practice.
+                <span className="font-sans font-semibold tracking-wide text-xs text-slate-600 dark:text-slate-400">
+                  Submissions are no longer accepted. Problem statements remain available to view.
                 </span>
               </div>
             )}
@@ -356,7 +356,7 @@ export default function ContestProblems() {
                     <span className="font-mono text-[11px] font-bold tracking-widest text-red-500 uppercase">
                       FINISHED
                     </span>
-                    <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">
+                    <div className="font-sans text-[12px] text-slate-500 dark:text-slate-400 mt-1 tracking-wider">
                       Tentative Final standings displayed
                     </div>
                   </div>
@@ -387,12 +387,12 @@ export default function ContestProblems() {
               <div className="p-4 flex flex-col gap-2.5">
                 {[
                   ["Navigation", "Click on a problem index to read the statement and submit code."],
-                  ["Scoring", "Penalty is calculated as 10 minutes per wrong submission on solved problems."],
+                  ["Scoring", "Penalty is calculated as 5 minutes per wrong submission on solved problems."],
                   ["Data Sync", "Do not refresh the page rapidly; data syncs automatically."],
                 ].map(([title, body]) => (
                   <div key={title} className="border-l-2 border-slate-300 dark:border-slate-700 pl-2.5">
                     <div className="font-mono text-[10px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-[0.08em] mb-1">{title}</div>
-                    <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">{body}</div>
+                    <div className="font-sans text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">{body}</div>
                   </div>
                 ))}
               </div>

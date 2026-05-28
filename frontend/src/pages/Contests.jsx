@@ -480,7 +480,7 @@ export default function Contests() {
               </div>
               <div className="p-4 flex flex-col gap-2.5">
                 {[
-                  ["Scoring", "Rank by solved count. Ties broken by penalty (10m per wrong attempt)."],
+                  ["Scoring", "Rank by solved count. Ties broken by penalty (5m per wrong attempt)."],
                   ["Integrity", "Cheating = permanent ban. Zero tolerance enforced."],
                   ["Silence", "No solution discussion until the round timer hits zero."],
                 ].map(([title, body]) => (
