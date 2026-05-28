@@ -165,7 +165,7 @@ export default function ProblemSet() {
               <h3 className="font-sans text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">
                 Premium Pro
               </h3>
-              <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-[0.05em] leading-relaxed">
+              <p className="font-sans text-[11px] text-slate-500 dark:text-slate-400 tracking-[0.05em] leading-relaxed">
                 Unlock exclusive editorials & fast servers.
               </p>
             </div>
@@ -184,7 +184,7 @@ export default function ProblemSet() {
               <h3 className="font-sans text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 Leaderboards
               </h3>
-              <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-[0.05em] leading-relaxed">
+              <p className="font-sans text-[11px] text-slate-500 dark:text-slate-400 tracking-[0.05em] leading-relaxed">
                 See global rankings & challenge peers.
               </p>
             </div>
@@ -203,7 +203,7 @@ export default function ProblemSet() {
               <h3 className="font-sans text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
                 My Lists
               </h3>
-              <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-[0.05em] leading-relaxed">
+              <p className="font-sans text-[11px] text-slate-500 dark:text-slate-400 tracking-[0.05em] leading-relaxed">
                 Track your custom problem sets.
               </p>
             </div>
@@ -228,7 +228,7 @@ export default function ProblemSet() {
                   </h2>
                   {!loading && (
                     <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                      {total} TASKS
+                      {total} PROBLEMS
                     </span>
                   )}
                 </div>

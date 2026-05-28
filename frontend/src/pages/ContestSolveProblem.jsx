@@ -17,6 +17,35 @@ import "katex/dist/katex.min.css";
 
 const TABS = ["Problem", "Submissions", "Run", "Result"];
 
+/* =========================
+   MARKDOWN RENDERER
+========================= */
+function MarkdownRenderer({ content, className = "" }) {
+  if (!content) return null;
+
+  return (
+    <div
+      className={`
+        cf-markdown font-sans text-[14px] leading-relaxed text-slate-800 dark:text-slate-300
+        prose dark:prose-invert max-w-none
+        prose-headings:font-sans prose-headings:font-bold prose-headings:tracking-tight
+        prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+        prose-a:text-blue-600 dark:prose-a:text-blue-400
+        prose-code:font-mono prose-code:text-[13px] prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-[3px]
+        prose-pre:font-mono prose-pre:text-[13px] prose-pre:bg-slate-50 dark:prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[3px] prose-pre:text-slate-800 dark:prose-pre:text-slate-200
+        ${className}
+      `}
+    >
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex, rehypeHighlight]}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
 export default function ContestSolveProblem() {
   const { contestId, problemId } = useParams();
   const { user, loading: authLoading } = useAuth();
@@ -216,7 +245,7 @@ export default function ContestSolveProblem() {
         {isEnded && (
           <div className="mt-4 border-l-2 border-red-500 pl-3">
             <span className="font-mono text-[10px] text-red-500 tracking-[0.08em] uppercase">Contest Concluded</span>
-            <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+            <div className="font-sans text-[11px] text-slate-500 dark:text-slate-400 mt-1">
               Submissions are closed. Problem will be added to the global problemset shortly.
             </div>
           </div>
@@ -294,35 +323,27 @@ export default function ContestSolveProblem() {
               </div>
 
               {/* Markdown Content */}
-              <div className="font-sans text-[14px] text-slate-800 dark:text-slate-300 cf-markdown">
-                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex, rehypeHighlight]}>
-                  {content.statement}
-                </ReactMarkdown>
+              <div className="font-sans text-[14px] text-slate-800 dark:text-slate-300">
+                <MarkdownRenderer content={content.statement} />
 
                 {content.input_format && (
                   <div className="mt-10">
                     <h3 className="font-sans text-lg font-bold text-slate-900 dark:text-white mb-3">Input Format</h3>
-                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                      {content.input_format}
-                    </ReactMarkdown>
+                    <MarkdownRenderer content={content.input_format} />
                   </div>
                 )}
 
                 {content.output_format && (
                   <div className="mt-8">
                     <h3 className="font-sans text-lg font-bold text-slate-900 dark:text-white mb-3">Output Format</h3>
-                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                      {content.output_format}
-                    </ReactMarkdown>
+                    <MarkdownRenderer content={content.output_format} />
                   </div>
                 )}
 
                 {content.constraints && (
                   <div className="mt-8">
                     <h3 className="font-sans text-lg font-bold text-slate-900 dark:text-white mb-3">Constraints</h3>
-                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-                      {content.constraints}
-                    </ReactMarkdown>
+                    <MarkdownRenderer content={content.constraints} />
                   </div>
                 )}
 
@@ -474,6 +495,13 @@ export default function ContestSolveProblem() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* --- EDITORIAL TAB --- */}
+          {activeTab === "Editorial" && (
+            <div className="bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-200 dark:border-slate-800 p-8 md:p-12">
+              <MarkdownRenderer content={content.editorial} />
             </div>
           )}
 
