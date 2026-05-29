@@ -437,6 +437,8 @@ if (problem.is_hidden) {
   } catch (err) {
     console.error("Judge0 Error:", err.response?.data || err.message);
     res.status(500).json({ error: "Run failed" });
+  } finally {
+    conn.release();
   }
 });
 
