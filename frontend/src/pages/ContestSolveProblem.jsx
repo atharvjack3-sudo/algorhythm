@@ -285,7 +285,7 @@ export default function ContestSolveProblem() {
                   onClick={() => setActiveTab(t)}
                   className={`pb-3 font-mono text-[11px] font-semibold tracking-[0.08em] uppercase transition-all duration-200 border-b-2 relative top-[2px] bg-transparent ${
                     activeTab === t 
-                      ? "text-blue-500 border-blue-500" 
+                      ? "text-orange-500 border-orange-500" 
                       : "text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700"
                   }`}
                 >

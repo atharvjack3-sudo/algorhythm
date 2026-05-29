@@ -4,7 +4,7 @@ import { Navigate, useNavigate, Link } from "react-router-dom";
 import { api } from "../api/client";
 import QuesCountCircle from "../components/QuesCountCircle";
 import EditProfileModal from "../components/EditProfileModal";
-
+import AdminControlPanel from "../components/AdminControlPanel";
 // ==========================================
 // 1. RATING GRAPH COMPONENT
 // ==========================================
@@ -316,20 +316,21 @@ export default function Dashboard() {
       </div>
     );
   };
-
-  if (loading) {
-    return (
+  if (!loading && !user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (statsLoading) {
+      return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse uppercase">
           LOADING DASHBOARD...
         </span>
       </div>
-    );
-  }
+      )
+    }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
+  
 
   const joinedYear = user.created_at
     ? new Date(user.created_at).getFullYear()
@@ -339,46 +340,6 @@ export default function Dashboard() {
   const acceptanceRate = stats?.acceptance_rate ?? "—";
   const status = user?.is_premium == true ? "Premium" : "Regular";
   
-
-  
-  async function fetchExternal() {
-    try {
-      setFetchLoading(true);
-      const res = await api.get(`/user-information/${fetchUsername}`);
-      setFetchedUser(res.data);
-      setFetchedUserNewRole(res.data.role);
-      setUpdateBanStatus(res.data.is_banned); // Sync ban status from fetch
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setFetchLoading(false);
-    }
-  }
-
-  async function updateUserDetails() {
-    try {
-      setDetailUpdateLoading(true);
-      
-      const payload = {
-        role: fetchedUserNewRole,
-        is_banned: updateBanStatus,
-      };
-
-      await api.post(`/update-user-information/${fetchedUser.id}`, payload);
-      
-      // Update local state without needing to re-fetch
-      setFetchedUser(prev => ({
-        ...prev,
-        role: fetchedUserNewRole,
-        is_banned: updateBanStatus
-      }));
-
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDetailUpdateLoading(false);
-    }
-  }
 
   return (
     <>
@@ -708,231 +669,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {user?.role === "owner" ? (
-        <div className="w-full flex flex-col bg-slate-50 dark:bg-slate-950 justify-center items-center pb-16">
-          <div className="w-[73%] max-w-6xl bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col mb-6">
-            {/* Panel Header */}
-            <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 bg-slate-50 dark:bg-slate-950/50 rounded-t-md">
-              <span className="inline-block w-[3px] h-[14px] rounded-sm bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
-              <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
-                Control Panel ({user?.role})
-              </span>
-            </div>
-
-            <div className="p-5 flex flex-col gap-6">
-              {/* Fetch Form */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  fetchExternal();
-                }}
-                className="flex flex-col sm:flex-row items-start sm:items-end gap-3"
-              >
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                    Fetch User
-                  </label>
-                  <input
-                    className="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-3 py-1.5 text-[11px] font-mono outline-none focus:border-orange-500 dark:focus:border-orange-500 transition-colors w-full sm:w-64"
-                    value={fetchUsername}
-                    onChange={(e) => setFetchUsername(e.target.value)}
-                    required
-                    type="text"
-                    placeholder="Enter username..."
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={fetchLoading}
-                  className="font-mono text-[11px] font-bold tracking-[0.12em] rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-slate-950 border-none px-6 py-1.5 hover:opacity-85 h-[30px] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {fetchLoading ? "FETCHING..." : "FETCH →"}
-                </button>
-              </form>
-
-              {/* Fetched User Results */}
-              {fetchedUser != null && (
-                <div className="bg-slate-50/50 dark:bg-slate-950/30 rounded-md border border-slate-200 dark:border-slate-800 flex flex-col mt-2">
-                  {/* Result Header & Clear Action */}
-                  <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 rounded-t-md">
-                    <div className="flex items-center gap-2.5">
-                      <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                      <span className="font-mono text-[10px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
-                        User Details
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setFetchedUser(null);
-                        setFetchUsername("");
-                        setFetchedUserNewRole("user");
-                      }}
-                      className="font-mono text-[10px] font-semibold tracking-[0.06em] bg-transparent text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 border border-slate-300 dark:border-slate-700 px-3 py-1 rounded-[3px] hover:border-red-500 dark:hover:border-red-500 transition-colors uppercase cursor-pointer"
-                    >
-                      Clear [X]
-                    </button>
-                  </div>
-
-                  {/* Information Grid */}
-                  <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        ID
-                      </span>
-                      <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                        {fetchedUser.id}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        Username
-                      </span>
-                      <span className="font-sans text-[13px] font-bold text-slate-900 dark:text-white">
-                        {fetchedUser.username}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        Email
-                      </span>
-                      <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                        {fetchedUser.email}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        Role
-                      </span>
-                      <span className="font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase">
-                        {fetchedUser.role}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        Contest Rating
-                      </span>
-                      <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                        {fetchedUser.contest_rating || 1200}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        Contest Global Rank
-                      </span>
-                      <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                        {fetchedUser.contest_global_rank || "--"}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        Banned Status
-                      </span>
-                      {fetchedUser.is_banned ? (
-                        <span className="inline-flex w-max items-center gap-1.5 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-mono text-[10px] font-bold rounded-[3px] border border-red-200 dark:border-red-800/30 uppercase tracking-[0.1em]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]"></span>
-                          Yes
-                        </span>
-                      ) : (
-                        <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                          No
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-                      <span className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                        Created At
-                      </span>
-                      <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                        {new Date(fetchedUser.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions Form */}
-                  <div className="p-5 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-b-md">
-                    <div className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase mb-4">
-                      Administrative Actions
-                    </div>
-
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        updateUserDetails();
-                      }}
-                      className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
-                    >
-                      {/* Custom Checkbox */}
-                      <label className="flex items-center gap-2 cursor-pointer group">
-                        <div className="relative flex items-center justify-center">
-                          <input
-                            type="checkbox"
-                            className="peer sr-only"
-                            checked={updateBanStatus}
-                            onChange={(e) =>
-                              setUpdateBanStatus(e.target.checked)
-                            }
-                          />
-                          <div className="w-4 h-4 border border-slate-300 dark:border-slate-600 rounded-[3px] bg-slate-50 dark:bg-slate-950 peer-checked:bg-red-500 peer-checked:border-red-500 transition-colors" />
-                          <svg
-                            className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                        <span className="font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
-                          Ban User
-                        </span>
-                      </label>
-
-                      {/* Styled Select Dropdown */}
-                      <div className="flex items-center gap-3">
-                        <label className="font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest">
-                          Update Role
-                        </label>
-                        <select
-                          value={fetchedUserNewRole}
-                          onChange={(e) =>
-                            setFetchedUserNewRole(e.target.value)
-                          }
-                          className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-3 py-1 text-[11px] font-mono outline-none focus:border-orange-500 transition-colors cursor-pointer uppercase tracking-widest"
-                        >
-                          <option value="user">User</option>
-                          <option value="moderator">Moderator</option>
-                          <option disabled value="owner">
-                            Owner
-                          </option>
-                        </select>
-                      </div>
-                      <button
-                        type="submit"
-                        disabled={detailUpdateLoading}
-                        className="font-mono text-[11px] font-bold tracking-[0.12em] rounded-[3px] transition-opacity duration-150 cursor-pointer bg-red-500 text-slate-950 border-none px-6 py-1.5 hover:opacity-85 h-[30px] disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {detailUpdateLoading ? "UPDATING..." : "UPDATE →"}
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <AdminControlPanel user={user}/>
       {/* Edit Profile Modal */}
       <EditProfileModal 
         isOpen={isEditModalOpen} 
