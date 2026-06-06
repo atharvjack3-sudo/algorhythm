@@ -125,6 +125,12 @@ router.post("/submissions", authMiddleware, async (req, res) => {
           expected_output: Buffer.from(expectedOutput).toString("base64"), // Let Judge0 compare
           cpu_time_limit: timeLimit,
           memory_limit: memoryLimit
+        },
+        {
+          headers: {
+            "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+          }
         }
       );
 
