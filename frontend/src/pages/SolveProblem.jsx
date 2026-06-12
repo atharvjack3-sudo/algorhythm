@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense, lazy } from "react";
+import React, { useEffect, useState, Suspense, lazy, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
@@ -15,9 +15,26 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 
-const DiscussionTab = lazy(() =>
-  import("../components/discussion/DiscussionTab")
+const themeModules = import.meta.glob("../themes/*.json");
+export const AVAILABLE_THEMES = Object.keys(themeModules)
+  .map((path) => path.split("/").pop().replace(".json", ""))
+  .sort();
+const loadedThemes = new Set();
+
+const DiscussionTab = lazy(
+  () => import("../components/discussion/DiscussionTab"),
 );
+
+export async function loadMonacoTheme(monaco, themeName) {
+  const path = `../themes/${themeName}.json`;
+  const loader = themeModules[path];
+
+  if (!loader) return;
+  const theme = await loader();
+
+  monaco.editor.defineTheme(themeName, theme.default);
+  monaco.editor.setTheme(themeName);
+}
 
 const TABS = [
   "Problem",
@@ -61,12 +78,12 @@ export default function SolveProblem() {
   const { problemId } = useParams();
   const { user, loading: authLoading } = useAuth();
   const { theme } = useTheme();
-
+  const [editorTheme, setEditorTheme] = useState(theme === "dark" ? "vs-dark" : "light");
   const [activeTab, setActiveTab] = useState("Problem");
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
   const [openSubmission, setOpenSubmission] = useState(null);
-  
+
   const [runLoading, setRunLoading] = useState(false);
   const [runResults, setRunResults] = useState([]);
   const [runError, setRunError] = useState(null);
@@ -74,13 +91,15 @@ export default function SolveProblem() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [solved, setSolved] = useState(false);
   const [lastResult, setLastResult] = useState(null);
   const [complexity, setComplexity] = useState(null);
   const [submissions, setSubmissions] = useState([]);
+  const monacoRef = useRef(null);
+  const editorRef = useRef(null);
 
   /* =========================
      RESIZER LOGIC
@@ -88,6 +107,22 @@ export default function SolveProblem() {
   const [leftWidth, setLeftWidth] = useState(45); // Start at 45%
   const [isDragging, setIsDragging] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+  function handleEditorDidMount(editor, monaco) {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+  }
+  function handleBeforeMount(monaco) {
+    monacoRef.current = monaco;
+  }
+  useEffect(() => {
+    if (!monacoRef.current) return;
+    if (editorTheme === "vs-dark") return;
+    if (editorTheme === "light") return;
+
+    loadMonacoTheme(monacoRef.current, editorTheme).then(() => {
+      monacoRef.current.editor.setTheme(editorTheme);
+    });
+  }, [editorTheme]);
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
@@ -245,14 +280,24 @@ export default function SolveProblem() {
     return (
       <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="bg-white dark:bg-slate-900 px-6 py-4 border border-slate-200 dark:border-slate-800 rounded-md text-center shadow-sm">
-          <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.1em] uppercase mb-1">Error</div>
-          <p className="font-sans text-[14px] text-slate-800 dark:text-slate-200">{error}</p>
+          <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.1em] uppercase mb-1">
+            Error
+          </div>
+          <p className="font-sans text-[14px] text-slate-800 dark:text-slate-200">
+            {error}
+          </p>
         </div>
       </div>
     );
   }
 
   const { problem, content, stats, topics, samples } = data;
+
+  const handleEditorWillMount = async (monaco) => {
+    monacoRef.current = monaco;
+
+    await loadMonacoTheme(monaco, editorTheme);
+  };
 
   return (
     <>
@@ -292,8 +337,8 @@ export default function SolveProblem() {
                   problem?.difficulty === "easy"
                     ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                     : problem?.difficulty === "medium"
-                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
-                    : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                      ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
                 }`}
               >
                 {problem?.difficulty}
@@ -314,7 +359,10 @@ export default function SolveProblem() {
             {topics?.length > 0 && (
               <div className="mt-3 flex gap-2 flex-wrap">
                 {topics.map((t) => (
-                  <span key={t} className="px-2 py-0.5 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800">
+                  <span
+                    key={t}
+                    className="px-2 py-0.5 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800"
+                  >
                     {t}
                   </span>
                 ))}
@@ -342,7 +390,6 @@ export default function SolveProblem() {
 
           {/* Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-6 text-[14px] text-slate-800 dark:text-slate-200 custom-scrollbar bg-white dark:bg-slate-950">
-            
             {/* ===== DISCUSSION ===== */}
             {activeTab === "Discussion" && (
               <Suspense
@@ -359,7 +406,6 @@ export default function SolveProblem() {
             {/* ===== PROBLEM ===== */}
             {activeTab === "Problem" && (
               <div className="flex flex-col gap-8">
-                
                 <MarkdownRenderer content={content.statement} />
 
                 {content.constraints && (
@@ -368,9 +414,9 @@ export default function SolveProblem() {
                       Constraints
                     </h3>
                     <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
-                      <MarkdownRenderer 
-                        content={content.constraints} 
-                        className="font-mono text-[12px] whitespace-pre-line" 
+                      <MarkdownRenderer
+                        content={content.constraints}
+                        className="font-mono text-[12px] whitespace-pre-line"
                       />
                     </div>
                   </div>
@@ -382,7 +428,7 @@ export default function SolveProblem() {
                       Input Format
                     </h3>
                     <div className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
-                      <MarkdownRenderer 
+                      <MarkdownRenderer
                         content={content.input_format}
                         className="text-[13px] whitespace-pre-line"
                       />
@@ -394,7 +440,7 @@ export default function SolveProblem() {
                       Output Format
                     </h3>
                     <div className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
-                      <MarkdownRenderer 
+                      <MarkdownRenderer
                         content={content.output_format}
                         className="text-[13px] whitespace-pre-line"
                       />
@@ -450,8 +496,12 @@ export default function SolveProblem() {
               <div className="flex flex-col gap-5">
                 {runError && (
                   <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[3px] shadow-sm">
-                    <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">Runtime / Compilation Error</div>
-                    <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">{runError}</pre>
+                    <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
+                      Runtime / Compilation Error
+                    </div>
+                    <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
+                      {runError}
+                    </pre>
                   </div>
                 )}
 
@@ -464,25 +514,40 @@ export default function SolveProblem() {
                     {runResults.map((r, i) => {
                       const isMatch = r.output?.trim() === r.expected?.trim();
                       return (
-                        <div key={i} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
+                        <div
+                          key={i}
+                          className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm"
+                        >
                           <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
-                            <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">Test Case {r.sample || r.index || i + 1}</span>
-                            <span className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
-                              isMatch ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                            }`}>
+                            <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">
+                              Test Case {r.sample || r.index || i + 1}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
+                                isMatch
+                                  ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                  : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                              }`}
+                            >
                               {isMatch ? "Matched" : "Mismatch"}
                             </span>
                           </div>
-                          
+
                           <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
                             <div>
-                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Your Output</div>
-                              <pre className={`p-4 m-0 font-mono text-[12px] whitespace-pre-wrap ${isMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
+                                Your Output
+                              </div>
+                              <pre
+                                className={`p-4 m-0 font-mono text-[12px] whitespace-pre-wrap ${isMatch ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                              >
                                 {r.output || "(empty output)"}
                               </pre>
                             </div>
                             <div>
-                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Expected Output</div>
+                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
+                                Expected Output
+                              </div>
                               <pre className="p-4 m-0 font-mono text-[12px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap">
                                 {r.expected}
                               </pre>
@@ -505,40 +570,60 @@ export default function SolveProblem() {
                   </div>
                 ) : (
                   <>
-                    <div className={`p-5 rounded-md border shadow-sm ${
-                      lastResult.verdict === "AC" || lastResult.verdict === "Accepted" 
-                      ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50" 
-                      : "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
-                    }`}>
-                      <h3 className={`font-mono text-[18px] font-bold tracking-wide uppercase ${lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}>
-                        {lastResult.verdict === "AC" ? "Accepted" : lastResult.verdict}
+                    <div
+                      className={`p-5 rounded-md border shadow-sm ${
+                        lastResult.verdict === "AC" ||
+                        lastResult.verdict === "Accepted"
+                          ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50"
+                          : "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
+                      }`}
+                    >
+                      <h3
+                        className={`font-mono text-[18px] font-bold tracking-wide uppercase ${lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}
+                      >
+                        {lastResult.verdict === "AC"
+                          ? "Accepted"
+                          : lastResult.verdict}
                       </h3>
-                      <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Tested against all system cases</p>
+                      <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
+                        Tested against all system cases
+                      </p>
                     </div>
 
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
                       <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
-                        <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">Test Cases Breakdown</span>
+                        <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
+                          Test Cases Breakdown
+                        </span>
                       </div>
                       <div className="w-full overflow-x-auto custom-scrollbar">
                         <table className="w-full border-collapse whitespace-nowrap text-left">
                           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            {lastResult.samples && lastResult.samples.map((s) => (
-                              <tr key={s.index} className="border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                <td className="px-4 py-3 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                                  Test #{s.index}
-                                </td>
-                                <td className="px-4 py-3 text-right">
-                                  <span className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
-                                    s.verdict === "AC" || s.verdict === "Accepted" 
-                                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
-                                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                  }`}>
-                                    {s.verdict === "AC" ? "Accepted" : s.verdict}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
+                            {lastResult.samples &&
+                              lastResult.samples.map((s) => (
+                                <tr
+                                  key={s.index}
+                                  className="border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                >
+                                  <td className="px-4 py-3 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                    Test #{s.index}
+                                  </td>
+                                  <td className="px-4 py-3 text-right">
+                                    <span
+                                      className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
+                                        s.verdict === "AC" ||
+                                        s.verdict === "Accepted"
+                                          ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                          : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                      }`}
+                                    >
+                                      {s.verdict === "AC"
+                                        ? "Accepted"
+                                        : s.verdict}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
                           </tbody>
                         </table>
                       </div>
@@ -546,15 +631,23 @@ export default function SolveProblem() {
 
                     {lastResult.hidden_failed && (
                       <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
-                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-1">Hidden Test Failure</div>
-                        <p className="font-sans text-[13px] text-slate-800 dark:text-slate-200">{lastResult.hidden_failed}</p>
+                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-1">
+                          Hidden Test Failure
+                        </div>
+                        <p className="font-sans text-[13px] text-slate-800 dark:text-slate-200">
+                          {lastResult.hidden_failed}
+                        </p>
                       </div>
                     )}
-                    
+
                     {lastResult.verdict !== "AC" && lastResult.error && (
                       <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
-                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">Error Details</div>
-                        <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">{lastResult.error}</pre>
+                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
+                          Error Details
+                        </div>
+                        <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
+                          {lastResult.error}
+                        </pre>
                       </div>
                     )}
                   </>
@@ -575,9 +668,15 @@ export default function SolveProblem() {
                       <table className="w-full text-left border-collapse whitespace-nowrap">
                         <thead className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
                           <tr>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase w-20">ID</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">Time Submitted</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">Status</th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase w-20">
+                              ID
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
+                              Time Submitted
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">
+                              Status
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -591,16 +690,24 @@ export default function SolveProblem() {
                                 #{submissions.length - i}
                               </td>
                               <td className="px-5 py-3 font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                                {new Date(s.submitted_at).toLocaleString(undefined, {
-                                  month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                                })}
+                                {new Date(s.submitted_at).toLocaleString(
+                                  undefined,
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )}
                               </td>
                               <td className="px-5 py-3 text-right">
-                                <span className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
-                                  s.verdict === "AC"
-                                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                    : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                }`}>
+                                <span
+                                  className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
+                                    s.verdict === "AC"
+                                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                  }`}
+                                >
                                   {s.verdict}
                                 </span>
                               </td>
@@ -618,7 +725,7 @@ export default function SolveProblem() {
 
         {/* ===== DESKTOP DRAG RESIZER ===== */}
         <div
-          className="hidden md:flex w-[1px] bg-slate-200 dark:bg-slate-800 cursor-col-resize hover:bg-blue-500 dark:hover:bg-blue-500 transition-colors z-50 items-center justify-center flex-shrink-0 relative group"
+          className="hidden md:flex w-[1px] bg-slate-200 dark:bg-slate-800 cursor-col-resize hover:bg-orange-500 dark:hover:bg-gray-300 transition-colors z-50 items-center justify-center flex-shrink-0 relative group"
           onMouseDown={(e) => {
             e.preventDefault();
             setIsDragging(true);
@@ -629,15 +736,39 @@ export default function SolveProblem() {
 
         {/* ===== RIGHT PANEL EDITOR ===== */}
         <section className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800">
-          
           {/* Editor Toolbar */}
-          <div className="h-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 z-10 flex-shrink-0 transition-colors">
+          <div className="min-h-12 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
             <div className="flex items-center gap-2">
-              <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">Language</label>
+              <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">
+                Theme
+              </label>
+
+              <select
+                value={editorTheme}
+                onChange={async (e) => {
+                  setEditorTheme(e.target.value);
+                }}
+                className="bg-slate-50 custom-scrollbar dark:bg-slate-950 border border-slate-900 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] pl-2 py-1 text-[11px] font-mono outline-none focus:border-orange-500 transition-colors cursor-pointer"
+              >
+                {AVAILABLE_THEMES.map((theme) => (
+                  <option key={theme} value={theme}>
+                    {theme}
+                  </option>
+                ))}
+                <option key={"vs-dark"} value={"vs-dark"}>
+                  VS Dark
+                </option>
+                <option key={"light"} value={"light"}>
+                  VS Light
+                </option>
+              </select>
+              <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">
+                Language
+              </label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-mono outline-none focus:border-blue-500 transition-colors cursor-pointer uppercase tracking-widest"
+                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-mono outline-none focus:border-orange-500 transition-colors cursor-pointer uppercase tracking-widest"
               >
                 <option value="cpp">C++17</option>
                 <option value="java">Java</option>
@@ -671,7 +802,13 @@ export default function SolveProblem() {
                 </>
               ) : (
                 <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                  <a href="/auth" className="text-blue-600 dark:text-blue-400 hover:underline font-bold">SIGN IN</a> TO SUBMIT
+                  <a
+                    href="/auth"
+                    className="text-blue-600 dark:text-blue-400 hover:underline font-bold"
+                  >
+                    SIGN IN
+                  </a>{" "}
+                  TO SUBMIT
                 </span>
               )}
             </div>
@@ -687,9 +824,11 @@ export default function SolveProblem() {
           <div className="flex-1 w-full relative">
             <Editor
               height="100%"
+              theme={editorTheme}
+              beforeMount={handleBeforeMount}
+              onMount={handleEditorDidMount}
               language={language}
-              theme={theme === "dark" ? "vs-dark" : "light"}
-              value={code}
+              defaultValue={code}
               onChange={(value) => setCode(value ?? "")}
               options={{
                 fontSize: 13,
@@ -698,6 +837,9 @@ export default function SolveProblem() {
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
+                quickSuggestions: false,
+                parameterHints: { enabled: false },
+                suggestOnTriggerCharacters: false,
                 tabSize: 4,
                 wordWrap: "on",
                 cursorBlinking: "smooth",
@@ -715,7 +857,6 @@ export default function SolveProblem() {
         {openSubmission && (
           <div className="fixed inset-0 bg-slate-900/80 z-[150] backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white dark:bg-slate-950 w-full max-w-4xl h-[85vh] rounded-md shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 transition-colors">
-              
               {/* Modal Header */}
               <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 transition-colors">
                 <div className="flex items-center gap-4">
@@ -741,7 +882,9 @@ export default function SolveProblem() {
                       disabled={complexity?.id === openSubmission.id}
                       className="font-mono text-[10px] font-bold tracking-[0.06em] rounded-[3px] bg-transparent text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700 px-3 py-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
                     >
-                      {complexity?.id === openSubmission.id ? "ANALYZED ✓" : "AI ANALYSIS"}
+                      {complexity?.id === openSubmission.id
+                        ? "ANALYZED ✓"
+                        : "AI ANALYSIS"}
                     </button>
                   )}
 
@@ -768,13 +911,17 @@ export default function SolveProblem() {
                   </div>
                   <div className="flex flex-wrap gap-x-6 gap-y-3 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold uppercase tracking-wider">Time:</span>
+                      <span className="font-bold uppercase tracking-wider">
+                        Time:
+                      </span>
                       <span className="bg-white dark:bg-slate-950 px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
                         <InlineMath math={complexity?.time || "O(1)"} />
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold uppercase tracking-wider">Space:</span>
+                      <span className="font-bold uppercase tracking-wider">
+                        Space:
+                      </span>
                       <span className="bg-white dark:bg-slate-950 px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
                         <InlineMath math={complexity?.space || "O(1)"} />
                       </span>
