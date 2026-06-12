@@ -78,7 +78,7 @@ export default function SolveProblem() {
   const { problemId } = useParams();
   const { user, loading: authLoading } = useAuth();
   const { theme } = useTheme();
-  const [editorTheme, setEditorTheme] = useState(theme === "dark" ? "vs-dark" : "light");
+  const [editorTheme, setEditorTheme] = useState(theme === "light" ? "light" : "vs-dark");
   const [activeTab, setActiveTab] = useState("Problem");
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
