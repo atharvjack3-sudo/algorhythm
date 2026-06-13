@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import logo from "../assets/navico/main_logo.png";
+//import logo from "../assets/navico/main_logo.png";
+import logo from "../assets/navico/light_mode_logo.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
@@ -69,7 +70,7 @@ export default function Navbar() {
           --nb-dd-link-hover-border: #f1f5f9;
           --nb-dd-link-icon: #94a3b8;
           --nb-mobile-label: #cbd5e1;
-          --nb-logo-filter: invert(1);
+          --nb-logo-filter: invert(0);
           --nb-logout-hover-bg: rgba(239,68,68,0.06);
           --nb-logout-hover-border: rgba(239,68,68,0.15);
           --nb-logout-hover-color: #ef4444;
