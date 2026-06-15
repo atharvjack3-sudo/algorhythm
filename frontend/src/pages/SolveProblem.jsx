@@ -11,6 +11,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
+import SubmissionAnim from "../components/submissionAnim";
 
 import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
@@ -78,7 +79,9 @@ export default function SolveProblem() {
   const { problemId } = useParams();
   const { user, loading: authLoading } = useAuth();
   const { theme } = useTheme();
-  const [editorTheme, setEditorTheme] = useState(theme === "light" ? "light" : "vs-dark");
+  const [editorTheme, setEditorTheme] = useState(
+    theme === "light" ? "light" : "vs-dark",
+  );
   const [activeTab, setActiveTab] = useState("Problem");
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
@@ -205,6 +208,7 @@ export default function SolveProblem() {
   async function handleSubmit() {
     if (!user) return;
     try {
+      setActiveTab("Result");
       setSubmitting(true);
       setSubmitError(null);
       const res = await api.post("/submissions", {
@@ -222,7 +226,6 @@ export default function SolveProblem() {
         },
         ...prev,
       ]);
-      setActiveTab("Result");
     } catch (err) {
       setSubmitError(err.response?.data?.error || "Submission failed");
     } finally {
@@ -231,8 +234,10 @@ export default function SolveProblem() {
   }
 
   const handleRun = async () => {
+    if (!user) return;
     if (!code.trim()) return;
     try {
+      setActiveTab("Run");
       setRunLoading(true);
       setRunError(null);
       setRunResults([]);
@@ -242,7 +247,6 @@ export default function SolveProblem() {
         code,
       });
       setRunResults(res.data.samples);
-      setActiveTab("Run");
     } catch (err) {
       setRunError(err.response?.data?.error || "Run failed");
     } finally {
@@ -494,69 +498,76 @@ export default function SolveProblem() {
             {/* ===== RUN ===== */}
             {activeTab === "Run" && (
               <div className="flex flex-col gap-5">
-                {runError && (
-                  <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[3px] shadow-sm">
-                    <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
-                      Runtime / Compilation Error
-                    </div>
-                    <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
-                      {runError}
-                    </pre>
-                  </div>
-                )}
-
-                {runResults.length === 0 ? (
-                  <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
-                    Run your code to evaluate sample test cases.
-                  </div>
+                {runLoading ? (
+                  <SubmissionAnim />
                 ) : (
-                  <div className="flex flex-col gap-5">
-                    {runResults.map((r, i) => {
-                      const isMatch = r.output?.trim() === r.expected?.trim();
-                      return (
-                        <div
-                          key={i}
-                          className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm"
-                        >
-                          <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
-                            <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">
-                              Test Case {r.sample || r.index || i + 1}
-                            </span>
-                            <span
-                              className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
-                                isMatch
-                                  ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                  : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                              }`}
-                            >
-                              {isMatch ? "Matched" : "Mismatch"}
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
-                            <div>
-                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
-                                Your Output
-                              </div>
-                              <pre
-                                className={`p-4 m-0 font-mono text-[12px] whitespace-pre-wrap ${isMatch ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
-                              >
-                                {r.output || "(empty output)"}
-                              </pre>
-                            </div>
-                            <div>
-                              <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
-                                Expected Output
-                              </div>
-                              <pre className="p-4 m-0 font-mono text-[12px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap">
-                                {r.expected}
-                              </pre>
-                            </div>
-                          </div>
+                  <>
+                    {runError && (
+                      <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[3px] shadow-sm">
+                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
+                          Runtime / Compilation Error
                         </div>
-                      );
-                    })}
-                  </div>
+                        <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
+                          {runError}
+                        </pre>
+                      </div>
+                    )}
+
+                    {runResults.length === 0 ? (
+                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                        Run your code to evaluate sample test cases.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-5">
+                        {runResults.map((r, i) => {
+                          const isMatch =
+                            r.output?.trim() === r.expected?.trim();
+                          return (
+                            <div
+                              key={i}
+                              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm"
+                            >
+                              <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                                <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">
+                                  Test Case {r.sample || r.index || i + 1}
+                                </span>
+                                <span
+                                  className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
+                                    isMatch
+                                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                  }`}
+                                >
+                                  {isMatch ? "Matched" : "Mismatch"}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
+                                <div>
+                                  <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
+                                    Your Output
+                                  </div>
+                                  <pre
+                                    className={`p-4 m-0 font-mono text-[12px] whitespace-pre-wrap ${isMatch ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                                  >
+                                    {r.output || "(empty output)"}
+                                  </pre>
+                                </div>
+                                <div>
+                                  <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
+                                    Expected Output
+                                  </div>
+                                  <pre className="p-4 m-0 font-mono text-[12px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap">
+                                    {r.expected}
+                                  </pre>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -564,91 +575,97 @@ export default function SolveProblem() {
             {/* ===== RESULT ===== */}
             {activeTab === "Result" && (
               <div className="flex flex-col gap-5">
-                {!lastResult ? (
-                  <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
-                    Submit code to view final verdict.
-                  </div>
+                {submitting ? (
+                  <SubmissionAnim />
                 ) : (
                   <>
-                    <div
-                      className={`p-5 rounded-md border shadow-sm ${
-                        lastResult.verdict === "AC" ||
-                        lastResult.verdict === "Accepted"
-                          ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50"
-                          : "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
-                      }`}
-                    >
-                      <h3
-                        className={`font-mono text-[18px] font-bold tracking-wide uppercase ${lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}
-                      >
-                        {lastResult.verdict === "AC"
-                          ? "Accepted"
-                          : lastResult.verdict}
-                      </h3>
-                      <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
-                        Tested against all system cases
-                      </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
-                      <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
-                        <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
-                          Test Cases Breakdown
-                        </span>
+                    {!lastResult ? (
+                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                        Submit code to view final verdict.
                       </div>
-                      <div className="w-full overflow-x-auto custom-scrollbar">
-                        <table className="w-full border-collapse whitespace-nowrap text-left">
-                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            {lastResult.samples &&
-                              lastResult.samples.map((s) => (
-                                <tr
-                                  key={s.index}
-                                  className="border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                >
-                                  <td className="px-4 py-3 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                                    Test #{s.index}
-                                  </td>
-                                  <td className="px-4 py-3 text-right">
-                                    <span
-                                      className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
-                                        s.verdict === "AC" ||
-                                        s.verdict === "Accepted"
-                                          ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                          : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                      }`}
+                    ) : (
+                      <>
+                        <div
+                          className={`p-5 rounded-md border shadow-sm ${
+                            lastResult.verdict === "AC" ||
+                            lastResult.verdict === "Accepted"
+                              ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50"
+                              : "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
+                          }`}
+                        >
+                          <h3
+                            className={`font-mono text-[18px] font-bold tracking-wide uppercase ${lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}
+                          >
+                            {lastResult.verdict === "AC"
+                              ? "Accepted"
+                              : lastResult.verdict}
+                          </h3>
+                          <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
+                            Tested against all system cases
+                          </p>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
+                          <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
+                            <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
+                              Test Cases Breakdown
+                            </span>
+                          </div>
+                          <div className="w-full overflow-x-auto custom-scrollbar">
+                            <table className="w-full border-collapse whitespace-nowrap text-left">
+                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                                {lastResult.samples &&
+                                  lastResult.samples.map((s) => (
+                                    <tr
+                                      key={s.index}
+                                      className="border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                                     >
-                                      {s.verdict === "AC"
-                                        ? "Accepted"
-                                        : s.verdict}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {lastResult.hidden_failed && (
-                      <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
-                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-1">
-                          Hidden Test Failure
+                                      <td className="px-4 py-3 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                        Test #{s.index}
+                                      </td>
+                                      <td className="px-4 py-3 text-right">
+                                        <span
+                                          className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
+                                            s.verdict === "AC" ||
+                                            s.verdict === "Accepted"
+                                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                          }`}
+                                        >
+                                          {s.verdict === "AC"
+                                            ? "Accepted"
+                                            : s.verdict}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                        <p className="font-sans text-[13px] text-slate-800 dark:text-slate-200">
-                          {lastResult.hidden_failed}
-                        </p>
-                      </div>
-                    )}
 
-                    {lastResult.verdict !== "AC" && lastResult.error && (
-                      <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
-                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
-                          Error Details
-                        </div>
-                        <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
-                          {lastResult.error}
-                        </pre>
-                      </div>
+                        {lastResult.hidden_failed && (
+                          <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
+                            <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-1">
+                              Hidden Test Failure
+                            </div>
+                            <p className="font-sans text-[13px] text-slate-800 dark:text-slate-200">
+                              {lastResult.hidden_failed}
+                            </p>
+                          </div>
+                        )}
+
+                        {lastResult.verdict !== "AC" && lastResult.error && (
+                          <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
+                            <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
+                              Error Details
+                            </div>
+                            <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
+                              {lastResult.error}
+                            </pre>
+                          </div>
+                        )}
+                      </>
                     )}
                   </>
                 )}
