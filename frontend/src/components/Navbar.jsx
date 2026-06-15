@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import darklogo from "../assets/navico/main_logo.png";
+//import darklogo from "../assets/navico/main_logo.png";
 import logo from "../assets/navico/light_mode_logo.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
@@ -101,7 +101,7 @@ export default function Navbar() {
           --nb-dd-link-hover-border: #192a3a;
           --nb-dd-link-icon: #2d4055;
           --nb-mobile-label: #233245;
-          --nb-logo-filter: invert(0);
+          --nb-logo-filter: brightness(0) invert(1);
           --nb-logout-hover-bg: rgba(239,68,68,0.06);
           --nb-logout-hover-border: rgba(239,68,68,0.15);
           --nb-logout-hover-color: #ef4444;
@@ -480,7 +480,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="nb-logo" onClick={() => navigate("/")}>
-            <img src={theme === "light" ? logo : darklogo} alt="Algorhythm" />
+            <img src={logo} alt="Algorhythm" />
           </div>
 
           {/* Center Links */}
