@@ -337,7 +337,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
   let testcases = [];
 
   /* =======================
-     DB Read
+      DB Read
   ======================= */
   const readConn = await db.connect();
   try {
@@ -370,7 +370,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
   }
 
   /* =======================
-     PHASE 2: Hybrid Judge0 Execution
+     Judge0 Execution
   ======================= */
   const codeBase64 = Buffer.from(code).toString("base64");
   const multipliers = LIMIT_MULTIPLIERS[language] || { time: 2.0, memory: 2.0 };
@@ -387,6 +387,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
   let maxMemoryKb = 0;
 
   try {
+    
     const fileReadPromises = testcases.map(async (tc) => {
       const [input, expectedOutput] = await Promise.all([
         fs.readFile(path.join(process.cwd(), tc.input_path), "utf-8"),
@@ -400,8 +401,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     const sampleTestcases = loadedTestcases.filter(item => item.tc.is_sample);
     const hiddenTestcases = loadedTestcases.filter(item => !item.tc.is_sample);
 
-    // Concurrently execute samples
-    const samplePromises = sampleTestcases.map(async ({ tc, input, expectedOutput }) => {
+    for (const { tc, input, expectedOutput } of sampleTestcases) {
       const judgeRes = await axios.post(
         JUDGE0_URL,
         {
@@ -414,12 +414,8 @@ router.post("/submissions", authMiddleware, async (req, res) => {
         },
         { headers: { "X-RapidAPI-Key": process.env.JUDGE0_API_KEY, "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com" } }
       );
-      return { tc, data: judgeRes.data };
-    });
 
-    const resolvedSamples = await Promise.all(samplePromises);
-
-    for (const { tc, data } of resolvedSamples) {
+      const data = judgeRes.data;
       const runtimeMs = Math.round(parseFloat(data.time || "0") * 1000);
       const memoryKb = data.memory || 0;
 
@@ -431,6 +427,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
 
       sampleResults.push({ index: sampleResults.length + 1, verdict: currentVerdict });
 
+      // Track the first failure
       if (!isAccepted && finalVerdict === "AC") {
         finalVerdict = currentVerdict;
         hiddenFailedIndex = -(sampleResults.length); 
@@ -440,7 +437,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
       }
     }
 
-    // Sequentially execute hidden cases
+    // 2. Sequentially execute hidden cases 
     if (finalVerdict === "AC") {
       let hiddenCount = 0;
       for (const { tc, input, expectedOutput } of hiddenTestcases) {
@@ -471,143 +468,143 @@ router.post("/submissions", authMiddleware, async (req, res) => {
           
           if (data.compile_output) finalCO = Buffer.from(data.compile_output, "base64").toString("utf-8");
           if (data.stderr) finalErr = Buffer.from(data.stderr, "base64").toString("utf-8");
-          break; 
+          break; // Stop execution on first hidden failure
         }
       }
     }
 
     /* =======================
-        Client Response
-    ======================= */
-    let hiddenFailedMessage = null;
-    if (finalVerdict !== "AC" && hiddenFailedIndex !== null) {
-      hiddenFailedMessage = hiddenFailedIndex < 0 
-        ? `Failed on Pretest #${Math.abs(hiddenFailedIndex)}` 
-        : `Hidden testcase #${hiddenFailedIndex}`;
-    }
-
-  
-    res.json({
-      verdict: finalVerdict,
-      samples: sampleResults,
-      hidden_failed: hiddenFailedMessage,
-      error: finalCO || finalErr || null
-    });
-
-    /* =======================
-       Background DB Job
+       DB Job
     ======================= */
     const isAC = finalVerdict === "AC";
     const acInt = isAC ? 1 : 0;
+    
+    const writeConn = await db.connect();
+    try {
+      await writeConn.query('BEGIN');
 
-    (async () => {
-      let bgConn;
-      try {
-        bgConn = await db.connect();
-        await bgConn.query('BEGIN');
+      // Insert Submission
+      await writeConn.query(
+        `INSERT INTO submissions (user_id, problem_id, language, verdict, runtime_ms, memory_kb, code) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [userId, problemId, language, finalVerdict, maxRuntimeMs, maxMemoryKb, code]
+      );
 
-        //  Insert Submission
-        await bgConn.query(
-          `INSERT INTO submissions (user_id, problem_id, language, verdict, runtime_ms, memory_kb, code) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [userId, problemId, language, finalVerdict, maxRuntimeMs, maxMemoryKb, code]
+      // User Stats Update
+      await writeConn.query(
+        `
+        UPDATE user_stats 
+        SET 
+          total_submissions = total_submissions + 1,
+          successful_submissions = successful_submissions + $1,
+          acceptance_rate = CASE WHEN total_submissions + 1 = 0 THEN NULL ELSE ((successful_submissions + $1)::DECIMAL / (total_submissions + 1)) * 100 END,
+          current_streak = CASE WHEN $1 = 1 THEN (CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END) ELSE current_streak END,
+          longest_streak = CASE WHEN $1 = 1 THEN GREATEST(longest_streak, CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END) ELSE longest_streak END,
+          last_active_date = CASE WHEN $1 = 1 THEN CURRENT_DATE ELSE last_active_date END
+        WHERE user_id = $2
+        `,
+        [acInt, userId]
+      );
+
+      // Problem Stats Update
+      await writeConn.query(
+        `
+        UPDATE problem_stats
+        SET 
+          total_submissions = total_submissions + 1, 
+          total_accepted = total_accepted + $1,
+          acceptance_rate = CASE WHEN total_submissions + 1 = 0 THEN NULL ELSE ((total_accepted + $1)::DECIMAL / (total_submissions + 1)) * 100 END
+        WHERE problem_id = $2
+        `,
+        [acInt, problemId]
+      );
+
+      if (isAC) {
+        const { rows: statusRows } = await writeConn.query(
+          `SELECT status FROM user_problem_status WHERE user_id = $1 AND problem_id = $2`,
+          [userId, problemId]
         );
-
-        // User Stats Update
-        await bgConn.query(
-          `
-          UPDATE user_stats 
-          SET 
-            total_submissions = total_submissions + 1,
-            successful_submissions = successful_submissions + $1,
-            acceptance_rate = CASE WHEN total_submissions + 1 = 0 THEN NULL ELSE ((successful_submissions + $1)::DECIMAL / (total_submissions + 1)) * 100 END,
-            current_streak = CASE WHEN $1 = 1 THEN (CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END) ELSE current_streak END,
-            longest_streak = CASE WHEN $1 = 1 THEN GREATEST(longest_streak, CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END) ELSE longest_streak END,
-            last_active_date = CASE WHEN $1 = 1 THEN CURRENT_DATE ELSE last_active_date END
-          WHERE user_id = $2
-          `,
-          [acInt, userId]
-        );
-
-        //  Problem Stats Update
-        await bgConn.query(
-          `
-          UPDATE problem_stats
-          SET 
-            total_submissions = total_submissions + 1, 
-            total_accepted = total_accepted + $1,
-            acceptance_rate = CASE WHEN total_submissions + 1 = 0 THEN NULL ELSE ((total_accepted + $1)::DECIMAL / (total_submissions + 1)) * 100 END
-          WHERE problem_id = $2
-          `,
-          [acInt, problemId]
-        );
-
-       
-        if (isAC) {
-          const { rows: statusRows } = await bgConn.query(
-            `SELECT status FROM user_problem_status WHERE user_id = $1 AND problem_id = $2`,
+        
+        if (!statusRows[0] || statusRows[0].status !== "solved") {
+          const diffCol = `${problemDifficulty}_solved`; 
+          await writeConn.query(`UPDATE user_stats SET total_solved = total_solved + 1, ${diffCol} = ${diffCol} + 1 WHERE user_id = $1`, [userId]);
+          await writeConn.query(
+            `INSERT INTO user_problem_status (user_id, problem_id, status, solved_at) VALUES ($1, $2, 'solved', NOW()) ON CONFLICT (user_id, problem_id) DO UPDATE SET status = 'solved', solved_at = NOW()`,
             [userId, problemId]
           );
-          
-          if (!statusRows[0] || statusRows[0].status !== "solved") {
-            const diffCol = `${problemDifficulty}_solved`; 
-            await bgConn.query(`UPDATE user_stats SET total_solved = total_solved + 1, ${diffCol} = ${diffCol} + 1 WHERE user_id = $1`, [userId]);
-            await bgConn.query(
-              `INSERT INTO user_problem_status (user_id, problem_id, status, solved_at) VALUES ($1, $2, 'solved', NOW()) ON CONFLICT (user_id, problem_id) DO UPDATE SET status = 'solved', solved_at = NOW()`,
-              [userId, problemId]
-            );
-          }
         }
+      }
 
-        //  Topic Updates
-        const { rows: topicRows } = await bgConn.query(
-          `SELECT topic_id FROM problem_topics WHERE problem_id = $1`,
-          [problemId]
+      // Topic Updates
+      const { rows: topicRows } = await writeConn.query(
+        `SELECT topic_id FROM problem_topics WHERE problem_id = $1`,
+        [problemId]
+      );
+
+      if (topicRows.length > 0) {
+        const topicIds = topicRows.map(r => r.topic_id);
+        const numTopics = topicIds.length;
+
+        // Insert new topics to ensure they exist
+        await writeConn.query(
+          `INSERT INTO user_topic_rating (user_id, topic_id) 
+           SELECT $1, unnest($2::int[]) 
+           ON CONFLICT (user_id, topic_id) DO NOTHING`,
+          [userId, topicIds]
         );
 
-        if (topicRows.length > 0) {
-          const topicIds = topicRows.map(r => r.topic_id);
-          const numTopics = topicIds.length;
+        // Fetch current ratings
+        const { rows: utrRows } = await writeConn.query(
+          `SELECT topic_id, rating, attempts FROM user_topic_rating WHERE user_id = $1 AND topic_id = ANY($2::int[])`,
+          [userId, topicIds]
+        );
 
-          //  Insert new topics to ensure they exist
-          await bgConn.query(
-            `INSERT INTO user_topic_rating (user_id, topic_id) 
-             SELECT $1, unnest($2::int[]) 
-             ON CONFLICT (user_id, topic_id) DO NOTHING`,
-            [userId, topicIds]
-          );
+        // Compute new ratings
+        const updates = utrRows.map(utr => {
+          const newRating = updateRating(utr.rating, difficultyToRating(problemDifficulty), utr.attempts, isAC, numTopics);
+          return `(${userId}, ${utr.topic_id}, ${newRating}, 1, ${acInt})`;
+        });
 
-          //  Fetch current ratings
-          const { rows: utrRows } = await bgConn.query(
-            `SELECT topic_id, rating, attempts FROM user_topic_rating WHERE user_id = $1 AND topic_id = ANY($2::int[])`,
-            [userId, topicIds]
-          );
-
-          //  Compute new ratings
-          const updates = utrRows.map(utr => {
-            const newRating = updateRating(utr.rating, difficultyToRating(problemDifficulty), utr.attempts, isAC, numTopics);
-            return `(${userId}, ${utr.topic_id}, ${newRating}, 1, ${acInt})`;
-          });
-
-          //  Update all topics
-          if (updates.length > 0) {
-            const valuesStr = updates.join(', ');
-            await bgConn.query(`
-              UPDATE user_topic_rating as t
-              SET rating = v.rating, attempts = t.attempts + v.attempts_inc, solves = t.solves + v.solves_inc
-              FROM (VALUES ${valuesStr}) AS v(user_id, topic_id, rating, attempts_inc, solves_inc)
-              WHERE t.user_id = v.user_id AND t.topic_id = v.topic_id
-            `);
-          }
+        // Update all topics
+        if (updates.length > 0) {
+          const valuesStr = updates.join(', ');
+          await writeConn.query(`
+            UPDATE user_topic_rating as t
+            SET rating = v.rating, attempts = t.attempts + v.attempts_inc, solves = t.solves + v.solves_inc
+            FROM (VALUES ${valuesStr}) AS v(user_id, topic_id, rating, attempts_inc, solves_inc)
+            WHERE t.user_id = v.user_id AND t.topic_id = v.topic_id
+          `);
         }
-
-        await bgConn.query('COMMIT');
-      } catch (bgErr) {
-        if (bgConn) await bgConn.query('ROLLBACK');
-        console.error("Background DB Sync Error:", bgErr.message);
-      } finally {
-        if (bgConn) bgConn.release();
       }
-    })();
+
+      await writeConn.query('COMMIT');
+    } catch (dbErr) {
+      await writeConn.query('ROLLBACK');
+      console.error("DB Sync Error:", dbErr.message);
+      if (!res.headersSent) {
+        return res.status(500).json({ error: "Failed to record submission statistics." });
+      }
+    } finally {
+      writeConn.release();
+    }
+
+    /* =======================
+       Client Response
+    ======================= */
+    if (!res.headersSent) {
+      let hiddenFailedMessage = null;
+      if (finalVerdict !== "AC" && hiddenFailedIndex !== null) {
+        hiddenFailedMessage = hiddenFailedIndex < 0 
+          ? `Failed on Pretest #${Math.abs(hiddenFailedIndex)}` 
+          : `Hidden testcase #${hiddenFailedIndex}`;
+      }
+
+      res.json({
+        verdict: finalVerdict,
+        samples: sampleResults,
+        hidden_failed: hiddenFailedMessage,
+        error: finalCO || finalErr || null
+      });
+    }
 
   } catch (err) {
     console.error("Judge0 Execution Error:", err.message);
@@ -616,7 +613,6 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     }
   }
 });
-
 /**
  * GET /api/submissions/:problemId
  */
