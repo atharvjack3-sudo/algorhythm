@@ -244,7 +244,7 @@ function CollabTab({
             onChange={(e) => setJoinCode(e.target.value)}
             value={joinCode}
             placeholder="Room Code"
-            className="flex-1 h-10 px-3 rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-center focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
+            className="flex-1 h-10 px-3 rounded-md font-mono bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-center focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
           />
           <button
             type="submit"
