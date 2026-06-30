@@ -243,7 +243,7 @@ export default function ProblemSet() {
                     Problem Set
                   </h2>
                   {!loading && (
-                    <span className="font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2.5 py-1 rounded-sm border border-blue-200 dark:border-blue-500/20">
+                    <span className="font-mono text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2.5 py-1 rounded-sm border border-blue-200 dark:border-orange-500/20">
                       {total} PROBLEMS
                     </span>
                   )}
@@ -272,7 +272,7 @@ export default function ProblemSet() {
                   onClick={() => setShowFilter((v) => !v)}
                   className={`font-mono text-[12px] font-bold tracking-wide rounded-lg transition-all flex items-center justify-center gap-2 px-5 py-2.5 uppercase shadow-sm ${
                     showFilter || selectedDifficulties.length > 0 || selectedTags.length > 0
-                      ? "bg-blue-500 dark:bg-blue-600 border border-blue-600 dark:border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                      ? "bg-orange-500 dark:bg-orange-600 border border-orange-600 dark:border-orange-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]"
                       : "bg-white/50 dark:bg-[#0F172A]/50 backdrop-blur-sm border border-slate-300 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
@@ -361,7 +361,7 @@ export default function ProblemSet() {
                           setShowFilter(false);
                           setPage(1);
                         }}
-                        className="font-mono text-[12px] font-extrabold tracking-wide rounded-md bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 uppercase transition-colors shadow-md shadow-blue-500/20"
+                        className="font-mono text-[12px] font-extrabold tracking-wide rounded-md bg-orange-600 hover:bg-orange-500 text-white px-6 py-2 uppercase transition-colors shadow-md shadow-orange-500/20"
                       >
                         Apply Filters
                       </button>
@@ -378,7 +378,7 @@ export default function ProblemSet() {
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50">
                       <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase w-20 text-center">Status</th>
-                      <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase">Problem Info</th>
+                      <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase">Problem Title</th>
                       <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase text-center w-40">Acceptance</th>
                       <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase text-center w-32">Difficulty</th>
                       <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase text-center w-24">Save</th>
@@ -423,14 +423,14 @@ export default function ProblemSet() {
                         >
                           <td className="px-6 py-5 text-center relative">
                              {/* Border line indicator */}
-                             <div className="absolute inset-y-0 left-0 w-1 bg-blue-500 scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center rounded-r-full" />
+                             <div className="absolute inset-y-0 left-0 w-1 bg-orange-500 scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center" />
                              
-                             <div className="font-mono text-[13px] font-bold text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors">
+                             <div className="font-mono text-[13px] font-bold text-slate-400 dark:text-slate-500 group-hover:text-orange-500 transition-colors">
                               {problem.id}
                              </div>
                           </td>
                           <td className="px-6 py-5">
-                            <div className="font-sans text-[15px] font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <div className="font-sans text-[15px] text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                               {problem.title}
                             </div>
                           </td>
