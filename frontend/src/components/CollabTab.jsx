@@ -16,6 +16,9 @@ function CollabTab({
   const [error, setError] = useState("");
   const [joinCode, setJoinCode] = useState("");
 
+  const [isCreating, setIsCreating] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(roomCode);
     setCopied(true);
@@ -96,6 +99,12 @@ function CollabTab({
     setCollabActive(false);
   }
 
+  const Spinner = ({ className }) => (
+    <svg className={`animate-spin h-5 w-5 ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  );
 
   if (collabActive) {
     return (
@@ -180,13 +189,17 @@ function CollabTab({
           with your friends.
         </p>
         <button
-          onClick={(e) => {
+          onClick={async (e) => {
+            setIsCreating(true);
             e.preventDefault();
-            handleRoomCreation();
+            await handleRoomCreation();
+            setIsCreating(false);
           }}
-          className="w-full cursor-pointer hover:bg-orange-600 transition-all duration-200 h-10 rounded-md text-white font-semibold tracking-wide bg-orange-500 shadow-sm"
+          disabled={isCreating}
+          className="w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 hover:bg-orange-600 transition-all duration-200 h-10 rounded-md text-white font-semibold tracking-wide bg-orange-500 shadow-sm"
         >
-          Create Room
+          {isCreating && <Spinner className="text-white" />}
+          {isCreating ? "Creating..." : "Create Room"}
         </button>
       </div>
 
@@ -197,9 +210,11 @@ function CollabTab({
           problem.
         </p>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            handleRoomJoin(joinCode, problemId);
+            setIsJoining(true);
+            await handleRoomJoin(joinCode, problemId);
+            setIsJoining(false);
           }}
           className="flex gap-2"
         >
@@ -213,9 +228,11 @@ function CollabTab({
           />
           <button
             type="submit"
-            className="px-4 cursor-pointer hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 h-10 rounded-md text-white dark:text-black font-semibold tracking-wide bg-gray-900 dark:bg-white shadow-sm"
+            disabled={isJoining}
+            className="px-4 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 h-10 rounded-md text-white dark:text-black font-semibold tracking-wide bg-gray-900 dark:bg-white shadow-sm"
           >
-            Join
+            {isJoining && <Spinner className="text-white dark:text-black" />}
+            {isJoining ? "Joining..." : "Join"}
           </button>
         </form>
       </div>
