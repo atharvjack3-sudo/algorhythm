@@ -13,6 +13,7 @@ import discussionRoutes from "./routes/discussion.route.js";
 import contestRoutes from "./routes/contests.route.js";
 import blogRoutes from "./routes/blog.route.js";
 import playgroundRoutes from "./routes/playground.route.js";
+import collabRoutes from "./routes/collab.route.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api", discussionRoutes);
 app.use("/api", contestRoutes);
 app.use("/api", blogRoutes);
 app.use("/api", playgroundRoutes);
+app.use("/api", collabRoutes);
 
 
 export default app;
