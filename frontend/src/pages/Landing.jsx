@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/navico/main_logo.png";
+import logo from "../assets/navico/light_mode_logo.png";
 import { NavLink } from "react-router-dom";
 
 function useReveal() {
@@ -489,12 +489,7 @@ export default function AlgorhythmLanding() {
       <div className="max-w-[1100px] mx-auto px-6">
         {/* HERO */}
         <div className="py-[120px] pb-20 text-center relative">
-          <Reveal className="mb-7">
-            <span className="inline-flex select-none items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-orange-500/10 dark:bg-orange-600/10 text-orange-500 dark:text-orange-400">
-              <span className="select-none w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400 animate-pulse"></span>
-              Now in Public Beta
-            </span>
-          </Reveal>
+          
           <Reveal delay={100}>
             <h1 className="select-none text-[clamp(48px,8vw,88px)] font-medium leading-[1.04] tracking-[-0.03em] mb-6">
               Think in algorithms.
@@ -1482,9 +1477,7 @@ export default function AlgorhythmLanding() {
               Teamwork makes the Dreamwork.
             </h2>
             <p className="text-[17px] text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
-              Discuss your approach, get code reviewed, discover a DP solution
-              where you used brute force. The discussion board is where real
-              learning happens.
+              Work, debug, solve problems together on a shared Integrated Development Environment with your friends. Whether is a complex DP state machine, or a clever Greedy problem.
             </p>
           </Reveal>
 
@@ -2085,7 +2078,7 @@ export default function AlgorhythmLanding() {
               <div className="flex items-center gap-2.5 mb-3.5">
                 <img
                   src={logo}
-                  className="w-50 not-dark:invert"
+                  className="w-50 dark:brightness-0 dark:invert-100"
                   alt="Algorhythm"
                 />
               </div>
@@ -2184,7 +2177,7 @@ export default function AlgorhythmLanding() {
           </div>
           <div className="flex items-center justify-between pt-6 border-t border-black/10 dark:border-white/10">
             <div className="text-[13px] font-semibold text-[#888] dark:text-[#555]">
-              © 2026 Algorhythm. Built by Atharv Dubey.
+              Built by Atharv Dubey.
             </div>
             <div className="flex gap-4">
               <a
@@ -2199,14 +2192,14 @@ export default function AlgorhythmLanding() {
                 target="_blank"
                 className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                GitHub1
+                GitHub (1)
               </a>
               <a
                 href="https://github.com/atharvjack3-sudo/algorhythm"
                 target="_blank"
                 className="text-[13px] text-[#888] dark:text-[#555] no-underline hover:text-[#0d0d0d] dark:hover:text-[#f0f0ee] transition-colors"
               >
-                GitHub2
+                GitHub (2)
               </a>
             </div>
           </div>
