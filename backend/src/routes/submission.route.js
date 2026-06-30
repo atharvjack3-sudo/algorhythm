@@ -58,6 +58,273 @@ function mapVerdict(description) {
 /**
  * POST /api/submissions
  */
+// router.post("/submissions", authMiddleware, async (req, res) => {
+//   const userId = req.user.id;
+//   const { problemId, language, code } = req.body;
+
+//   if (!LANGUAGE_MAP[language] || !code || !problemId) {
+//     return res.status(400).json({ error: "Invalid submission data" });
+//   }
+
+//   const conn = await db.connect();
+
+//   try {
+//     /* =======================
+//        Problem & Validation
+//     ======================= */
+//     const { rows: problemRows } = await conn.query(
+//       `SELECT is_hidden FROM problems WHERE id = $1`,
+//       [problemId]
+//     );
+
+//     if (problemRows.length === 0 || problemRows[0].is_hidden) {
+//       return res.status(404).json({ error: "Problem not found" });
+//     }
+
+//     const { rows: testcases } = await conn.query(
+//       `SELECT * FROM problem_testcases WHERE problem_id = $1 ORDER BY id`,
+//       [problemId]
+//     );
+
+//     if (testcases.length === 0) {
+//       return res.status(400).json({ error: "No testcases found" });
+//     }
+
+//     /* =======================
+//        Judge0 Execution
+//     ======================= */
+//     let finalVerdict = "AC";
+//     let hiddenFailedIndex = null;
+//     const sampleResults = [];
+//     let hiddenCount = 0;
+    
+//     let finalCO = null;
+//     let finalErr = null;
+//     let maxRuntimeMs = 0;
+//     let maxMemoryKb = 0;
+    
+//     const codeBase64 = Buffer.from(code).toString("base64");
+
+//     // Calculate dynamic limits
+//     const multipliers = LIMIT_MULTIPLIERS[language] || { time: 2.0, memory: 2.0 };
+//     const timeLimit = BASE_TIME_LIMIT_SEC * multipliers.time;
+//     const memoryLimit = BASE_MEMORY_LIMIT_KB * multipliers.memory;
+
+//     for (let i = 0; i < testcases.length; i++) {
+//       const tc = testcases[i];
+
+//       const input = await fs.readFile(path.join(process.cwd(), tc.input_path), "utf-8");
+//       const expectedOutput = await fs.readFile(path.join(process.cwd(), tc.output_path), "utf-8");
+
+//       const judgeRes = await axios.post(
+//         JUDGE0_URL, 
+//         {
+//           source_code: codeBase64,
+//           language_id: LANGUAGE_MAP[language],
+//           stdin: Buffer.from(input).toString("base64"),
+//           expected_output: Buffer.from(expectedOutput).toString("base64"), // Let Judge0 compare
+//           cpu_time_limit: timeLimit,
+//           memory_limit: memoryLimit
+//         },
+//         {
+//           headers: {
+//             "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
+//             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+//           }
+//         }
+//       );
+
+//       const judgeStatus = judgeRes.data.status;
+//       const runtimeMs = Math.round(parseFloat(judgeRes.data.time || "0") * 1000);
+//       const memoryKb = judgeRes.data.memory || 0;
+
+//       maxRuntimeMs = Math.max(maxRuntimeMs, runtimeMs);
+//       maxMemoryKb = Math.max(maxMemoryKb, memoryKb);
+
+//       const isAccepted = judgeStatus.id === 3;
+//       const currentVerdict = isAccepted ? "AC" : mapVerdict(judgeStatus.description);
+
+//       if (tc.is_sample) {
+//         sampleResults.push({
+//           index: sampleResults.length + 1,
+//           verdict: currentVerdict,
+//         });
+//       } else {
+//         hiddenCount++;
+//       }
+
+//       if (!isAccepted) {
+//         finalVerdict = currentVerdict;
+        
+//         // Extract CE and RE data for the frontend debugger
+//         if (judgeRes.data.compile_output) {
+//           finalCO = Buffer.from(judgeRes.data.compile_output, "base64").toString("utf-8");
+//         }
+//         if (judgeRes.data.stderr) {
+//           finalErr = Buffer.from(judgeRes.data.stderr, "base64").toString("utf-8");
+//         }
+
+//         if (!tc.is_sample) {
+//           hiddenFailedIndex = hiddenCount;
+//           break; // Stop on first hidden failure
+//         }
+//       }
+//     }
+
+//     /* =======================
+//        DB TRANSACTION
+//     ======================= */
+//     await conn.query('BEGIN');
+
+//     await conn.query(
+//       `INSERT INTO submissions (user_id, problem_id, language, verdict, runtime_ms, memory_kb, code) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+//       [userId, problemId, language, finalVerdict, maxRuntimeMs, maxMemoryKb, code]
+//     );
+
+//     await conn.query(
+//       `UPDATE user_stats SET total_submissions = total_submissions + 1 WHERE user_id = $1`,
+//       [userId]
+//     );
+
+//     if (finalVerdict === "AC") {
+//       await conn.query(
+//         `UPDATE user_stats SET successful_submissions = successful_submissions + 1 WHERE user_id = $1`,
+//         [userId]
+//       );
+//     }
+
+//     await conn.query(
+//       `
+//       UPDATE user_stats
+//       SET acceptance_rate = CASE WHEN total_submissions = 0 THEN NULL ELSE (successful_submissions::DECIMAL / total_submissions) * 100 END
+//       WHERE user_id = $1
+//       `,
+//       [userId]
+//     );
+
+//     await conn.query(
+//       `
+//       UPDATE problem_stats
+//       SET total_submissions = total_submissions + 1, total_accepted = total_accepted + $1
+//       WHERE problem_id = $2
+//       `,
+//       [finalVerdict === "AC" ? 1 : 0, problemId]
+//     );
+
+//     await conn.query(
+//       `
+//       UPDATE problem_stats
+//       SET acceptance_rate = CASE WHEN total_submissions = 0 THEN NULL ELSE (total_accepted::DECIMAL / total_submissions) * 100 END
+//       WHERE problem_id = $1
+//       `,
+//       [problemId]
+//     );
+
+//     const { rows: statusRows } = await conn.query(
+//       `SELECT status FROM user_problem_status WHERE user_id = $1 AND problem_id = $2`,
+//       [userId, problemId]
+//     );
+//     const statusRow = statusRows[0];
+
+//     if (finalVerdict === "AC" && (!statusRow || statusRow.status !== "solved")) {
+//       const { rows: probRows } = await conn.query(
+//         `SELECT difficulty FROM problems WHERE id = $1`,
+//         [problemId]
+//       );
+//       const problem = probRows[0];
+//       const diffCol = `${problem.difficulty}_solved`;
+
+//       await conn.query(
+//         `UPDATE user_stats SET total_solved = total_solved + 1, ${diffCol} = ${diffCol} + 1 WHERE user_id = $1`,
+//         [userId]
+//       );
+
+//       await conn.query(
+//         `
+//         INSERT INTO user_problem_status (user_id, problem_id, status, solved_at)
+//         VALUES ($1, $2, 'solved', NOW())
+//         ON CONFLICT (user_id, problem_id) DO UPDATE SET status = 'solved', solved_at = NOW()
+//         `,
+//         [userId, problemId]
+//       );
+//     }
+
+//     // Streak Calculation
+//     if (finalVerdict === "AC") {
+//       await conn.query(
+//         `
+//         UPDATE user_stats
+//         SET
+//           current_streak = CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END,
+//           longest_streak = GREATEST(longest_streak, CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END),
+//           last_active_date = CURRENT_DATE
+//         WHERE user_id = $1
+//         `,
+//         [userId]
+//       );
+//     }
+
+//     // Topic Ratings Update
+//     const { rows: topicRows } = await conn.query(
+//       `SELECT topic_id FROM problem_topics WHERE problem_id = $1`,
+//       [problemId]
+//     );
+
+//     const numTopics = topicRows.length;
+//     const solved = finalVerdict === "AC";
+
+//     for (const row of topicRows) {
+//       const topicId = row.topic_id;
+
+//       await conn.query(
+//         `INSERT INTO user_topic_rating (user_id, topic_id) VALUES ($1, $2) ON CONFLICT (user_id, topic_id) DO NOTHING`,
+//         [userId, topicId]
+//       );
+
+//       const { rows: utrRows } = await conn.query(
+//         `SELECT rating, attempts FROM user_topic_rating WHERE user_id = $1 AND topic_id = $2`,
+//         [userId, topicId]
+//       );
+//       const utr = utrRows[0];
+
+//       const { rows: pRows } = await conn.query(
+//         `SELECT difficulty FROM problems WHERE id = $1`,
+//         [problemId]
+//       );
+//       const probData = pRows[0];
+
+//       const newRating = updateRating(
+//         utr.rating, difficultyToRating(probData.difficulty), utr.attempts, solved, numTopics
+//       );
+
+//       await conn.query(
+//         `
+//         UPDATE user_topic_rating
+//         SET rating = $1, attempts = attempts + 1, solves = solves + $2
+//         WHERE user_id = $3 AND topic_id = $4
+//         `,
+//         [newRating, solved ? 1 : 0, userId, topicId]
+//       );
+//     }
+
+//     await conn.query('COMMIT');
+
+//     res.json({
+//       verdict: finalVerdict,
+//       samples: sampleResults,
+//       hidden_failed: hiddenFailedIndex !== null ? `Hidden testcase #${hiddenFailedIndex}` : null,
+//       error: finalCO || finalErr || null
+//     });
+
+//   } catch (err) {
+//     await conn.query('ROLLBACK');
+//     console.error("Judge0/DB Error:", err.message);
+//     res.status(500).json({ error: "Submission failed" });
+//   } finally {
+//     conn.release();
+//   }
+// });
+
 router.post("/submissions", authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const { problemId, language, code } = req.body;
@@ -66,14 +333,16 @@ router.post("/submissions", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "Invalid submission data" });
   }
 
-  const conn = await db.connect();
+  let problemDifficulty;
+  let testcases = [];
 
+  /* =======================
+      DB Read
+  ======================= */
+  const readConn = await db.connect();
   try {
-    /* =======================
-       Problem & Validation
-    ======================= */
-    const { rows: problemRows } = await conn.query(
-      `SELECT is_hidden FROM problems WHERE id = $1`,
+    const { rows: problemRows } = await readConn.query(
+      `SELECT is_hidden, difficulty FROM problems WHERE id = $1`,
       [problemId]
     );
 
@@ -81,250 +350,269 @@ router.post("/submissions", authMiddleware, async (req, res) => {
       return res.status(404).json({ error: "Problem not found" });
     }
 
-    const { rows: testcases } = await conn.query(
+    problemDifficulty = problemRows[0].difficulty;
+
+    const { rows: tcRows } = await readConn.query(
       `SELECT * FROM problem_testcases WHERE problem_id = $1 ORDER BY id`,
       [problemId]
     );
 
-    if (testcases.length === 0) {
+    if (tcRows.length === 0) {
       return res.status(400).json({ error: "No testcases found" });
     }
 
-    /* =======================
-       Judge0 Execution
-    ======================= */
-    let finalVerdict = "AC";
-    let hiddenFailedIndex = null;
-    const sampleResults = [];
-    let hiddenCount = 0;
+    testcases = tcRows;
+  } catch (err) {
+    console.error("DB Read Error:", err.message);
+    return res.status(500).json({ error: "Database error during validation" });
+  } finally {
+    readConn.release(); 
+  }
+
+  /* =======================
+     Judge0 Execution
+  ======================= */
+  const codeBase64 = Buffer.from(code).toString("base64");
+  const multipliers = LIMIT_MULTIPLIERS[language] || { time: 2.0, memory: 2.0 };
+  const timeLimit = BASE_TIME_LIMIT_SEC * multipliers.time;
+  const memoryLimit = BASE_MEMORY_LIMIT_KB * multipliers.memory;
+
+  let finalVerdict = "AC";
+  let hiddenFailedIndex = null;
+  const sampleResults = [];
+  
+  let finalCO = null;
+  let finalErr = null;
+  let maxRuntimeMs = 0;
+  let maxMemoryKb = 0;
+
+  try {
     
-    let finalCO = null;
-    let finalErr = null;
-    let maxRuntimeMs = 0;
-    let maxMemoryKb = 0;
+    const fileReadPromises = testcases.map(async (tc) => {
+      const [input, expectedOutput] = await Promise.all([
+        fs.readFile(path.join(process.cwd(), tc.input_path), "utf-8"),
+        fs.readFile(path.join(process.cwd(), tc.output_path), "utf-8")
+      ]);
+      return { tc, input, expectedOutput };
+    });
     
-    const codeBase64 = Buffer.from(code).toString("base64");
+    const loadedTestcases = await Promise.all(fileReadPromises);
 
-    // Calculate dynamic limits
-    const multipliers = LIMIT_MULTIPLIERS[language] || { time: 2.0, memory: 2.0 };
-    const timeLimit = BASE_TIME_LIMIT_SEC * multipliers.time;
-    const memoryLimit = BASE_MEMORY_LIMIT_KB * multipliers.memory;
+    const sampleTestcases = loadedTestcases.filter(item => item.tc.is_sample);
+    const hiddenTestcases = loadedTestcases.filter(item => !item.tc.is_sample);
 
-    for (let i = 0; i < testcases.length; i++) {
-      const tc = testcases[i];
-
-      const input = await fs.readFile(path.join(process.cwd(), tc.input_path), "utf-8");
-      const expectedOutput = await fs.readFile(path.join(process.cwd(), tc.output_path), "utf-8");
-
+    for (const { tc, input, expectedOutput } of sampleTestcases) {
       const judgeRes = await axios.post(
-        JUDGE0_URL, 
+        JUDGE0_URL,
         {
           source_code: codeBase64,
           language_id: LANGUAGE_MAP[language],
           stdin: Buffer.from(input).toString("base64"),
-          expected_output: Buffer.from(expectedOutput).toString("base64"), // Let Judge0 compare
+          expected_output: Buffer.from(expectedOutput).toString("base64"),
           cpu_time_limit: timeLimit,
           memory_limit: memoryLimit
         },
-        {
-          headers: {
-            "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
-            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-          }
-        }
+        { headers: { "X-RapidAPI-Key": process.env.JUDGE0_API_KEY, "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com" } }
       );
 
-      const judgeStatus = judgeRes.data.status;
-      const runtimeMs = Math.round(parseFloat(judgeRes.data.time || "0") * 1000);
-      const memoryKb = judgeRes.data.memory || 0;
+      const data = judgeRes.data;
+      const runtimeMs = Math.round(parseFloat(data.time || "0") * 1000);
+      const memoryKb = data.memory || 0;
 
       maxRuntimeMs = Math.max(maxRuntimeMs, runtimeMs);
       maxMemoryKb = Math.max(maxMemoryKb, memoryKb);
 
-      const isAccepted = judgeStatus.id === 3;
-      const currentVerdict = isAccepted ? "AC" : mapVerdict(judgeStatus.description);
+      const isAccepted = data.status.id === 3;
+      const currentVerdict = isAccepted ? "AC" : mapVerdict(data.status.description);
 
-      if (tc.is_sample) {
-        sampleResults.push({
-          index: sampleResults.length + 1,
-          verdict: currentVerdict,
-        });
-      } else {
-        hiddenCount++;
-      }
+      sampleResults.push({ index: sampleResults.length + 1, verdict: currentVerdict });
 
-      if (!isAccepted) {
+      // Track the first failure
+      if (!isAccepted && finalVerdict === "AC") {
         finalVerdict = currentVerdict;
+        hiddenFailedIndex = -(sampleResults.length); 
         
-        // Extract CE and RE data for the frontend debugger
-        if (judgeRes.data.compile_output) {
-          finalCO = Buffer.from(judgeRes.data.compile_output, "base64").toString("utf-8");
-        }
-        if (judgeRes.data.stderr) {
-          finalErr = Buffer.from(judgeRes.data.stderr, "base64").toString("utf-8");
-        }
+        if (data.compile_output) finalCO = Buffer.from(data.compile_output, "base64").toString("utf-8");
+        if (data.stderr) finalErr = Buffer.from(data.stderr, "base64").toString("utf-8");
+      }
+    }
 
-        if (!tc.is_sample) {
-          hiddenFailedIndex = hiddenCount;
-          break; // Stop on first hidden failure
+    // 2. Sequentially execute hidden cases 
+    if (finalVerdict === "AC") {
+      let hiddenCount = 0;
+      for (const { tc, input, expectedOutput } of hiddenTestcases) {
+        hiddenCount++;
+        const judgeRes = await axios.post(
+          JUDGE0_URL,
+          {
+            source_code: codeBase64,
+            language_id: LANGUAGE_MAP[language],
+            stdin: Buffer.from(input).toString("base64"),
+            expected_output: Buffer.from(expectedOutput).toString("base64"),
+            cpu_time_limit: timeLimit,
+            memory_limit: memoryLimit
+          },
+          { headers: { "X-RapidAPI-Key": process.env.JUDGE0_API_KEY, "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com" } }
+        );
+
+        const data = judgeRes.data;
+        const runtimeMs = Math.round(parseFloat(data.time || "0") * 1000);
+        const memoryKb = data.memory || 0;
+
+        maxRuntimeMs = Math.max(maxRuntimeMs, runtimeMs);
+        maxMemoryKb = Math.max(maxMemoryKb, memoryKb);
+
+        if (data.status.id !== 3) {
+          finalVerdict = mapVerdict(data.status.description);
+          hiddenFailedIndex = hiddenCount; 
+          
+          if (data.compile_output) finalCO = Buffer.from(data.compile_output, "base64").toString("utf-8");
+          if (data.stderr) finalErr = Buffer.from(data.stderr, "base64").toString("utf-8");
+          break; // Stop execution on first hidden failure
         }
       }
     }
 
     /* =======================
-       DB TRANSACTION
+       DB Job
     ======================= */
-    await conn.query('BEGIN');
+    const isAC = finalVerdict === "AC";
+    const acInt = isAC ? 1 : 0;
+    
+    const writeConn = await db.connect();
+    try {
+      await writeConn.query('BEGIN');
 
-    await conn.query(
-      `INSERT INTO submissions (user_id, problem_id, language, verdict, runtime_ms, memory_kb, code) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [userId, problemId, language, finalVerdict, maxRuntimeMs, maxMemoryKb, code]
-    );
-
-    await conn.query(
-      `UPDATE user_stats SET total_submissions = total_submissions + 1 WHERE user_id = $1`,
-      [userId]
-    );
-
-    if (finalVerdict === "AC") {
-      await conn.query(
-        `UPDATE user_stats SET successful_submissions = successful_submissions + 1 WHERE user_id = $1`,
-        [userId]
+      // Insert Submission
+      await writeConn.query(
+        `INSERT INTO submissions (user_id, problem_id, language, verdict, runtime_ms, memory_kb, code) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [userId, problemId, language, finalVerdict, maxRuntimeMs, maxMemoryKb, code]
       );
-    }
 
-    await conn.query(
-      `
-      UPDATE user_stats
-      SET acceptance_rate = CASE WHEN total_submissions = 0 THEN NULL ELSE (successful_submissions::DECIMAL / total_submissions) * 100 END
-      WHERE user_id = $1
-      `,
-      [userId]
-    );
+      // User Stats Update
+      await writeConn.query(
+        `
+        UPDATE user_stats 
+        SET 
+          total_submissions = total_submissions + 1,
+          successful_submissions = successful_submissions + $1,
+          acceptance_rate = CASE WHEN total_submissions + 1 = 0 THEN NULL ELSE ((successful_submissions + $1)::DECIMAL / (total_submissions + 1)) * 100 END,
+          current_streak = CASE WHEN $1 = 1 THEN (CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END) ELSE current_streak END,
+          longest_streak = CASE WHEN $1 = 1 THEN GREATEST(longest_streak, CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END) ELSE longest_streak END,
+          last_active_date = CASE WHEN $1 = 1 THEN CURRENT_DATE ELSE last_active_date END
+        WHERE user_id = $2
+        `,
+        [acInt, userId]
+      );
 
-    await conn.query(
-      `
-      UPDATE problem_stats
-      SET total_submissions = total_submissions + 1, total_accepted = total_accepted + $1
-      WHERE problem_id = $2
-      `,
-      [finalVerdict === "AC" ? 1 : 0, problemId]
-    );
+      // Problem Stats Update
+      await writeConn.query(
+        `
+        UPDATE problem_stats
+        SET 
+          total_submissions = total_submissions + 1, 
+          total_accepted = total_accepted + $1,
+          acceptance_rate = CASE WHEN total_submissions + 1 = 0 THEN NULL ELSE ((total_accepted + $1)::DECIMAL / (total_submissions + 1)) * 100 END
+        WHERE problem_id = $2
+        `,
+        [acInt, problemId]
+      );
 
-    await conn.query(
-      `
-      UPDATE problem_stats
-      SET acceptance_rate = CASE WHEN total_submissions = 0 THEN NULL ELSE (total_accepted::DECIMAL / total_submissions) * 100 END
-      WHERE problem_id = $1
-      `,
-      [problemId]
-    );
+      if (isAC) {
+        const { rows: statusRows } = await writeConn.query(
+          `SELECT status FROM user_problem_status WHERE user_id = $1 AND problem_id = $2`,
+          [userId, problemId]
+        );
+        
+        if (!statusRows[0] || statusRows[0].status !== "solved") {
+          const diffCol = `${problemDifficulty}_solved`; 
+          await writeConn.query(`UPDATE user_stats SET total_solved = total_solved + 1, ${diffCol} = ${diffCol} + 1 WHERE user_id = $1`, [userId]);
+          await writeConn.query(
+            `INSERT INTO user_problem_status (user_id, problem_id, status, solved_at) VALUES ($1, $2, 'solved', NOW()) ON CONFLICT (user_id, problem_id) DO UPDATE SET status = 'solved', solved_at = NOW()`,
+            [userId, problemId]
+          );
+        }
+      }
 
-    const { rows: statusRows } = await conn.query(
-      `SELECT status FROM user_problem_status WHERE user_id = $1 AND problem_id = $2`,
-      [userId, problemId]
-    );
-    const statusRow = statusRows[0];
-
-    if (finalVerdict === "AC" && (!statusRow || statusRow.status !== "solved")) {
-      const { rows: probRows } = await conn.query(
-        `SELECT difficulty FROM problems WHERE id = $1`,
+      // Topic Updates
+      const { rows: topicRows } = await writeConn.query(
+        `SELECT topic_id FROM problem_topics WHERE problem_id = $1`,
         [problemId]
       );
-      const problem = probRows[0];
-      const diffCol = `${problem.difficulty}_solved`;
 
-      await conn.query(
-        `UPDATE user_stats SET total_solved = total_solved + 1, ${diffCol} = ${diffCol} + 1 WHERE user_id = $1`,
-        [userId]
-      );
+      if (topicRows.length > 0) {
+        const topicIds = topicRows.map(r => r.topic_id);
+        const numTopics = topicIds.length;
 
-      await conn.query(
-        `
-        INSERT INTO user_problem_status (user_id, problem_id, status, solved_at)
-        VALUES ($1, $2, 'solved', NOW())
-        ON CONFLICT (user_id, problem_id) DO UPDATE SET status = 'solved', solved_at = NOW()
-        `,
-        [userId, problemId]
-      );
+        // Insert new topics to ensure they exist
+        await writeConn.query(
+          `INSERT INTO user_topic_rating (user_id, topic_id) 
+           SELECT $1, unnest($2::int[]) 
+           ON CONFLICT (user_id, topic_id) DO NOTHING`,
+          [userId, topicIds]
+        );
+
+        // Fetch current ratings
+        const { rows: utrRows } = await writeConn.query(
+          `SELECT topic_id, rating, attempts FROM user_topic_rating WHERE user_id = $1 AND topic_id = ANY($2::int[])`,
+          [userId, topicIds]
+        );
+
+        // Compute new ratings
+        const updates = utrRows.map(utr => {
+          const newRating = updateRating(utr.rating, difficultyToRating(problemDifficulty), utr.attempts, isAC, numTopics);
+          return `(${userId}, ${utr.topic_id}, ${newRating}, 1, ${acInt})`;
+        });
+
+        // Update all topics
+        if (updates.length > 0) {
+          const valuesStr = updates.join(', ');
+          await writeConn.query(`
+            UPDATE user_topic_rating as t
+            SET rating = v.rating, attempts = t.attempts + v.attempts_inc, solves = t.solves + v.solves_inc
+            FROM (VALUES ${valuesStr}) AS v(user_id, topic_id, rating, attempts_inc, solves_inc)
+            WHERE t.user_id = v.user_id AND t.topic_id = v.topic_id
+          `);
+        }
+      }
+
+      await writeConn.query('COMMIT');
+    } catch (dbErr) {
+      await writeConn.query('ROLLBACK');
+      console.error("DB Sync Error:", dbErr.message);
+      if (!res.headersSent) {
+        return res.status(500).json({ error: "Failed to record submission statistics." });
+      }
+    } finally {
+      writeConn.release();
     }
 
-    // Streak Calculation
-    if (finalVerdict === "AC") {
-      await conn.query(
-        `
-        UPDATE user_stats
-        SET
-          current_streak = CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END,
-          longest_streak = GREATEST(longest_streak, CASE WHEN last_active_date = CURRENT_DATE THEN current_streak WHEN last_active_date = CURRENT_DATE - INTERVAL '1 day' THEN current_streak + 1 ELSE 1 END),
-          last_active_date = CURRENT_DATE
-        WHERE user_id = $1
-        `,
-        [userId]
-      );
+    /* =======================
+       Client Response
+    ======================= */
+    if (!res.headersSent) {
+      let hiddenFailedMessage = null;
+      if (finalVerdict !== "AC" && hiddenFailedIndex !== null) {
+        hiddenFailedMessage = hiddenFailedIndex < 0 
+          ? `Failed on Pretest #${Math.abs(hiddenFailedIndex)}` 
+          : `Hidden testcase #${hiddenFailedIndex}`;
+      }
+
+      res.json({
+        verdict: finalVerdict,
+        samples: sampleResults,
+        hidden_failed: hiddenFailedMessage,
+        error: finalCO || finalErr || null
+      });
     }
-
-    // Topic Ratings Update
-    const { rows: topicRows } = await conn.query(
-      `SELECT topic_id FROM problem_topics WHERE problem_id = $1`,
-      [problemId]
-    );
-
-    const numTopics = topicRows.length;
-    const solved = finalVerdict === "AC";
-
-    for (const row of topicRows) {
-      const topicId = row.topic_id;
-
-      await conn.query(
-        `INSERT INTO user_topic_rating (user_id, topic_id) VALUES ($1, $2) ON CONFLICT (user_id, topic_id) DO NOTHING`,
-        [userId, topicId]
-      );
-
-      const { rows: utrRows } = await conn.query(
-        `SELECT rating, attempts FROM user_topic_rating WHERE user_id = $1 AND topic_id = $2`,
-        [userId, topicId]
-      );
-      const utr = utrRows[0];
-
-      const { rows: pRows } = await conn.query(
-        `SELECT difficulty FROM problems WHERE id = $1`,
-        [problemId]
-      );
-      const probData = pRows[0];
-
-      const newRating = updateRating(
-        utr.rating, difficultyToRating(probData.difficulty), utr.attempts, solved, numTopics
-      );
-
-      await conn.query(
-        `
-        UPDATE user_topic_rating
-        SET rating = $1, attempts = attempts + 1, solves = solves + $2
-        WHERE user_id = $3 AND topic_id = $4
-        `,
-        [newRating, solved ? 1 : 0, userId, topicId]
-      );
-    }
-
-    await conn.query('COMMIT');
-
-    res.json({
-      verdict: finalVerdict,
-      samples: sampleResults,
-      hidden_failed: hiddenFailedIndex !== null ? `Hidden testcase #${hiddenFailedIndex}` : null,
-      error: finalCO || finalErr || null
-    });
 
   } catch (err) {
-    await conn.query('ROLLBACK');
-    console.error("Judge0/DB Error:", err.message);
-    res.status(500).json({ error: "Submission failed" });
-  } finally {
-    conn.release();
+    console.error("Judge0 Execution Error:", err.message);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Execution environment failed" });
+    }
   }
 });
-
 /**
  * GET /api/submissions/:problemId
  */
