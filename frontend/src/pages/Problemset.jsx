@@ -377,7 +377,7 @@ export default function ProblemSet() {
                 <table className="w-full text-left border-collapse whitespace-nowrap">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50">
-                      <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase w-20 text-center">Status</th>
+                      <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase w-20 text-center">ID</th>
                       <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase">Problem Title</th>
                       <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase text-center w-40">Acceptance</th>
                       <th className="px-6 py-4 font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase text-center w-32">Difficulty</th>
