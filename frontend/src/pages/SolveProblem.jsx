@@ -11,10 +11,15 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
-import SubmissionAnim from "../components/submissionAnim";
 
 import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
+import SubmissionAnim from "../components/submissionAnim";
+import CollabTab from "../components/CollabTab";
+
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { MonacoBinding } from "y-monaco";
 
 const themeModules = import.meta.glob("../themes/*.json");
 export const AVAILABLE_THEMES = Object.keys(themeModules)
@@ -44,6 +49,7 @@ const TABS = [
   "Run",
   "Result",
   "Discussion",
+  "Collab",
 ];
 
 /* =========================
@@ -60,8 +66,16 @@ function MarkdownRenderer({ content, className = "" }) {
         prose-headings:font-sans prose-headings:font-bold prose-headings:tracking-tight
         prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
         prose-a:text-blue-600 dark:prose-a:text-blue-400
-        prose-code:font-mono prose-code:text-[13px] prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-[3px]
-        prose-pre:font-mono prose-pre:text-[13px] prose-pre:bg-slate-50 dark:prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[3px] prose-pre:text-slate-800 dark:prose-pre:text-slate-200
+        
+        /* 1. Target INLINE code only */
+        [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[13px] [&_:not(pre)>code]:bg-slate-100 dark:[&_:not(pre)>code]:bg-slate-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px]
+        
+        /* 2. Container PRE styles */
+        prose-pre:p-0 prose-pre:bg-[#282c34] prose-pre:border prose-pre:border-slate-700 dark:prose-pre:border-slate-800 prose-pre:rounded-[5px]
+        
+        /* 3. Force highlight.js CODE block to use JetBrains Mono, 13px size, and better line height */
+        [&_pre_code.hljs]:!bg-transparent [&_pre_code.hljs]:p-4 [&_pre_code.hljs]:!text-[#abb2bf] [&_pre_code.hljs]:!font-mono [&_pre_code.hljs]:!text-[13px] [&_pre_code.hljs]:!leading-[1.6]
+        
         ${className}
       `}
     >
@@ -80,7 +94,7 @@ export default function SolveProblem() {
   const { user, loading: authLoading } = useAuth();
   const { theme } = useTheme();
   const [editorTheme, setEditorTheme] = useState(
-    theme === "light" ? "light" : "vs-dark",
+    theme === "dark" ? "vs-dark" : "light",
   );
   const [activeTab, setActiveTab] = useState("Problem");
   const [language, setLanguage] = useState("cpp");
@@ -104,6 +118,16 @@ export default function SolveProblem() {
   const monacoRef = useRef(null);
   const editorRef = useRef(null);
 
+  /* ==============
+  Collab States
+  ============= */
+  const [collabActive, setCollabActive] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [collabData, setCollabData] = useState(null);
+  const ydocRef = useRef(null);
+  const providerRef = useRef(null);
+  const bindingRef = useRef(null);
+  const listenerRef = useRef(null);
   /* =========================
      RESIZER LOGIC
   ========================= */
@@ -117,6 +141,103 @@ export default function SolveProblem() {
   function handleBeforeMount(monaco) {
     monacoRef.current = monaco;
   }
+  function handleCollabEditorMount(editor, monaco) {
+    if (!collabData || !collabData.wsRoomId) {
+      console.error("Collab data is missing, cannot connect to WebSocket!");
+      return;
+    }
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+
+    const ydoc = new Y.Doc();
+    const provider = new WebsocketProvider(
+      "wss://algorhythm-6zhv.onrender.com/",
+      collabData.wsRoomId,
+      ydoc,
+    );
+
+
+    provider.awareness.setLocalStateField("user", {
+      name: user.username,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    });
+
+    const yText = ydoc.getText("code");
+    const meta = ydoc.getMap("meta");
+
+    if (isOwner && !meta.get("initialized")) {
+      meta.set("initialized", true);
+      yText.insert(0, code);
+    }
+
+    const binding = new MonacoBinding(
+      yText,
+      editor.getModel(),
+      new Set([editor]),
+      provider.awareness,
+    );
+
+    const listener = editor.onDidChangeModelContent(() => {
+      setCode(editor.getValue());
+    });
+
+    ydocRef.current = ydoc;
+    providerRef.current = provider;
+    bindingRef.current = binding;
+    listenerRef.current = listener;
+  }
+  const colors = [
+    "#ef4444",
+    "#3b82f6",
+    "#22c55e",
+    "#f59e0b",
+    "#8b5cf6",
+    "#ec4899",
+    "#06b6d4",
+    "#84cc16",
+  ];
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (collabActive) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [collabActive]);
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (!collabActive) return;
+
+    return () => {
+      listenerRef.current?.dispose();
+
+      if (isOwner && collabData) {
+        api
+          .post("/collab/terminate-room", {
+            roomCode: collabData.roomCode,
+          })
+          .catch(console.error);
+      }
+
+      bindingRef.current?.destroy();
+      providerRef.current?.destroy();
+      ydocRef.current?.destroy();
+
+      listenerRef.current = null;
+      bindingRef.current = null;
+      providerRef.current = null;
+      ydocRef.current = null;
+
+      setIsOwner(false);
+      setCollabData(null);
+    };
+  }, [collabActive]);
+
   useEffect(() => {
     if (!monacoRef.current) return;
     if (editorTheme === "vs-dark") return;
@@ -164,9 +285,6 @@ export default function SolveProblem() {
     };
   }, [isDragging]);
 
-  /* =========================
-     API CALLS
-  ========================= */
   useEffect(() => {
     async function fetchProblem() {
       try {
@@ -267,9 +385,6 @@ export default function SolveProblem() {
     }
   }
 
-  /* =========================
-     LOADING & ERROR STATES
-  ========================= */
   if (loading) {
     return (
       <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -314,10 +429,30 @@ export default function SolveProblem() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+        
+        .yRemoteSelectionHead {
+          position: absolute;
+          border-left-width: 2px !important;
+          border-left-style: solid !important;
+          height: 100%;
+          box-sizing: border-box;
+          z-index: 99;
+        }
+
+        .yRemoteSelectionHead::after {
+          position: absolute;
+          content: ' ';
+          border-width: 3px !important;
+          border-style: solid !important;
+          border-radius: 4px;
+          left: -4px;
+          top: -5px;
+        }
       `}</style>
 
       <div className="w-full h-[calc(100dvh-56px)] overflow-y-auto md:overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row font-sans transition-colors duration-200 relative">
-        {/* Invisible overlay while dragging to prevent Monaco Editor from swallowing mouse events */}
+       
         {isDragging && (
           <div className="fixed inset-0 z-[200] cursor-col-resize" />
         )}
@@ -671,6 +806,16 @@ export default function SolveProblem() {
                 )}
               </div>
             )}
+            <div className={activeTab === "Collab" ? "block" : "hidden"}>
+              <CollabTab
+                collabActive={collabActive}
+                setCollabActive={setCollabActive}
+                problemId={problemId}
+                isOwner={isOwner}
+                setIsOwner={setIsOwner}
+                setCollabData={setCollabData}
+              />
+            </div>
 
             {/* ===== SUBMISSIONS ===== */}
             {activeTab === "Submissions" && (
@@ -839,34 +984,65 @@ export default function SolveProblem() {
 
           {/* Monaco Editor Container */}
           <div className="flex-1 w-full relative">
-            <Editor
-              height="100%"
-              theme={editorTheme}
-              beforeMount={handleBeforeMount}
-              onMount={handleEditorDidMount}
-              language={language}
-              defaultValue={code}
-              onChange={(value) => setCode(value ?? "")}
-              options={{
-                fontSize: 13,
-                fontFamily: "'JetBrains Mono', monospace",
-                lineNumbers: "on",
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                quickSuggestions: false,
-                parameterHints: { enabled: false },
-                suggestOnTriggerCharacters: false,
-                tabSize: 4,
-                wordWrap: "on",
-                cursorBlinking: "smooth",
-                renderLineHighlight: "all",
-                smoothScrolling: true,
-                padding: { top: 16 },
-                overviewRulerBorder: false,
-                hideCursorInOverviewRuler: true,
-              }}
-            />
+            {collabActive && collabData ? (
+              <Editor
+                key="collab"
+                height="100%"
+                theme={editorTheme}
+                beforeMount={handleBeforeMount}
+                onMount={handleCollabEditorMount}
+                language={language}
+                options={{
+                  fontSize: 13,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  lineNumbers: "on",
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  quickSuggestions: false,
+                  parameterHints: { enabled: false },
+                  suggestOnTriggerCharacters: false,
+                  tabSize: 4,
+                  wordWrap: "on",
+                  cursorBlinking: "smooth",
+                  renderLineHighlight: "all",
+                  smoothScrolling: true,
+                  padding: { top: 16 },
+                  overviewRulerBorder: false,
+                  hideCursorInOverviewRuler: true,
+                }}
+              />
+            ) : (
+              <Editor
+                key="regular"
+                height="100%"
+                theme={editorTheme}
+                beforeMount={handleBeforeMount}
+                onMount={handleEditorDidMount}
+                language={language}
+                defaultValue={code}
+                onChange={(value) => setCode(value ?? "")}
+                options={{
+                  fontSize: 13,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  lineNumbers: "on",
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  quickSuggestions: false,
+                  parameterHints: { enabled: false },
+                  suggestOnTriggerCharacters: false,
+                  tabSize: 4,
+                  wordWrap: "on",
+                  cursorBlinking: "smooth",
+                  renderLineHighlight: "all",
+                  smoothScrolling: true,
+                  padding: { top: 16 },
+                  overviewRulerBorder: false,
+                  hideCursorInOverviewRuler: true,
+                }}
+              />
+            )}
           </div>
         </section>
 
@@ -900,7 +1076,7 @@ export default function SolveProblem() {
                       className="font-mono text-[10px] font-bold tracking-[0.06em] rounded-[3px] bg-transparent text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700 px-3 py-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
                     >
                       {complexity?.id === openSubmission.id
-                        ? "ANALYZED ✓"
+                        ? "ANALYZED"
                         : "AI ANALYSIS"}
                     </button>
                   )}
