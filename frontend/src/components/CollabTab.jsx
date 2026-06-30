@@ -210,8 +210,10 @@ function CollabTab({
         </p>
         <button
           onClick={async (e) => {
-            setIsCreating(true);
             e.preventDefault();
+            const res = window.confirm("Are you sure you want to create a collab room?");
+            if (!res) return;
+            setIsCreating(true);
             await handleRoomCreation();
             setIsCreating(false);
           }}
