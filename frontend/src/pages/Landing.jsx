@@ -1394,9 +1394,9 @@ export default function AlgorhythmLanding() {
                     </span>
                   </div>
                   <div className="text-[13px] text-[#555] dark:text-[#a0a0a8] leading-[1.6]">
-                    Here's my DFS approach — runs in{" "}
+                    Here's my Dijkstra approach — runs in{" "}
                     <code className="bg-white dark:bg-[#13151a] px-1.5 py-[1px] rounded text-[12px] font-mono text-[#2563eb] dark:text-[#4d8dff]">
-                      O(V+E)
+                      O(E log V)
                     </code>
                     . Anyone see a way to squeeze the inner loop? It hits TLE on
                     test 46 specifically.
@@ -1416,11 +1416,11 @@ export default function AlgorhythmLanding() {
                     </span>
                   </div>
                   <div className="text-[13px] text-[#555] dark:text-[#a0a0a8] leading-[1.6]">
-                    Use Dijkstra instead — you get{" "}
+                    Use BFS instead — you get{" "}
                     <code className="bg-white dark:bg-[#13151a] px-1.5 py-[1px] rounded text-[12px] font-mono text-[#2563eb] dark:text-[#4d8dff]">
-                      O(E log V)
+                      O(E + V)
                     </code>
-                    . Your DFS revisits nodes. Try keeping a{" "}
+                    . Since we have an unweighted graph, regular queue maintains the ordering naturally. Try keeping a{" "}
                     <code className="bg-white dark:bg-[#13151a] px-1.5 py-[1px] rounded text-[12px] font-mono text-[#2563eb] dark:text-[#4d8dff]">
                       dist[]
                     </code>{" "}
@@ -1461,6 +1461,7 @@ export default function AlgorhythmLanding() {
                   );
                 })}
               </div>
+              
 
               <div className="mt-3.5 flex justify-between items-center">
                 <div className="text-[12px] text-[#888] dark:text-[#555]">
@@ -1468,6 +1469,125 @@ export default function AlgorhythmLanding() {
                 </div>
                 <div className="text-[13px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee]">
                   148-day streak
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+
+        {/* Collab Bento */}
+        <div className="pb-[100px]">
+          <Reveal className="text-center mb-16">
+            <h2 className="text-[clamp(36px,5vw,56px)] font-medium tracking-[-0.025em] leading-[1.1] mt-4">
+              Teamwork makes the Dreamwork.
+            </h2>
+            <p className="text-[17px] text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
+              Discuss your approach, get code reviewed, discover a DP solution
+              where you used brute force. The discussion board is where real
+              learning happens.
+            </p>
+          </Reveal>
+
+<div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
+            {/* Bento */}
+            <Reveal className="col-span-12 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
+              <p className="w-full flex justify-center items-center">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-orange-600/10 text-orange-400 dark:text-orange-400 border border-transparent">
+                Live Collaborations
+              </span></p>
+              <h3 className="text-[22px] text-center font-medium tracking-[-0.02em] mt-4 mb-2.5">
+                Solve Together
+              </h3>
+              <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65] text-center">
+                Hop into the same editor as your teammates and work the
+                problem together, live — watch each other's cursors move,
+                edit code side by side, and figure out the tricky parts in
+                real time instead of across separate threads.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                {/* Shared editor mock */}
+                <div className="bg-[#f0efe9] dark:bg-[#1a1c24] rounded-2xl p-4">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]"></span>
+                    <span className="ml-2 text-[11px] text-[#888] dark:text-[#555] font-mono">
+                      solution.py
+                    </span>
+                  </div>
+
+                  <div className="font-mono text-[12.5px] leading-[1.7] text-[#555] dark:text-[#a0a0a8]">
+                    <div>
+                      <span className="text-[#2563eb] dark:text-[#4d8dff]">def</span>{" "}
+                      <span className="text-[#0d0d0d] dark:text-[#f0f0ee]">solve</span>
+                      (graph, start):
+                    </div>
+                    <div className="pl-4 relative">
+                      visited = set()
+                      <span className="absolute -right-1 top-0 inline-flex items-center">
+                        <span className="w-[2px] h-[15px] bg-[#2563eb] dark:bg-[#4d8dff]"></span>
+                        <span className="ml-1 text-[9px] px-1.5 py-[1px] rounded bg-[#2563eb] dark:bg-[#4d8dff] text-white whitespace-nowrap">
+                          john_coder
+                        </span>
+                      </span>
+                    </div>
+                    <div className="pl-4">queue = [start]</div>
+                    <div className="pl-4 relative bg-orange-600/10 -ml-1 px-1 rounded">
+                      while queue:
+                      <span className="absolute right-1 top-0 inline-flex items-center">
+                        <span className="w-[2px] h-[15px] bg-orange-500"></span>
+                        <span className="ml-1 text-[9px] px-1.5 py-[1px] rounded bg-orange-500 text-white whitespace-nowrap">
+                          raj_k
+                        </span>
+                      </span>
+                    </div>
+                    <div className="pl-8">node = queue.pop(0)</div>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/10 text-[11px] text-[#888] dark:text-[#555]">
+                    2 people editing &middot; saved 4s ago
+                  </div>
+                </div>
+
+                {/* Active session list */}
+                <div className="bg-[#f0efe9] dark:bg-[#1a1c24] rounded-2xl p-4 flex flex-col gap-2.5">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#888] dark:text-[#555] mb-1">
+                    In this room
+                  </div>
+                  <div className="flex items-center gap-2.5 bg-white dark:bg-[#13151a] rounded-xl px-3 py-2.5">
+                    <div className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-medium shrink-0 bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff]">
+                      JC
+                    </div>
+                    <span className="text-[12px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee] flex-1">
+                      john_coder
+                    </span>
+                    <span className="text-[11px] text-[#888] dark:text-[#555]">
+                      Driving
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 bg-white dark:bg-[#13151a] rounded-xl px-3 py-2.5">
+                    <div className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-medium shrink-0 bg-orange-600/10 text-orange-500">
+                      RK
+                    </div>
+                    <span className="text-[12px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee] flex-1">
+                      raj_k
+                    </span>
+                    <span className="text-[11px] text-[#888] dark:text-[#555]">
+                      Reviewing
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 bg-white dark:bg-[#13151a] rounded-xl px-3 py-2.5">
+                    <div className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-medium shrink-0 bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">
+                      MT
+                    </div>
+                    <span className="text-[12px] font-medium text-[#0d0d0d] dark:text-[#f0f0ee] flex-1">
+                      maria_tech
+                    </span>
+                    <span className="text-[11px] text-[#888] dark:text-[#555]">
+                      Watching
+                    </span>
+                  </div>
                 </div>
               </div>
             </Reveal>
