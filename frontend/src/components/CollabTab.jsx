@@ -193,13 +193,38 @@ function CollabTab({
             Leave Room
           </button>
         )}
+        {collabTeam && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-4">
+            {collabTeam.map((user) => {
+              const firstLetter = user.name?.charAt(0).toUpperCase() || "?";
+              return (
+                <div
+                  key={user.id || user.name}
+                  className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                >
+                  <div
+                    className="flex items-center justify-center w-8 h-8 rounded-full text-white font-bold text-xs shrink-0"
+                    style={{ backgroundColor: user.color || "#64748b" }}
+                  >
+                    {firstLetter}
+                  </div>
 
-        {collabTeam &&
-          collabTeam.map((user) => (
-            <p className="p-2 w-full font-sans font-semibold text-sm" style={{ color: user.color }}>
-              {user.name}
-            </p>
-          ))}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-sans font-medium text-sm text-slate-700 truncate">
+                      {user.name}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        Active
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
