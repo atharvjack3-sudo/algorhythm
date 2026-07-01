@@ -200,22 +200,24 @@ function CollabTab({
               return (
                 <div
                   key={user.id || user.name}
-                  className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                  className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/70 bg-white dark:bg-slate-900/40 shadow-sm hover:shadow-md dark:hover:bg-slate-900/80 transition-all duration-200 backdrop-blur-sm"
                 >
+                  {/* Avatar circle */}
                   <div
-                    className="flex items-center justify-center w-8 h-8 rounded-full text-white font-bold text-xs shrink-0"
+                    className="flex items-center justify-center w-8 h-8 rounded-full text-white font-bold text-xs shrink-0 shadow-inner"
                     style={{ backgroundColor: user.color || "#64748b" }}
                   >
                     {firstLetter}
                   </div>
 
+                  {/* Name & Status */}
                   <div className="min-w-0 flex-1">
-                    <p className="font-sans font-medium text-sm text-slate-700 truncate">
+                    <p className="font-sans font-medium text-sm text-slate-700 dark:text-slate-200 truncate">
                       {user.name}
                     </p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[11px] text-slate-400 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                      <span className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
                         Active
                       </span>
                     </div>
