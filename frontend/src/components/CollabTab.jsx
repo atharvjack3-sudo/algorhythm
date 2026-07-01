@@ -9,6 +9,7 @@ function CollabTab({
   setCollabData,
   isOwner,
   setIsOwner,
+  collabTeam,
 }) {
   const { user, loading: authLoading } = useAuth();
   const [roomCode, setRoomCode] = useState("Fetching...");
@@ -33,14 +34,6 @@ function CollabTab({
         problemId: problemId,
       });
       const obj = res.data;
-      /*
-              res.status(201).json({
-              errorPresent: false,
-              errorMsg: null,
-              roomCode: rcode,
-              wsRoomId: wsRoomId,
-          });
-      */
       if (obj.errorPresent && obj.roomCode == null) {
         setCollabActive(false);
         setError(obj.errorMsg);
@@ -175,8 +168,10 @@ function CollabTab({
           <button
             onClick={(e) => {
               e.preventDefault();
-              const res = window.confirm("Are you sure you want to terminate the session?");
-              if (!res) return; 
+              const res = window.confirm(
+                "Are you sure you want to terminate the session?",
+              );
+              if (!res) return;
               exitRoom();
             }}
             className="w-full mt-2 cursor-pointer hover:bg-red-600 bg-red-500 transition-all duration-200 h-10 rounded-md text-white font-semibold tracking-wide shadow-sm"
@@ -187,8 +182,10 @@ function CollabTab({
           <button
             onClick={(e) => {
               e.preventDefault();
-              const res = window.confirm("Are you sure you want to exit the session?");
-              if (!res) return; 
+              const res = window.confirm(
+                "Are you sure you want to exit the session?",
+              );
+              if (!res) return;
               exitRoom();
             }}
             className="w-full mt-2 cursor-pointer hover:bg-gray-600 bg-gray-500 transition-all duration-200 h-10 rounded-md text-white font-semibold tracking-wide shadow-sm"
@@ -196,6 +193,13 @@ function CollabTab({
             Leave Room
           </button>
         )}
+
+        {collabTeam &&
+          collabTeam.map((user) => (
+            <p className="p-2 w-full font-sans font-semibold text-sm" style={{ color: user.color }}>
+              {user.name}
+            </p>
+          ))}
       </div>
     );
   }
@@ -211,7 +215,9 @@ function CollabTab({
         <button
           onClick={async (e) => {
             e.preventDefault();
-            const res = window.confirm("Are you sure you want to create a collab room?");
+            const res = window.confirm(
+              "Are you sure you want to create a collab room?",
+            );
             if (!res) return;
             setIsCreating(true);
             await handleRoomCreation();

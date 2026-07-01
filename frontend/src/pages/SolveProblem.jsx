@@ -124,6 +124,7 @@ export default function SolveProblem() {
   const [collabActive, setCollabActive] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [collabData, setCollabData] = useState(null);
+  const [collabTeam, setCollabTeam] = useState([]);
   const ydocRef = useRef(null);
   const providerRef = useRef(null);
   const bindingRef = useRef(null);
@@ -156,10 +157,14 @@ export default function SolveProblem() {
       ydoc,
     );
 
-
     provider.awareness.setLocalStateField("user", {
       name: user.username,
       color: colors[Math.floor(Math.random() * colors.length)],
+    });
+
+    provider.awareness.on("change", () => {
+      const users = Array.from(provider.awareness.getStates().values()).map((state) => state.user).filter(Boolean);
+      setCollabTeam(users);
     });
 
     const yText = ydoc.getText("code");
@@ -452,7 +457,6 @@ export default function SolveProblem() {
       `}</style>
 
       <div className="w-full h-[calc(100dvh-56px)] overflow-y-auto md:overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row font-sans transition-colors duration-200 relative">
-       
         {isDragging && (
           <div className="fixed inset-0 z-[200] cursor-col-resize" />
         )}
@@ -814,6 +818,7 @@ export default function SolveProblem() {
                 isOwner={isOwner}
                 setIsOwner={setIsOwner}
                 setCollabData={setCollabData}
+                collabTeam={collabTeam}
               />
             </div>
 
