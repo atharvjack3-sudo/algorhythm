@@ -287,7 +287,7 @@ function CollabTab({
             className="px-4 cursor-pointer disabled:cursor-not-allowed flex justify-center items-center gap-2 disabled:opacity-70 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 h-10 rounded-md text-white dark:text-black font-semibold tracking-wide bg-gray-900 dark:bg-white shadow-sm"
           >
             {isJoining && <Spinner className="text-white dark:text-black" />}
-            {isJoining ? "Joining..." : "Join"}
+            {isJoining ? "" : "Join"}
           </button>
         </form>
       </div>
