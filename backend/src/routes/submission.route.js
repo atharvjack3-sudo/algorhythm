@@ -325,6 +325,74 @@ function mapVerdict(description) {
 //   }
 // });
 
+router.post("/custom-run", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { language, code, testcases } = req.body;
+  if (!LANGUAGE_MAP[language] || !code) {
+    return res.status(400).json({ error: "Invalid submission data" });
+  }
+  if (testcases.length === 0 || testcases.length > 3) {
+      return res.status(400).json({ error: "Incorrect testcase count" });
+  }
+
+  for (let i = 0; i < testcases.length; i++) testcases[i] = testcases[i].trim();
+  
+  try {
+    const codeBase64 = Buffer.from(code).toString("base64");
+    const multipliers = LIMIT_MULTIPLIERS[language] || { time: 2.0, memory: 2.0 };
+    const timeLimit = BASE_TIME_LIMIT_SEC * multipliers.time;
+    const memoryLimit = BASE_MEMORY_LIMIT_KB * multipliers.memory;
+    let result = [];
+
+    for (let i = 0; i < testcases.length; i++) {
+      let finalCO = null;
+      let finalErr = null;
+      const tc = Buffer.from(testcases[i]).toString("base64").trim();
+      const judgeRes = await axios.post(
+        JUDGE0_URL,
+        {
+          source_code: codeBase64,
+          language_id: LANGUAGE_MAP[language],
+          stdin: tc,
+          cpu_time_limit: timeLimit,
+          memory_limit: memoryLimit
+        },
+        { headers: { "X-RapidAPI-Key": process.env.JUDGE0_API_KEY, "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com" } }
+      );
+
+      const obj = judgeRes.data;
+      const time = Math.round(parseFloat(obj.time || "0") * 1000);
+      const mem = obj.memory || 0;
+      const stdoutBase64 = judgeRes.data.stdout || "";
+      const stdout = stdoutBase64 ? Buffer.from(stdoutBase64, "base64").toString("utf-8").trim() : "";
+      const ran_correctly = obj.status.id === 3;
+      if (!ran_correctly) {
+        if (obj.compile_output) {
+          finalCO = Buffer.from(judgeRes.data.compile_output, "base64").toString("utf-8");
+        }
+        if (obj.stderr) {
+          finalErr = Buffer.from(judgeRes.data.stderr, "base64").toString("utf-8");
+        }
+      }
+      const verdict = ran_correctly ? "AC" : mapVerdict(obj.status.description);
+
+      result.push({
+        output: stdout,
+        verdict: verdict,
+        time: time,
+        memory: mem,
+        error: finalCO || finalErr || null,
+      });
+    }
+
+    res.status(200).json({ results: result });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 router.post("/submissions", authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const { problemId, language, code } = req.body;
