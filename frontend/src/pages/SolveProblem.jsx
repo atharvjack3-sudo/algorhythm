@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
-
+import CustomTC from "../components/CustomTC"
 import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 import SubmissionAnim from "../components/submissionAnim";
@@ -707,6 +707,9 @@ export default function SolveProblem() {
                       </div>
                     )}
                   </>
+                )}
+                {!runLoading && (
+                <CustomTC setRunLoading={setRunLoading} lang={language} code={code}/>
                 )}
               </div>
             )}
