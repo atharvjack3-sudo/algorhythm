@@ -170,8 +170,8 @@ function CustomTC({ setRunLoading, lang, code }) {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-xs font-medium text-slate-500 dark:text-slate-400 font-mono">
-                      <span>⏱ {res.time} ms</span>
-                      <span>💾 {res.memory} KB</span>
+                      <span>{res.time} ms</span>
+                      <span>{res.memory} KB</span>
                     </div>
                   </div>
 

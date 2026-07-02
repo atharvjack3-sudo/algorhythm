@@ -637,7 +637,7 @@ export default function SolveProblem() {
             )}
 
             {/* ===== RUN ===== */}
-            {activeTab === "Run" && (
+            <div className={`${activeTab === "Run" ? "block" : "hidden"}`}>
               <div className="flex flex-col gap-5">
                 {runLoading ? (
                   <SubmissionAnim />
@@ -718,7 +718,7 @@ export default function SolveProblem() {
                   />
                 </div>
               </div>
-            )}
+            </div>
 
             {/* ===== RESULT ===== */}
             {activeTab === "Result" && (
