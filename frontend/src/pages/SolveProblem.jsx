@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
-import CustomTC from "../components/CustomTC"
+import CustomTC from "../components/CustomTC";
 import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 import SubmissionAnim from "../components/submissionAnim";
@@ -163,7 +163,9 @@ export default function SolveProblem() {
     });
 
     provider.awareness.on("change", () => {
-      const users = Array.from(provider.awareness.getStates().values()).map((state) => state.user).filter(Boolean);
+      const users = Array.from(provider.awareness.getStates().values())
+        .map((state) => state.user)
+        .filter(Boolean);
       setCollabTeam(users);
     });
 
@@ -708,9 +710,13 @@ export default function SolveProblem() {
                     )}
                   </>
                 )}
-                {!runLoading && (
-                <CustomTC setRunLoading={setRunLoading} lang={language} code={code}/>
-                )}
+                <div className={`${runLoading ? "hidden" : "block"}`}>
+                  <CustomTC
+                    setRunLoading={setRunLoading}
+                    lang={language}
+                    code={code}
+                  />
+                </div>
               </div>
             )}
 
