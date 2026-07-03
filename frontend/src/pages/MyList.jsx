@@ -468,7 +468,7 @@ export default function MyList() {
                                       <div className="flex items-center justify-start">
                                         <div className={`w-[18px] h-[18px] rounded-[3px] border flex items-center justify-center transition-colors ${
                                           isSolved
-                                            ? "bg-blue-600 border-blue-600 text-white"
+                                            ? ` ${colorClasses.bg} ${colorClasses.border} text-white`
                                             : "bg-transparent border-slate-300 dark:border-slate-600"
                                         }`}>
                                           {isSolved && (
