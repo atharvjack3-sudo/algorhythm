@@ -13,7 +13,7 @@ export default function MyList() {
   const [newListName, setNewListName] = useState("");
   const [newListDescription, setNewListDescription] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
-  
+
   // New state mapping for accordion behavior
   const [expandedLists, setExpandedLists] = useState({});
   const [problemsByList, setProblemsByList] = useState({});
@@ -126,7 +126,7 @@ export default function MyList() {
 
   const toggleList = async (list) => {
     const isCurrentlyExpanded = !!expandedLists[list.id];
-    
+
     // Toggle state
     setExpandedLists((prev) => ({ ...prev, [list.id]: !isCurrentlyExpanded }));
 
@@ -148,7 +148,7 @@ export default function MyList() {
   const removeProblemFromList = async (listId, problemId) => {
     try {
       await api.delete(`/lists/${listId}/problems/${problemId}`);
-      
+
       // Update local problems state
       setProblemsByList((prev) => ({
         ...prev,
@@ -217,16 +217,27 @@ export default function MyList() {
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .font-sans { font-family: 'DM Sans', sans-serif; }
-        
+
         .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+        @keyframes accordionReveal {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .accordion-reveal { animation: accordionReveal 0.18s ease-out; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .accordion-reveal { animation: none; }
+          * { transition-duration: 0.01ms !important; }
+        }
       `}</style>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 pb-16 transition-colors duration-200">
-        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-10">
-          
+        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-8">
+
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex flex-col gap-2">
@@ -251,49 +262,80 @@ export default function MyList() {
                 setNewListColor("blue");
                 setShowCreateModal(true);
               }}
-              className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-2.5 hover:opacity-85 flex items-center justify-center gap-2"
+              className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-all duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-2.5 shadow-sm shadow-orange-500/20 hover:bg-orange-600 hover:shadow-md hover:shadow-orange-500/25 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 flex items-center justify-center gap-2 self-start md:self-auto"
             >
               CREATE LIST [+]
             </button>
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md p-6 flex flex-col gap-2 shadow-sm">
-              <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                Total Lists
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md p-6 flex items-center justify-between gap-2 shadow-sm">
+              <div className="flex flex-col gap-2">
+                <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                  Total Lists
+                </div>
+                <div className="font-mono text-3xl font-bold text-slate-900 dark:text-white tabular-nums">
+                  {lists.length}
+                </div>
               </div>
-              <div className="font-mono text-3xl font-bold text-slate-900 dark:text-white">
-                {lists.length}
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md p-6 flex flex-col gap-2 shadow-sm">
-              <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                Total Problems
-              </div>
-              <div className="font-mono text-3xl font-bold text-slate-900 dark:text-white">
-                {lists.reduce((sum, list) => sum + Number(list.problemCount), 0)}
+              <div className="w-9 h-9 rounded-md bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center text-slate-400 dark:text-slate-500 shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md p-6 flex flex-col gap-2 shadow-sm">
-              <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                Problems Solved
+            <div className="bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md p-6 flex items-center justify-between gap-2 shadow-sm">
+              <div className="flex flex-col gap-2">
+                <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                  Total Problems
+                </div>
+                <div className="font-mono text-3xl font-bold text-slate-900 dark:text-white tabular-nums">
+                  {lists.reduce((sum, list) => sum + Number(list.problemCount), 0)}
+                </div>
               </div>
-              <div className="font-mono text-3xl font-bold text-slate-900 dark:text-white">
-                {lists.reduce((sum, list) => sum + Number(list.solvedCount), 0)}
+              <div className="w-9 h-9 rounded-md bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center text-slate-400 dark:text-slate-500 shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v18M4 9h16" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md p-6 flex items-center justify-between gap-2 shadow-sm">
+              <div className="flex flex-col gap-2">
+                <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                  Problems Solved
+                </div>
+                <div className="font-mono text-3xl font-bold text-slate-900 dark:text-white tabular-nums">
+                  {lists.reduce((sum, list) => sum + Number(list.solvedCount), 0)}
+                </div>
+              </div>
+              <div className="w-9 h-9 rounded-md bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-500 dark:text-green-400 shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               </div>
             </div>
           </div>
 
           {/* Lists View (Accordion/Chevron style) */}
           {loading ? (
-            <div className="py-24 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
-              LOADING LISTS...
+            <div className="flex flex-col gap-4">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-[68px] bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md animate-pulse"
+                />
+              ))}
             </div>
           ) : lists.length === 0 ? (
-            <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-[#151b23] shadow-sm flex flex-col items-center gap-4">
+            <div className="px-4 py-16 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-md bg-white dark:bg-[#151b23] flex flex-col items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-6 4h6m2 5H7a2 2 0 01-2-2V4a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V20a2 2 0 01-2 2z" />
+                </svg>
+              </div>
               <div className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 No lists yet
               </div>
@@ -302,13 +344,13 @@ export default function MyList() {
               </p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="font-mono text-[11px] font-bold tracking-[0.12em] rounded-[3px] transition-colors bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-6 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 uppercase mt-2"
+                className="font-mono text-[11px] font-bold tracking-[0.12em] rounded-[3px] transition-colors bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-6 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 uppercase mt-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
               >
                 CREATE YOUR FIRST LIST
               </button>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {lists.map((list) => {
                 const isExpanded = !!expandedLists[list.id];
                 const listProblemsData = problemsByList[list.id] || [];
@@ -317,29 +359,40 @@ export default function MyList() {
                 const colorClasses = getColorClasses(list.color);
 
                 return (
-                  <div key={list.id} className="bg-white dark:bg-[#151b23] border border-slate-200 dark:border-slate-800 rounded-md shadow-sm overflow-hidden flex flex-col">
-                    
+                  <div
+                    key={list.id}
+                    className={`bg-white dark:bg-[#151b23] border rounded-md shadow-sm overflow-hidden flex flex-col transition-colors ${
+                      isExpanded ? "border-slate-300 dark:border-slate-700" : "border-slate-200 dark:border-slate-800"
+                    }`}
+                  >
+
                     {/* Accordion Header */}
-                    <div 
-                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-[#1d242f] transition-colors"
+                    <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => toggleList(list)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleList(list); } }}
+                      className="flex items-center justify-between gap-4 p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-[#1d242f] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-400"
                     >
-                      <div className="flex items-center gap-3">
-                        <svg 
-                          className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : "rotate-0"}`} 
+                      <div className="flex items-center gap-3 min-w-0">
+                        <svg
+                          className={`w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0 ${isExpanded ? "rotate-180" : "rotate-0"}`}
                           fill="none" viewBox="0 0 24 24" stroke="currentColor"
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
-                        <h3 className="font-sans text-lg font-bold text-slate-900 dark:text-white truncate max-w-sm md:max-w-md">
+
+                        <span className={`w-2 h-2 rounded-full ${colorClasses.bg} shrink-0`} />
+
+                        <h3 className="font-sans text-base md:text-lg font-bold text-slate-900 dark:text-white truncate max-w-[10rem] sm:max-w-xs md:max-w-md">
                           {list.name}
                         </h3>
 
                         {/* Action Icons (Edit / Delete) */}
-                        <div className="flex items-center gap-1 ml-2 opacity-60 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-0.5 ml-1 shrink-0">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleEditList(list); }}
-                            className="p-1.5 text-slate-400 hover:text-blue-500 rounded transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                             title="Edit list"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -348,7 +401,7 @@ export default function MyList() {
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); openDeleteModal(list); }}
-                            className="p-1.5 text-slate-400 hover:text-red-500 rounded transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                             title="Delete list"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,14 +412,14 @@ export default function MyList() {
                       </div>
 
                       {/* Progress Bar & Stats */}
-                      <div className="flex items-center gap-4 min-w-[200px] justify-end">
+                      <div className="flex items-center gap-4 min-w-[160px] justify-end shrink-0">
                         <div className="hidden sm:block w-32 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${colorClasses.bg} transition-all duration-500 ease-out`} 
-                            style={{ width: `${progress}%` }} 
+                          <div
+                            className={`h-full ${colorClasses.bg} transition-all duration-500 ease-out rounded-full`}
+                            style={{ width: `${progress}%` }}
                           />
                         </div>
-                        <span className="font-mono text-[13px] font-semibold text-slate-600 dark:text-slate-400 min-w-[36px] text-right">
+                        <span className="font-mono text-[13px] font-semibold text-slate-600 dark:text-slate-400 min-w-[44px] text-right tabular-nums">
                           {list.solvedCount} / {list.problemCount}
                         </span>
                       </div>
@@ -374,10 +427,12 @@ export default function MyList() {
 
                     {/* Expanded Problems List */}
                     {isExpanded && (
-                      <div className="border-t border-slate-200 dark:border-slate-800/60 bg-slate-50/50 dark:bg-[#0d1117] overflow-x-auto">
+                      <div className="accordion-reveal border-t border-slate-200 dark:border-slate-800/60 bg-slate-50/50 dark:bg-[#0d1117] overflow-x-auto custom-scrollbar">
                         {isLoadingProblems ? (
-                          <div className="py-12 text-center font-mono text-[11px] text-slate-500 uppercase tracking-widest animate-pulse">
-                            LOADING PROBLEMS...
+                          <div className="flex flex-col gap-2 p-4">
+                            {[0, 1, 2].map((i) => (
+                              <div key={i} className="h-9 bg-slate-200/60 dark:bg-slate-800/40 rounded animate-pulse" />
+                            ))}
                           </div>
                         ) : listProblemsData.length === 0 ? (
                           <div className="py-10 px-4 text-center flex flex-col items-center gap-2">
@@ -392,11 +447,11 @@ export default function MyList() {
                           <table className="w-full text-left border-collapse whitespace-nowrap">
                             <thead>
                               <tr className="border-b border-slate-200 dark:border-slate-800">
-                                <th className="px-6 py-4 font-sans text-xs font-bold text-slate-800 dark:text-slate-200 w-16">Status</th>
-                                <th className="px-6 py-4 font-sans text-xs font-bold text-slate-800 dark:text-slate-200 w-24">ID</th>
-                                <th className="px-6 py-4 font-sans text-xs font-bold text-slate-800 dark:text-slate-200">Problem</th>
-                                <th className="px-6 py-4 font-sans text-xs font-bold text-slate-800 dark:text-slate-200 text-center w-32">Difficulty</th>
-                                <th className="px-6 py-4 font-sans text-xs font-bold text-slate-800 dark:text-slate-200 text-center w-24">Action</th>
+                                <th className="px-6 py-3 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest w-16">Status</th>
+                                <th className="px-6 py-3 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest w-24">ID</th>
+                                <th className="px-6 py-3 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Problem</th>
+                                <th className="px-6 py-3 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center w-32">Difficulty</th>
+                                <th className="px-6 py-3 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center w-24">Action</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
@@ -412,8 +467,8 @@ export default function MyList() {
                                     <td className="px-6 py-3 text-center align-middle">
                                       <div className="flex items-center justify-start">
                                         <div className={`w-[18px] h-[18px] rounded-[3px] border flex items-center justify-center transition-colors ${
-                                          isSolved 
-                                            ? "bg-blue-600 border-blue-600 text-white" 
+                                          isSolved
+                                            ? "bg-blue-600 border-blue-600 text-white"
                                             : "bg-transparent border-slate-300 dark:border-slate-600"
                                         }`}>
                                           {isSolved && (
@@ -441,7 +496,7 @@ export default function MyList() {
                                           e.stopPropagation();
                                           removeProblemFromList(list.id, p.id);
                                         }}
-                                        className="font-mono text-[10px] font-bold bg-transparent text-slate-400 border border-slate-300 dark:border-slate-700 px-2 py-1 rounded-[3px] hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:border-red-500/30 dark:hover:text-red-400 transition-colors"
+                                        className="font-mono text-[10px] font-bold bg-transparent text-slate-400 border border-slate-300 dark:border-slate-700 px-2 py-1 rounded-[3px] hover:bg-red-50 hover:text-red-500 hover:border-red-300 dark:hover:bg-red-900/30 dark:hover:border-red-500/30 dark:hover:text-red-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                                         title="Remove from list"
                                       >
                                         [X]
@@ -465,17 +520,23 @@ export default function MyList() {
 
       {/* ===== Create/Edit Modal ===== */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-slate-900/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-950 w-full max-w-md rounded-md shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            
-            <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+        <div
+          className="fixed inset-0 bg-slate-900/70 z-[200] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={closeCreateModal}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-950 w-full max-w-md rounded-lg shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+          >
+
+            <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
               <div className="font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                 {editingList ? "EDIT LIST" : "NEW LIST"}
               </div>
-              <button 
+              <button
                 onClick={closeCreateModal}
-                className="font-mono text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none p-1"
+                className="font-mono text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
               >
                 CLOSE [X]
               </button>
@@ -491,7 +552,8 @@ export default function MyList() {
                   value={newListName}
                   onChange={(e) => setNewListName(e.target.value)}
                   placeholder="e.g., Dynamic Programming Prep"
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-[3px] font-sans text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
+                  autoFocus
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-[3px] font-sans text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                 />
               </div>
 
@@ -504,7 +566,7 @@ export default function MyList() {
                   onChange={(e) => setNewListDescription(e.target.value)}
                   placeholder="Brief description of this list..."
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-[3px] font-sans text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-[3px] font-sans text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
                 />
               </div>
 
@@ -516,9 +578,13 @@ export default function MyList() {
                   {colors.map((color) => (
                     <button
                       key={color.name}
+                      type="button"
                       onClick={() => setNewListColor(color.name)}
-                      className={`w-full aspect-square rounded-[3px] ${color.bg} transition-all duration-200 border-2 ${
-                        newListColor === color.name ? "border-slate-800 dark:border-white shadow-inner" : "border-transparent opacity-80 hover:opacity-100"
+                      title={color.name}
+                      className={`w-full aspect-square rounded-[4px] ${color.bg} transition-all duration-150 border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 ${
+                        newListColor === color.name
+                          ? "border-slate-800 dark:border-white scale-110 shadow-md"
+                          : "border-transparent opacity-70 hover:opacity-100 hover:scale-105"
                       }`}
                     />
                   ))}
@@ -529,14 +595,14 @@ export default function MyList() {
             <div className="bg-slate-50 dark:bg-slate-900 px-5 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
               <button
                 onClick={closeCreateModal}
-                className="font-mono text-[11px] font-semibold tracking-[0.06em] uppercase rounded-[3px] transition-colors bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="font-mono text-[11px] font-semibold tracking-[0.06em] uppercase rounded-[3px] transition-colors bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
               >
                 Cancel
               </button>
               <button
                 onClick={editingList ? handleUpdateList : handleCreateList}
                 disabled={!newListName.trim()}
-                className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-2 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-all duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-2 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-orange-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
               >
                 {editingList ? "UPDATE LIST →" : "CREATE LIST →"}
               </button>
@@ -547,29 +613,40 @@ export default function MyList() {
 
       {/* ===== Delete Confirmation Modal ===== */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-slate-900/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-950 w-full max-w-md rounded-md shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+        <div
+          className="fixed inset-0 bg-slate-900/70 z-[200] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-950 w-full max-w-md rounded-lg shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+          >
             <div className="p-8 flex flex-col items-center text-center">
-              <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-500 uppercase tracking-[0.1em] mb-4">
-                [WARNING] DELETE LIST
+              <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 dark:text-red-400 mb-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
               </div>
-              <h2 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-2">
+              <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-500 uppercase tracking-[0.1em] mb-3">
+                Delete List
+              </div>
+              <h2 className="font-sans text-xl font-bold text-slate-900 dark:text-white mb-2">
                 Are you absolutely sure?
               </h2>
               <p className="font-sans text-[14px] text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
                 You are about to delete <span className="font-bold text-slate-800 dark:text-slate-200">"{deletingList?.name}"</span>. This action cannot be undone and all tracked progress inside this list will be lost forever.
               </p>
-              
+
               <div className="flex gap-3 w-full">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="flex-1 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase rounded-[3px] transition-colors bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="flex-1 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase rounded-[3px] transition-colors bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteList}
-                  className="flex-1 font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-red-600 text-white border-none px-4 py-2.5 hover:opacity-85"
+                  className="flex-1 font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-colors cursor-pointer bg-red-600 text-white border-none px-4 py-2.5 hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
                 >
                   DELETE LIST
                 </button>
