@@ -437,7 +437,7 @@ export default function ProblemSet() {
                           <td className="px-6 py-5 text-center">
                             <div className="flex flex-col items-center gap-1.5 w-full max-w-[100px] mx-auto">
                               <span className="font-mono text-[12px] font-semibold text-slate-600 dark:text-slate-300">
-                                {problem.acceptance_rate !== null ? `${problem.acceptance_rate}%` : "—"}
+                                {problem.acceptance_rate !== null ? `${problem.acceptance_rate}%` : "N/A"}
                               </span>
                               {problem.acceptance_rate !== null && (
                                 <div className="w-full h-[5px] bg-slate-200 dark:bg-slate-700 rounded-xs overflow-hidden">
