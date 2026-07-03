@@ -430,7 +430,7 @@ export default function ProblemSet() {
                              </div>
                           </td>
                           <td className="px-6 py-5">
-                            <div className="font-sans text-[15px] text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors font-semibold">
+                            <div className="font-sans text-[14px] text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors font-semibold">
                               {problem.title}
                             </div>
                           </td>
