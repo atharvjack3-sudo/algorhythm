@@ -4,7 +4,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { api } from "../api/client";
-import Editor from "@monaco-editor/react";
+import Editor, { DiffEditor } from "@monaco-editor/react";
 import { InlineMath } from "react-katex";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,7 +16,8 @@ import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 import SubmissionAnim from "../components/submissionAnim";
 import CollabTab from "../components/CollabTab";
-
+import { Copy, RotateCcw, CloudUpload, History, Check, X } from "lucide-react";
+import "./css/scrollbar.css";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { MonacoBinding } from "y-monaco";
@@ -117,7 +118,9 @@ export default function SolveProblem() {
   const [submissions, setSubmissions] = useState([]);
   const monacoRef = useRef(null);
   const editorRef = useRef(null);
-  const [ showProblemTopics, setShowProblemTopics ] = useState(true);
+  const [showProblemTopics, setShowProblemTopics] = useState(true);
+  const [ differentiate, setDifferentiate ] = useState(false);
+  const [ cmpCode, setCmpCode ] = useState([]); // old, fin
 
   /* ==============
   Collab States
@@ -136,6 +139,9 @@ export default function SolveProblem() {
   const [leftWidth, setLeftWidth] = useState(45); // Start at 45%
   const [isDragging, setIsDragging] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+  ////////////////
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
     monacoRef.current = monaco;
@@ -143,6 +149,15 @@ export default function SolveProblem() {
   function handleBeforeMount(monaco) {
     monacoRef.current = monaco;
   }
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy code:", err);
+    }
+  };
   function handleCollabEditorMount(editor, monaco) {
     if (!collabData || !collabData.wsRoomId) {
       console.error("Collab data is missing, cannot connect to WebSocket!");
@@ -500,7 +515,14 @@ export default function SolveProblem() {
                 </span>
               )}
             </div>
-            { !showProblemTopics && <span className="px-2 py-0.5 mt-3 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800" onClick={()=>setShowProblemTopics(prev => !prev)}>Show Topics </span> }
+            {!showProblemTopics && (
+              <span
+                className="px-2 py-0.5 mt-3 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800"
+                onClick={() => setShowProblemTopics((prev) => !prev)}
+              >
+                Show Topics{" "}
+              </span>
+            )}
             {topics?.length > 0 && showProblemTopics && (
               <div className="mt-3 flex gap-2 flex-wrap">
                 {topics.map((t) => (
@@ -536,8 +558,9 @@ export default function SolveProblem() {
           {/* Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-6 text-[14px] text-slate-800 dark:text-slate-200 custom-scrollbar bg-white dark:bg-slate-950">
             {/* ===== DISCUSSION ===== */}
-            <div className={`${activeTab === "Discussion" ? "block" : "hidden"}`}>
-              
+            <div
+              className={`${activeTab === "Discussion" ? "block" : "hidden"}`}
+            >
               <Suspense
                 fallback={
                   <div className="py-10 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
@@ -547,7 +570,6 @@ export default function SolveProblem() {
               >
                 <DiscussionTab />
               </Suspense>
-            
             </div>
             {/* {activeTab === "Discussion" && (
               <Suspense
@@ -863,6 +885,9 @@ export default function SolveProblem() {
                             <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
                               Time Submitted
                             </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
+                              Language
+                            </th>
                             <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">
                               Status
                             </th>
@@ -888,6 +913,9 @@ export default function SolveProblem() {
                                     minute: "2-digit",
                                   },
                                 )}
+                              </td>
+                              <td className="text-center text-xs font-mono font-extralight text-gray-600 dark:text-slate-400">
+                                {s.language}
                               </td>
                               <td className="px-5 py-3 text-right">
                                 <span
@@ -926,7 +954,7 @@ export default function SolveProblem() {
         {/* ===== RIGHT PANEL EDITOR ===== */}
         <section className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800">
           {/* Editor Toolbar */}
-          <div className="min-h-12 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
+          <div className="min-h-12 py-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
             <div className="flex items-center gap-2">
               <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">
                 Theme
@@ -1002,6 +1030,58 @@ export default function SolveProblem() {
               )}
             </div>
           </div>
+          <div className="h-8 w-full px-5 pb-1 dark:bg-slate-900 border-b dark:border-slate-800 border-slate-200 flex items-center gap-5 justify-around">
+            <button
+              onClick={handleCopy}
+              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
+            >
+              {copySuccess ? (
+                <Check size={15} className="text-green-500" />
+              ) : (
+                <Copy size={15} />
+              )}
+              <span className="text-xs font-semibold tracking-wide hidden md:block">
+                {copySuccess ? "Copied" : "Copy"}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                const r = window.confirm(
+                  "Are you sure you want to reset the IDE?",
+                );
+                if (!r) return;
+                setCode("");
+                editorRef.current?.setValue("");
+              }}
+              className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
+            >
+              <RotateCcw size={15} />
+              <span className="cursor-pointer text-xs font-semibold tracking-wide hidden md:block">
+                Reset
+              </span>
+            </button>
+
+            <button
+              onClick={() => window.confirm("Coming Soon...")}
+              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
+            >
+              <CloudUpload size={15} />
+              <span className="text-xs font-semibold tracking-wide hidden md:block">
+                Cloud Save
+              </span>
+            </button>
+
+            <button
+              onClick={() => setShowRestoreModal(true)}
+              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
+            >
+              <History size={15} />
+              <span className="text-xs font-semibold tracking-wide hidden md:block">
+                History
+              </span>
+            </button>
+          </div>
 
           {submitError && (
             <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-widest border-b border-red-200 dark:border-red-900/50 flex-shrink-0">
@@ -1072,20 +1152,19 @@ export default function SolveProblem() {
             )}
           </div>
         </section>
-
         {/* ===== SUBMISSION MODAL ===== */}
         {openSubmission && (
           <div className="fixed inset-0 bg-slate-900/80 z-[150] backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white dark:bg-slate-950 w-full max-w-4xl h-[85vh] rounded-md shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 transition-colors">
               {/* Modal Header */}
-              <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 transition-colors">
+              <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                     SUBMISSION DETAILS
                   </div>
                   <span
-                    className={`font-mono text-[10px] px-2 py-0.5 rounded-[3px] font-bold uppercase tracking-widest border ${
+                    className={`font-mono text-[10px] px-2 py-0.5 -translate-x-2 rounded-[3px] font-bold uppercase tracking-widest border ${
                       openSubmission.verdict === "AC"
                         ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/30"
                         : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/30"
@@ -1094,7 +1173,6 @@ export default function SolveProblem() {
                     {openSubmission.verdict}
                   </span>
                 </div>
-
                 <div className="flex items-center gap-3">
                   {openSubmission.verdict === "AC" && (
                     <button
@@ -1115,6 +1193,34 @@ export default function SolveProblem() {
                     CLOSE [X]
                   </button>
                 </div>
+              </div>
+              <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-5 py-2 dark:border-slate-800 dark:bg-slate-900">
+                <button
+                  onClick={() => {
+                    setCmpCode([openSubmission.code, code]);
+                    setDifferentiate(true);
+                    setOpenSubmission(null);
+                  }}
+                  className="rounded-md border border-orange-500 bg-orange-500 px-4 py-2 text-xs font-semibold tracking-wide text-white transition-all hover:bg-orange-600 active:scale-95"
+                >
+                  Diff with Current
+                </button>
+
+                <button onClick={()=> window.confirm("coming soon...")} className="rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold tracking-wide text-slate-700 transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                  Diff with Other
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCode(openSubmission.code);
+                    editorRef?.current?.setValue(openSubmission.code);
+                    setLanguage(openSubmission.language);
+                    setOpenSubmission(null);
+                  }}
+                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold tracking-wide text-slate-700 transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  Restore Code
+                </button>
               </div>
 
               {/* AI Complexity Dropdown */}
@@ -1179,6 +1285,84 @@ export default function SolveProblem() {
           </div>
         )}
       </div>
+      {showRestoreModal && (
+        <div className="fixed inset-0 custom-scrollbar z-50 flex items-center justify-center bg-black/30 backdrop-blur-md">
+          <div className="w-[92%] md:w-[65%] lg:w-[55%] h-[80%] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl">
+            <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5">
+              <h2 className="text-lg font-bold tracking-wide text-slate-800 dark:text-white">
+                Restore Submission
+              </h2>
+
+              <button
+                onClick={() => setShowRestoreModal(false)}
+                className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="h-[calc(100%-56px)] overflow-y-auto">
+              {submissions.map((sub, i) => (
+                <div
+                  onClick={() => {
+                    setCode(sub.code);
+                    editorRef?.current?.setValue(sub.code);
+                    setLanguage(sub.language);
+                    setShowRestoreModal(false);
+                  }}
+                  key={sub._id ?? i}
+                  className="flex h-12 cursor-pointer items-center justify-between border-b border-slate-200 px-5 transition hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-900"
+                >
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Sub. #{i + 1}
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {sub.language}
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {new Date(sub.submitted_at).toLocaleString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                      sub.verdict === "AC"
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                    }`}
+                  >
+                    {sub.verdict}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {differentiate && (
+        <div className="absolute top-0 left-0 flex flex-col justify-center items-center w-full h-full z-100 bg-slate-950/20 backdrop-blur-3xl">
+          
+          <button className="mb-2 py-2 px-2 flex text-xs cursor-pointer hover:bg-orange-500 bg-orange-400 font-semibold font-sans gap-1 tracking-wide text-white rounded-sm" onClick={() => setDifferentiate(false)}> <X size={15}/> <span>Close</span></button>
+          <DiffEditor className="border-2 dark:border-slate-700 border-slate-500"
+            height="80vh"
+            width="80vw"
+            language="cpp"
+            theme={theme === "light" ? "vs-light" : "vs-dark" }
+            original={cmpCode[0]}
+            modified={cmpCode[1]}
+            options={{
+              readOnly: true, 
+              renderSideBySide: false,
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+            }}
+          />
+        </div>
+      )}
     </>
   );
 }
