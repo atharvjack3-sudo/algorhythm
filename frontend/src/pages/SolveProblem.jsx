@@ -117,6 +117,7 @@ export default function SolveProblem() {
   const [submissions, setSubmissions] = useState([]);
   const monacoRef = useRef(null);
   const editorRef = useRef(null);
+  const [ showProblemTopics, setShowProblemTopics ] = useState(true);
 
   /* ==============
   Collab States
@@ -494,14 +495,13 @@ export default function SolveProblem() {
               </span>
 
               {solved && (
-                <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-[3px] border border-green-200 dark:border-green-800/30 uppercase tracking-widest">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
+                <span className="flex items-center gap-1 font-sans text-[10px] font-light text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-[3px] border border-green-200 dark:border-green-800/30 tracking-widest">
                   Solved
                 </span>
               )}
             </div>
-
-            {topics?.length > 0 && (
+            { !showProblemTopics && <span className="px-2 py-0.5 mt-3 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800" onClick={()=>setShowProblemTopics(prev => !prev)}>Show Topics </span> }
+            {topics?.length > 0 && showProblemTopics && (
               <div className="mt-3 flex gap-2 flex-wrap">
                 {topics.map((t) => (
                   <span
@@ -536,7 +536,8 @@ export default function SolveProblem() {
           {/* Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-6 text-[14px] text-slate-800 dark:text-slate-200 custom-scrollbar bg-white dark:bg-slate-950">
             {/* ===== DISCUSSION ===== */}
-            {activeTab === "Discussion" && (
+            <div className={`${activeTab === "Discussion" ? "block" : "hidden"}`}>
+              
               <Suspense
                 fallback={
                   <div className="py-10 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
@@ -546,7 +547,19 @@ export default function SolveProblem() {
               >
                 <DiscussionTab />
               </Suspense>
-            )}
+            
+            </div>
+            {/* {activeTab === "Discussion" && (
+              <Suspense
+                fallback={
+                  <div className="py-10 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
+                    Loading discussions...
+                  </div>
+                }
+              >
+                <DiscussionTab />
+              </Suspense>
+            )} */}
 
             {/* ===== PROBLEM ===== */}
             {activeTab === "Problem" && (
@@ -963,17 +976,17 @@ export default function SolveProblem() {
                   <button
                     onClick={handleRun}
                     disabled={runLoading || submitting}
-                    className="font-mono text-[11px] font-semibold tracking-[0.06em] rounded-[3px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
+                    className="text-[12px] cursor-pointer font-semibold tracking-[0.06em] rounded-[3px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {runLoading ? "RUNNING..." : "RUN CODE"}
+                    {runLoading ? "Running..." : "Run Code"}
                   </button>
 
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || runLoading}
-                    className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-1 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-[12px] font-bold tracking-[0.12em] rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-2 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {submitting ? "SUBMITTING..." : "SUBMIT"}
+                    {submitting ? "Submitting..." : "Submit"}
                   </button>
                 </>
               ) : (

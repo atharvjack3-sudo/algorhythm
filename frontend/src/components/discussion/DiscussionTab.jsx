@@ -54,13 +54,13 @@ export default function DiscussionTab() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
-          <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-500" />
+          <MessageSquare className="w-5 h-5 text-orange-600 dark:text-orange-500" />
           Discussions
         </h2>
 
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 cursor-pointer text-white rounded-sm text-sm font-bold shadow-md shadow-orange-600/20 transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           New Post
@@ -85,7 +85,7 @@ export default function DiscussionTab() {
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">Be the first to start a conversation!</p>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-6 py-2.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95"
+            className="px-6 py-2.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-sm text-sm font-semibold shadow-md transition-all active:scale-95"
           >
             Start Discussion
           </button>
@@ -96,9 +96,9 @@ export default function DiscussionTab() {
             <div 
               key={d.id} 
               onClick={() => navigate(`/problemset/${problemId}/discussions/${d.id}`)}
-              className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:shadow-md hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-blue-300 dark:hover:border-slate-700 transition-all cursor-pointer group"
+              className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md hover:shadow-md hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-orange-300 dark:hover:border-orange-700 transition-all cursor-pointer group"
             >
-              <h3 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3 tracking-tight">
+              <h3 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors mb-3 tracking-tight">
                 {d.title}
               </h3>
 
@@ -116,7 +116,7 @@ export default function DiscussionTab() {
 
                 {/* Stats */}
                 <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
+                  <span className="flex items-center gap-1.5 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
                     <MessageCircle className="w-4 h-4" />
                     {d.reply_count} replies
                   </span>
