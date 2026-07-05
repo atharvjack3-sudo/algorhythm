@@ -1461,7 +1461,6 @@ export default function SolveProblem() {
           </div>
 
           {!cloudModalInit ? (
-          
             <div className="flex justify-center items-center py-10">
               <button
                 onClick={handleFetchSaves}
@@ -1494,9 +1493,7 @@ export default function SolveProblem() {
               </button>
             </div>
           ) : (
-            
             <div className="flex flex-col gap-4">
-              
               <div className="flex flex-col gap-2">
                 {!isCreatingSave ? (
                   <button
@@ -1555,9 +1552,7 @@ export default function SolveProblem() {
                 )}
               </div>
 
-              
               <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar relative">
-                
                 {isFetching && (
                   <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center rounded">
                     <svg
@@ -1587,7 +1582,14 @@ export default function SolveProblem() {
                   cloudSaves.map((cs) => (
                     <div
                       key={cs.id}
-                      className="flex justify-between items-center p-3 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors cursor-pointer"
+                      onClick={() => {
+                        if (collabActive) {
+                          yTextRef.current?.delete(0, yTextRef.current.length);
+                          yTextRef.current?.insert(0, cs.code);
+                        } else editorRef?.current?.setValue(cs.code);
+                        setLanguage(cs.language);
+                      }}
+                      className="flex justify-between items-center p-3 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors hover:brightness-125 cursor-pointer"
                     >
                       <div className="flex flex-col">
                         <span className="text-white font-medium">
@@ -1598,7 +1600,7 @@ export default function SolveProblem() {
                         </span>
                       </div>
                       <div className="bg-gray-900 border border-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
-                        {cs.lang || cs.language}
+                        {cs.language}
                       </div>
                     </div>
                   ))
