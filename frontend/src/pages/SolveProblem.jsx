@@ -545,7 +545,7 @@ export default function SolveProblem() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] transition-all relative whitespace-nowrap border-b-[3px] top-[1px]
+                className={`px-4 py-2.5 font-sans text-[11px] cursor-pointer font-semibold uppercase tracking-[0.08em] transition-all relative whitespace-nowrap border-b-[3px] top-[1px]
                   ${
                     activeTab === tab
                       ? "text-orange-600 dark:text-orange-500 border-orange-600 dark:border-orange-500"
@@ -1058,10 +1058,10 @@ export default function SolveProblem() {
                 } 
                 else editorRef.current?.setValue("");
               }}
-              className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
+              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
             >
               <RotateCcw size={15} />
-              <span className="cursor-pointer text-xs font-semibold tracking-wide hidden md:block">
+              <span className="text-xs font-semibold tracking-wide hidden md:block">
                 Reset
               </span>
             </button>
