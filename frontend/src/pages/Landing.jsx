@@ -1433,8 +1433,8 @@ export default function AlgorhythmLanding() {
           { n: 13, code: "// a = t - i", type: "add" },
           { n: 14, code: "for (int i : v) {", type: "ctx" },
           { n: 15, code: "  if (st.find(t - i) != st.end()) {", type: "ctx" },
-          { n: 16, code: '  cout << "YES";', type: "del" },
-          { n: 16, code: '  cout << "NO";', type: "add" },
+          { n: 16, code: '  cout << "NO";', type: "del" },
+          { n: 16, code: '  cout << "YES";', type: "add" },
           { n: 17, code: "  return 0;", type: "ctx" },
           { n: 18, code: "}", type: "ctx" },
         ].map((line, i) => (
