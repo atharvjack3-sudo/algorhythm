@@ -119,8 +119,8 @@ export default function SolveProblem() {
   const monacoRef = useRef(null);
   const editorRef = useRef(null);
   const [showProblemTopics, setShowProblemTopics] = useState(true);
-  const [ differentiate, setDifferentiate ] = useState(false);
-  const [ cmpCode, setCmpCode ] = useState([]); // old, fin
+  const [differentiate, setDifferentiate] = useState(false);
+  const [cmpCode, setCmpCode] = useState([]); // old, fin
 
   /* ==============
   Collab States
@@ -133,6 +133,7 @@ export default function SolveProblem() {
   const providerRef = useRef(null);
   const bindingRef = useRef(null);
   const listenerRef = useRef(null);
+  const yTextRef = useRef(null);
   /* =========================
      RESIZER LOGIC
   ========================= */
@@ -203,7 +204,7 @@ export default function SolveProblem() {
     const listener = editor.onDidChangeModelContent(() => {
       setCode(editor.getValue());
     });
-
+    yTextRef.current = yText;
     ydocRef.current = ydoc;
     providerRef.current = provider;
     bindingRef.current = binding;
@@ -255,6 +256,7 @@ export default function SolveProblem() {
       bindingRef.current = null;
       providerRef.current = null;
       ydocRef.current = null;
+      yTextRef.current = null;
 
       setIsOwner(false);
       setCollabData(null);
@@ -1051,8 +1053,10 @@ export default function SolveProblem() {
                   "Are you sure you want to reset the IDE?",
                 );
                 if (!r) return;
-                setCode("");
-                editorRef.current?.setValue("");
+                if (collabActive) {
+                  yTextRef.current?.delete(0, yTextRef.current.length);
+                } 
+                else editorRef.current?.setValue("");
               }}
               className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
             >
@@ -1206,14 +1210,20 @@ export default function SolveProblem() {
                   Diff with Current
                 </button>
 
-                <button onClick={()=> window.confirm("coming soon...")} className="rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold tracking-wide text-slate-700 transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                <button
+                  onClick={() => window.confirm("coming soon...")}
+                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold tracking-wide text-slate-700 transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
                   Diff with Other
                 </button>
 
                 <button
                   onClick={() => {
-                    setCode(openSubmission.code);
-                    editorRef?.current?.setValue(openSubmission.code);
+                    if (collabActive) {
+                      yTextRef.current?.delete(0, yTextRef.current.length);
+                      yTextRef.current?.insert(0, openSubmission.code);
+                    }
+                    else editorRef?.current?.setValue(openSubmission.code);
                     setLanguage(openSubmission.language);
                     setOpenSubmission(null);
                   }}
@@ -1305,8 +1315,11 @@ export default function SolveProblem() {
               {submissions.map((sub, i) => (
                 <div
                   onClick={() => {
-                    setCode(sub.code);
-                    editorRef?.current?.setValue(sub.code);
+                    if (collabActive) {
+                      yTextRef.current?.delete(0, yTextRef.current.length);
+                      yTextRef.current?.insert(0, sub.code);
+                    }
+                    else editorRef?.current?.setValue(sub.code);
                     setLanguage(sub.language);
                     setShowRestoreModal(false);
                   }}
@@ -1345,17 +1358,23 @@ export default function SolveProblem() {
       )}
       {differentiate && (
         <div className="absolute top-0 left-0 flex flex-col justify-center items-center w-full h-full z-100 bg-slate-950/20 backdrop-blur-3xl">
-          
-          <button className="mb-2 py-2 px-2 flex text-xs cursor-pointer hover:bg-orange-500 bg-orange-400 font-semibold font-sans gap-1 tracking-wide text-white rounded-sm" onClick={() => setDifferentiate(false)}> <X size={15}/> <span>Close</span></button>
-          <DiffEditor className="border-2 dark:border-slate-700 border-slate-500"
+          <button
+            className="mb-2 py-2 px-2 flex text-xs cursor-pointer hover:bg-orange-500 bg-orange-400 font-semibold font-sans gap-1 tracking-wide text-white rounded-sm"
+            onClick={() => setDifferentiate(false)}
+          >
+            {" "}
+            <X size={15} /> <span>Close</span>
+          </button>
+          <DiffEditor
+            className="border-2 dark:border-slate-700 border-slate-500"
             height="80vh"
             width="80vw"
             language="cpp"
-            theme={theme === "light" ? "vs-light" : "vs-dark" }
+            theme={theme === "light" ? "vs-light" : "vs-dark"}
             original={cmpCode[0]}
             modified={cmpCode[1]}
             options={{
-              readOnly: true, 
+              readOnly: true,
               renderSideBySide: false,
               minimap: { enabled: false },
               scrollBeyondLastLine: false,
