@@ -523,7 +523,6 @@ export default function AlgorhythmLanding() {
         </div>
 
         {/* TRUSTED BY MARQUEE */}
-        {/* TRUSTED BY MARQUEE */}
         <Reveal className="py-12   -mx-6 md:mx-0 md:rounded-2xl flex flex-col items-center relative overflow-hidden">
           <p className="text-[11px] select-none font-bold text-[#888] dark:text-[#555] uppercase tracking-[0.2em] mb-10 text-center">
             Trusted by engineers at
@@ -1343,6 +1342,143 @@ export default function AlgorhythmLanding() {
             </Reveal>
           </div>
         </div>
+        {/* SECTION 4: DIFF VIEWER */}
+<div className="pb-[100px]">
+  <Reveal className="text-center mb-16">
+    <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff] border border-transparent">
+      Code Review
+    </span>
+    <h2 className="text-[clamp(36px,5vw,56px)] select-none font-medium tracking-[-0.025em] leading-[1.1] mt-4">
+      See what changed. Line by line.
+    </h2>
+    <p className="text-[17px] select-none text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
+      Every resubmission is diffed against your last attempt automatically.
+      No more scrolling two tabs side by side to find the one line you fixed.
+    </p>
+  </Reveal>
+
+  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
+    {/* Left Bento */}
+    <Reveal className="col-span-12 md:col-span-4 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
+      <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
+        Auto-Diff
+      </span>
+      <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
+        Attempt #4 vs #3
+      </h3>
+      <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
+        We diff every submission against your last one, so you can see the
+        exact fix that flipped a Wrong Answer into an Accepted.
+      </p>
+
+      <div className="bg-[#f0efe9] text-center dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-5 mt-5">
+        <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
+          Lines changed
+        </div>
+        <div className="flex items-center justify-center gap-3 my-2">
+          <span className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono text-[#16a34a] dark:text-[#22c55e]">
+            +2
+          </span>
+          <span className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono text-[#e11d48] dark:text-[#fb7185]">
+            −2
+          </span>
+        </div>
+        <span className="inline-flex select-none items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] mt-1.5">
+          ✓ Accepted · Verdict flipped
+        </span>
+
+        <div className="mt-6 select-none items-center justify-center flex gap-2">
+          
+        </div>
+      </div>
+    </Reveal>
+
+    {/* Right Bento — Code Diff Mock */}
+    <Reveal
+      delay={100}
+      className="col-span-12 md:col-span-8 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden"
+    >
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185] border border-transparent">
+        Live Preview
+      </span>
+      <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
+        Inline diff view
+      </h3>
+      <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65] mb-5">
+        Removed lines in red, added lines in green — right where you'd expect
+        them, inside the editor you already know.
+      </p>
+
+      {/* Code editor mock */}
+      <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-[#f7f6f2] dark:bg-[#0d0f14] overflow-hidden font-mono text-[13px] leading-[1.7]">
+        {/* Editor tab bar */}
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-black/10 dark:border-white/10 bg-[#f0efe9] dark:bg-[#13151a]">
+          <div className="flex gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+          </div>
+          <span className="text-[12px] text-[#888] dark:text-[#666] ml-2">
+            solution.cpp
+          </span>
+        </div>
+
+        {/* Diff lines */}
+        {[
+          { n: 1, code: "#include <bits/stdc++.h>", type: "ctx" },
+          { n: 2, code: "using namespace std;", type: "ctx" },
+          { n: 11, code: "int t; cin >> t;", type: "ctx" },
+          { n: 12, code: "unordered_set<int> st;", type: "ctx" },
+          { n: 13, code: "// a + i = t", type: "del" },
+          { n: 13, code: "// a = t - i", type: "add" },
+          { n: 14, code: "for (int i : v) {", type: "ctx" },
+          { n: 15, code: "  if (st.find(t - i) != st.end()) {", type: "ctx" },
+          { n: 16, code: '  cout << "YES";', type: "del" },
+          { n: 16, code: '  cout << "NO";', type: "add" },
+          { n: 17, code: "  return 0;", type: "ctx" },
+          { n: 18, code: "}", type: "ctx" },
+        ].map((line, i) => (
+          <div
+            key={i}
+            className={`flex items-stretch ${
+              line.type === "del"
+                ? "bg-[#fef2f2] dark:bg-[#450a0a]/40"
+                : line.type === "add"
+                  ? "bg-[#f0fdf4] dark:bg-[#052e16]/40"
+                  : ""
+            }`}
+          >
+            <span
+              className={`w-6 shrink-0 text-center text-[11px] ${
+                line.type === "del"
+                  ? "bg-[#fecaca] dark:bg-[#7f1d1d]/50 text-[#b91c1c] dark:text-[#fb7185]"
+                  : line.type === "add"
+                    ? "bg-[#bbf7d0] dark:bg-[#166534]/50 text-[#15803d] dark:text-[#4ade80]"
+                    : ""
+              }`}
+            >
+              {line.type === "del" ? "−" : line.type === "add" ? "+" : ""}
+            </span>
+            <span className="w-8 shrink-0 text-right pr-3 text-[#a3a3a3] dark:text-[#4a4d57] select-none">
+              {line.n}
+            </span>
+            <span
+              className={`pl-2 pr-4 whitespace-pre ${
+                line.type === "del"
+                  ? "text-[#991b1b] dark:text-[#fca5a5]"
+                  : line.type === "add"
+                    ? "text-[#166534] dark:text-[#86efac]"
+                    : "text-[#0d0d0d] dark:text-[#d4d4d8]"
+              }`}
+            >
+              {line.code}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Reveal>
+  </div>
+</div>
 
         {/* SECTION 4: DISCUSSION */}
         <div className="pb-[100px]">
