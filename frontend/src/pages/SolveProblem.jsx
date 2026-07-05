@@ -146,6 +146,11 @@ export default function SolveProblem() {
   const [showCloudModal, setShowCloudModal] = useState(false);
   const [cloudModalInit, setCloudModalInit] = useState(false);
   const [cloudSaves, setCloudSaves] = useState([]);
+
+  const [isFetching, setIsFetching] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCreatingSave, setIsCreatingSave] = useState(false);
+  const [saveTitle, setSaveTitle] = useState("");
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
     monacoRef.current = monaco;
@@ -154,7 +159,7 @@ export default function SolveProblem() {
     monacoRef.current = monaco;
   }
   const handleFetchSaves = async () => {
-    if (authLoading || !user) return;
+    setIsFetching(true);
     try {
       const response = await api.get(`/cloud-saves/${problemId}`);
       const data = response.data;
@@ -168,9 +173,41 @@ export default function SolveProblem() {
       setCloudModalInit(true);
     } catch (error) {
       console.error(
-        "Network error fetching cloud saves:",
+        "Network error:",
         error.response?.data?.errorMsg || error.message,
       );
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  const handleCreateSave = async () => {
+    if (!saveTitle.trim()) return;
+    setIsSaving(true);
+
+    try {
+      const response = await api.post("/cloud-saves", {
+        problemId,
+        title: saveTitle,
+        code,
+        language,
+      });
+
+      if (response.data.errorPresent) {
+        console.error("Failed to create save:", response.data.errorMsg);
+        return;
+      }
+
+      setSaveTitle("");
+      setIsCreatingSave(false);
+      await handleFetchSaves();
+    } catch (error) {
+      console.error(
+        "Network error:",
+        error.response?.data?.errorMsg || error.message,
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
   const handleCopy = async () => {
@@ -1403,54 +1440,174 @@ export default function SolveProblem() {
         </div>
       )}
       <div
-        className={`${showCloudModal ? "block" : "hidden"} fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm`}
+        className={`${
+          showCloudModal ? "block" : "hidden"
+        } fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm`}
       >
         <div className="bg-gray-900 border border-gray-700 p-6 rounded-lg shadow-xl w-full max-w-lg">
+          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-white">Cloud Saves</h2>
             <button
               className="text-gray-400 hover:text-white transition-colors"
-              onClick={() => setShowCloudModal(false)}
+              onClick={() => {
+                setShowCloudModal(false);
+                setIsCreatingSave(false);
+                setSaveTitle("");
+              }}
             >
               <X size={15} />
             </button>
           </div>
 
-          
           {!cloudModalInit ? (
+          
             <div className="flex justify-center items-center py-10">
               <button
                 onClick={handleFetchSaves}
-                className="bg-orange-600 hover:bg-orange-500 cursor-pointer text-white font-semibold py-2 px-6 rounded transition-colors"
+                disabled={isFetching}
+                className="flex items-center justify-center bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:hover:bg-orange-600 disabled:cursor-not-allowed cursor-pointer text-white font-semibold py-2 px-6 rounded transition-colors"
               >
-                Fetch Cloud Saves
+                {isFetching && (
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                )}
+                {isFetching ? "Fetching..." : "Fetch Cloud Saves"}
               </button>
             </div>
           ) : (
             
-            <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
-              {cloudSaves.length > 0 ? (
-                cloudSaves.map((cs) => (
-                  <div
-                    key={cs.id} 
-                    className="flex justify-between items-center p-3 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors cursor-pointer"
+            <div className="flex flex-col gap-4">
+              
+              <div className="flex flex-col gap-2">
+                {!isCreatingSave ? (
+                  <button
+                    onClick={() => setIsCreatingSave(true)}
+                    className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2 rounded transition-colors"
                   >
-                    <div className="flex flex-col">
-                      <span className="text-white font-medium">{cs.title}</span>
-                      <span className="text-xs text-gray-400 mt-1">
-                        {new Date(cs.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="bg-gray-900 border border-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
-                      {cs.lang}
-                    </div>
+                    + Create New Cloud Save
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter save title..."
+                      value={saveTitle}
+                      onChange={(e) => setSaveTitle(e.target.value)}
+                      className="flex-1 bg-gray-950 border border-gray-700 text-white px-3 py-2 rounded outline-none focus:border-orange-500 transition-colors"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleCreateSave}
+                      disabled={isSaving || !saveTitle.trim()}
+                      className="flex items-center justify-center bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded transition-colors"
+                    >
+                      {isSaving && (
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      )}
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setIsCreatingSave(false)}
+                      disabled={isSaving}
+                      className="bg-gray-800 hover:bg-gray-700 border border-gray-600 text-gray-300 px-3 py-2 rounded transition-colors"
+                    >
+                      Cancel
+                    </button>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-400 text-center py-6">
-                  No cloud saves found.
-                </p>
-              )}
+                )}
+              </div>
+
+              
+              <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar relative">
+                
+                {isFetching && (
+                  <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center rounded">
+                    <svg
+                      className="animate-spin h-8 w-8 text-orange-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                )}
+
+                {cloudSaves.length > 0 ? (
+                  cloudSaves.map((cs) => (
+                    <div
+                      key={cs.id}
+                      className="flex justify-between items-center p-3 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors cursor-pointer"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-white font-medium">
+                          {cs.title}
+                        </span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          {new Date(cs.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="bg-gray-900 border border-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
+                        {cs.lang || cs.language}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-center py-6">
+                    No cloud saves found.
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>
