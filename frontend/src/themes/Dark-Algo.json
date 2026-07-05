@@ -99,23 +99,23 @@
       "token": "support.class"
     },
     {
-      "foreground": "4ade80",
+      "foreground": "fde68a",
       "token": "string"
     },
     {
-      "foreground": "4ade80",
+      "foreground": "fde68a",
       "token": "constant.other.symbol"
     },
     {
-      "foreground": "4ade80",
+      "foreground": "fde68a",
       "token": "entity.other.inherited-class"
     },
     {
-      "foreground": "4ade80",
+      "foreground": "fde68a",
       "token": "markup.heading"
     },
     {
-      "foreground": "4ade80",
+      "foreground": "fde68a",
       "token": "markup.inserted.git_gutter"
     },
     {
