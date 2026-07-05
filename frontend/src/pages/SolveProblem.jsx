@@ -143,6 +143,9 @@ export default function SolveProblem() {
   ////////////////
   const [copySuccess, setCopySuccess] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [showCloudModal, setShowCloudModal] = useState(false);
+  const [cloudModalInit, setCloudModalInit] = useState(false);
+  const [cloudSaves, setCloudSaves] = useState([]);
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
     monacoRef.current = monaco;
@@ -150,6 +153,26 @@ export default function SolveProblem() {
   function handleBeforeMount(monaco) {
     monacoRef.current = monaco;
   }
+  const handleFetchSaves = async () => {
+    if (authLoading || !user) return;
+    try {
+      const response = await api.get(`/cloud-saves/${problemId}`);
+      const data = response.data;
+
+      if (data.errorPresent) {
+        console.error("Failed to fetch cloud saves:", data.errorMsg);
+        return;
+      }
+
+      setCloudSaves(data.saves);
+      setCloudModalInit(true);
+    } catch (error) {
+      console.error(
+        "Network error fetching cloud saves:",
+        error.response?.data?.errorMsg || error.message,
+      );
+    }
+  };
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code);
@@ -1055,8 +1078,7 @@ export default function SolveProblem() {
                 if (!r) return;
                 if (collabActive) {
                   yTextRef.current?.delete(0, yTextRef.current.length);
-                } 
-                else editorRef.current?.setValue("");
+                } else editorRef.current?.setValue("");
               }}
               className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
             >
@@ -1067,7 +1089,7 @@ export default function SolveProblem() {
             </button>
 
             <button
-              onClick={() => window.confirm("Coming Soon...")}
+              onClick={() => setShowCloudModal(true)}
               className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
             >
               <CloudUpload size={15} />
@@ -1222,8 +1244,7 @@ export default function SolveProblem() {
                     if (collabActive) {
                       yTextRef.current?.delete(0, yTextRef.current.length);
                       yTextRef.current?.insert(0, openSubmission.code);
-                    }
-                    else editorRef?.current?.setValue(openSubmission.code);
+                    } else editorRef?.current?.setValue(openSubmission.code);
                     setLanguage(openSubmission.language);
                     setOpenSubmission(null);
                   }}
@@ -1318,8 +1339,7 @@ export default function SolveProblem() {
                     if (collabActive) {
                       yTextRef.current?.delete(0, yTextRef.current.length);
                       yTextRef.current?.insert(0, sub.code);
-                    }
-                    else editorRef?.current?.setValue(sub.code);
+                    } else editorRef?.current?.setValue(sub.code);
                     setLanguage(sub.language);
                     setShowRestoreModal(false);
                   }}
@@ -1382,6 +1402,59 @@ export default function SolveProblem() {
           />
         </div>
       )}
+      <div
+        className={`${showCloudModal ? "block" : "hidden"} fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm`}
+      >
+        <div className="bg-gray-900 border border-gray-700 p-6 rounded-lg shadow-xl w-full max-w-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-white">Cloud Saves</h2>
+            <button
+              className="text-gray-400 hover:text-white transition-colors"
+              onClick={() => setShowCloudModal(false)}
+            >
+              <X size={15} />
+            </button>
+          </div>
+
+          
+          {!cloudModalInit ? (
+            <div className="flex justify-center items-center py-10">
+              <button
+                onClick={handleFetchSaves}
+                className="bg-orange-600 hover:bg-orange-500 cursor-pointer text-white font-semibold py-2 px-6 rounded transition-colors"
+              >
+                Fetch Cloud Saves
+              </button>
+            </div>
+          ) : (
+            
+            <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+              {cloudSaves.length > 0 ? (
+                cloudSaves.map((cs) => (
+                  <div
+                    key={cs.id} 
+                    className="flex justify-between items-center p-3 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors cursor-pointer"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-white font-medium">{cs.title}</span>
+                      <span className="text-xs text-gray-400 mt-1">
+                        {new Date(cs.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="bg-gray-900 border border-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
+                      {cs.lang}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-center py-6">
+                  No cloud saves found.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </>
   );
 }
