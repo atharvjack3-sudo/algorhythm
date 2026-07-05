@@ -1363,7 +1363,7 @@ export default function SolveProblem() {
 
               <button
                 onClick={() => setShowRestoreModal(false)}
-                className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                className="rounded-md cursor-pointer p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
               >
                 <X size={18} />
               </button>
@@ -1439,33 +1439,36 @@ export default function SolveProblem() {
           />
         </div>
       )}
-      <div
+<div
         className={`${
           showCloudModal ? "block" : "hidden"
-        } fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm`}
+        } fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300`}
       >
-        <div className="bg-gray-900 border border-gray-700 p-6 rounded-lg shadow-xl w-full max-w-lg">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 rounded-md shadow-2xl shadow-black w-full max-w-lg animate-in fade-in zoom-in-95 duration-300">
           {/* Header */}
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-white">Cloud Saves</h2>
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-xl font-semibold font-sans text-slate-900 dark:text-slate-300">
+              Cloud Saves
+            </h2>
             <button
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-slate-400 cursor-pointer hover:text-orange-500 hover:rotate-90 transition-all duration-300 ease-out"
               onClick={() => {
                 setShowCloudModal(false);
                 setIsCreatingSave(false);
                 setSaveTitle("");
               }}
             >
-              <X size={15} />
+              <X size={16} />
             </button>
           </div>
 
           {!cloudModalInit ? (
-            <div className="flex justify-center items-center py-10">
+            <div className="flex justify-center flex-col items-center py-10">
+              <p className="text-center dark:text-slate-400 text-slate-700 mb-5 font-sans text-sm">Please fetch your pre-existing cloud saves to restore them, or create new cloud saves.</p>
               <button
                 onClick={handleFetchSaves}
                 disabled={isFetching}
-                className="flex items-center justify-center bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:hover:bg-orange-600 disabled:cursor-not-allowed cursor-pointer text-white font-semibold py-2 px-6 rounded transition-colors"
+                className="flex items-center justify-center bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:hover:bg-orange-500 disabled:cursor-not-allowed cursor-pointer text-white font-medium py-2.5 px-6 rounded-sm transition-all duration-200 ease-out font-sans text-xs hover:shadow-orange-500/30 active:scale-95"
               >
                 {isFetching && (
                   <svg
@@ -1498,24 +1501,24 @@ export default function SolveProblem() {
                 {!isCreatingSave ? (
                   <button
                     onClick={() => setIsCreatingSave(true)}
-                    className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2 rounded transition-colors"
+                    className="w-full bg-slate-50 dark:bg-slate-900 hover:bg-orange-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 py-2 rounded-md transition-all duration-200 ease-out hover:scale-[1.01] text-sm font-semibold font-sans active:scale-[0.99]"
                   >
                     + Create New Cloud Save
                   </button>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
                     <input
                       type="text"
                       placeholder="Enter save title..."
                       value={saveTitle}
                       onChange={(e) => setSaveTitle(e.target.value)}
-                      className="flex-1 bg-gray-950 border border-gray-700 text-white px-3 py-2 rounded outline-none focus:border-orange-500 transition-colors"
+                      className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-2 rounded-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 text-xs font-sans"
                       autoFocus
                     />
                     <button
                       onClick={handleCreateSave}
                       disabled={isSaving || !saveTitle.trim()}
-                      className="flex items-center justify-center bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded transition-colors"
+                      className="flex items-center justify-center font-sans bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-white px-4 py-2 rounded-sm text-xs transition-all duration-200 ease-out hover:scale-105 active:scale-95"
                     >
                       {isSaving && (
                         <svg
@@ -1544,7 +1547,7 @@ export default function SolveProblem() {
                     <button
                       onClick={() => setIsCreatingSave(false)}
                       disabled={isSaving}
-                      className="bg-gray-800 hover:bg-gray-700 border border-gray-600 text-gray-300 px-3 py-2 rounded transition-colors"
+                      className="bg-slate-100 text-xs font-sans dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 px-3 py-2 rounded-sm transition-all duration-200 ease-out active:scale-95"
                     >
                       Cancel
                     </button>
@@ -1552,9 +1555,9 @@ export default function SolveProblem() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar relative">
+              <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar relative">
                 {isFetching && (
-                  <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center rounded">
+                  <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg transition-opacity duration-200">
                     <svg
                       className="animate-spin h-8 w-8 text-orange-500"
                       xmlns="http://www.w3.org/2000/svg"
@@ -1577,35 +1580,38 @@ export default function SolveProblem() {
                     </svg>
                   </div>
                 )}
+                <p className="text-center dark:text-slate-400 text-slate-700 mb-5 font-sans text-xs">Click on a save to restore it to your IDE</p>
 
                 {cloudSaves.length > 0 ? (
-                  cloudSaves.map((cs) => (
+                  cloudSaves.map((cs, i) => (
                     <div
                       key={cs.id}
+                      style={{ animationDelay: `${i * 40}ms` }}
                       onClick={() => {
                         if (collabActive) {
                           yTextRef.current?.delete(0, yTextRef.current.length);
                           yTextRef.current?.insert(0, cs.code);
                         } else editorRef?.current?.setValue(cs.code);
                         setLanguage(cs.language);
+                        setShowCloudModal(false);
                       }}
-                      className="flex justify-between items-center p-3 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors hover:brightness-125 cursor-pointer"
+                      className="animate-in fade-in slide-in-from-left-1 fill-mode-both flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm cursor-pointer transition-all duration-200 ease-out hover:border-orange-400 dark:hover:border-orange-500/60 hover:bg-orange-50 dark:hover:bg-slate-800 hover:translate-x-1 hover:shadow-md hover:shadow-orange-500/10 active:scale-[0.98]"
                     >
                       <div className="flex flex-col">
-                        <span className="text-white font-medium">
+                        <span className="text-slate-900 font-sans text-sm dark:text-white font-medium">
                           {cs.title}
                         </span>
-                        <span className="text-xs text-gray-400 mt-1">
+                        <span className="text-xs text-slate-400 dark:text-slate-500 font-sans mt-1">
                           {new Date(cs.created_at).toLocaleString()}
                         </span>
                       </div>
-                      <div className="bg-gray-900 border border-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
+                      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 text-xs px-2 py-1 rounded-sm">
                         {cs.language}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-400 text-center py-6">
+                  <p className="text-slate-400 dark:text-slate-500 text-center py-6">
                     No cloud saves found.
                   </p>
                 )}
