@@ -16,7 +16,7 @@ import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 import SubmissionAnim from "../components/submissionAnim";
 import CollabTab from "../components/CollabTab";
-import { Copy, RotateCcw, CloudUpload, History, Check, X } from "lucide-react";
+import { Copy, RotateCcw, CloudUpload, History, Check, X, Info } from "lucide-react";
 import "./css/scrollbar.css";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
@@ -1237,8 +1237,9 @@ export default function SolveProblem() {
             )}
           </div>
           <div className="dark:bg-slate-950 w-full py-1 px-2 bg-white text-xs dark:text-slate-400 text-slate-700 font-sans flex justify-between">
-            <div>
-              <span className="mr-5">
+            <div className="flex">
+              <Info size={15}/> 
+              <span className="mr-5 ml-2">
                 Run Code: ⌘
                 <span className="font-semibold ml-0.5"> + Shift + Enter</span>
               </span>
