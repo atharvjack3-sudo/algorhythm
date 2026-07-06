@@ -1038,7 +1038,8 @@ export default function ContestSolveProblem() {
             )}
 
             {/* ===== RUN ===== */}
-            {activeTab === "Run" && (
+            <div className={`${activeTab === "Run" ? "block" : "hidden"}`}>
+            
               <div className="flex flex-col gap-5">
                 {runLoading ? (
                   <div className="w-full py-16 flex items-center justify-center">
@@ -1124,7 +1125,7 @@ export default function ContestSolveProblem() {
                   />
                 </div>
               </div>
-            )}
+            </div>
 
             {/* ===== RESULT ===== */}
             {activeTab === "Result" && (
