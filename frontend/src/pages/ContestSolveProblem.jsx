@@ -92,7 +92,7 @@
 //   useEffect(() => {
 //     async function loadProblem() {
 //       const cacheKey = `contest_${contestId}_problem_${problemId}_data`;
-      
+
 //       const setProblemState = (problemData) => {
 //         setData(problemData);
 //         // Dynamically check if the contest has ended based on current local time
@@ -112,12 +112,12 @@
 //         const res = await api.get(`/contests/${contestId}/problems/${problemId}`);
 //         sessionStorage.setItem(cacheKey, JSON.stringify(res.data));
 //         setProblemState(res.data);
-//       } catch (err) { 
+//       } catch (err) {
 //         // Redirect to contest page if not started or not registered
 //         if (err.response?.status === 403 || err.response?.status === 404 || err.response?.data?.code === "NOT_STARTED") {
 //           navigate(`/contests`);
 //         } else {
-//           console.error("Problem fetch failed"); 
+//           console.error("Problem fetch failed");
 //         }
 //       }
 //     }
@@ -128,8 +128,8 @@
 //     try {
 //       const res = await api.get(`/contests/${contestId}/my-submissions`);
 //       setSubmissions(res.data);
-//     } catch (err) { 
-//       console.error("Logs fetch failed"); 
+//     } catch (err) {
+//       console.error("Logs fetch failed");
 //     }
 //   }
 
@@ -144,7 +144,7 @@
 //       setRunError(null);
 //       const res = await api.post("/run", { problemId, language, code });
 //       setRunResults(res.data.samples);
-//       setActiveTab("Run"); 
+//       setActiveTab("Run");
 //     } catch (err) {
 //       setRunError(err.response?.data?.error || "Run failed");
 //     } finally {
@@ -159,12 +159,12 @@
 //       const res = await api.post(`/contests/${contestId}/submit`, { problemId, language, code });
 //       setLastResult(res.data);
 //       if (res.data.samples) setRunResults(res.data.samples);
-      
+
 //       // Invalidate the global dashboard cache so the user's solved stats update immediately!
 //       sessionStorage.removeItem(`dashboard_data_${user.id}`);
-      
+
 //       await loadSubmissions();
-//       setActiveTab("Result"); 
+//       setActiveTab("Result");
 //     } catch (err) {
 //       console.error("Submission failed");
 //     } finally {
@@ -203,7 +203,7 @@
 //           </select>
 //         </div>
 //       </div>
-      
+
 //       <div className="p-4">
 //         <div className="h-[450px] border border-slate-200 dark:border-slate-800 rounded overflow-hidden">
 //           <Editor
@@ -224,17 +224,17 @@
 //             onChange={(v) => setCode(v || "")}
 //           />
 //         </div>
-        
+
 //         <div className="mt-4 flex flex-wrap gap-2.5">
-//           <button 
-//             onClick={handleRun} 
+//           <button
+//             onClick={handleRun}
 //             disabled={runLoading}
 //             className="font-mono text-[11px] font-semibold tracking-[0.06em] rounded transition-all duration-150 cursor-pointer bg-transparent text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
 //           >
 //             {runLoading ? "Running..." : "Run Code"}
 //           </button>
-//           <button 
-//             onClick={handleSubmit} 
+//           <button
+//             onClick={handleSubmit}
 //             disabled={submitting || isEnded}
 //             className="font-mono text-[11px] font-bold tracking-[0.12em] rounded transition-opacity duration-150 cursor-pointer  bg-orange-600 dark:bg-orange-500 text-black dark:text-slate-950 border-none px-4 py-2 hover:opacity-85 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
 //           >
@@ -260,7 +260,7 @@
 //         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 //         .font-mono { font-family: 'JetBrains Mono', monospace; }
 //         .font-sans { font-family: 'DM Sans', sans-serif; }
-        
+
 //         /* Markdown Overrides */
 //         .cf-markdown p { margin-bottom: 1rem; line-height: 1.6; }
 //         .cf-markdown code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; padding: 0.15rem 0.3rem; background: var(--code-bg); border-radius: 0.25rem; }
@@ -268,24 +268,24 @@
 //         .cf-markdown pre code { background: transparent; padding: 0; }
 //         .cf-markdown ul, .cf-markdown ol { padding-left: 1.5rem; margin-bottom: 1rem; }
 //         .cf-markdown li { margin-bottom: 0.25rem; }
-        
+
 //         :root { --code-bg: #f1f5f9; --pre-bg: #f8fafc; --border-color: #e2e8f0; }
 //         .dark { --code-bg: rgba(30, 41, 59, 0.5); --pre-bg: #0f172a; --border-color: #1e293b; }
 //       `}</style>
 
 //       <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 pb-16">
 //         <div className="max-w-5xl mx-auto py-10 px-6 flex flex-col gap-8">
-          
+
 //           {/* --- TABS MENU --- */}
 //           <div className="border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
 //             <div className="flex gap-6 whitespace-nowrap">
 //               {TABS.map((t) => (
-//                 <button 
-//                   key={t} 
+//                 <button
+//                   key={t}
 //                   onClick={() => setActiveTab(t)}
 //                   className={`pb-3 font-mono text-[11px] font-semibold tracking-[0.08em] uppercase transition-all duration-200 border-b-2 relative top-[2px] bg-transparent ${
-//                     activeTab === t 
-//                       ? "text-orange-500 border-orange-500" 
+//                     activeTab === t
+//                       ? "text-orange-500 border-orange-500"
 //                       : "text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700"
 //                   }`}
 //                 >
@@ -293,7 +293,7 @@
 //                 </button>
 //               ))}
 //             </div>
-//             <button 
+//             <button
 //               onClick={() => navigate(`/contests/${contestId}/problems`)}
 //               className="pb-3 font-mono text-[11px] font-semibold tracking-[0.06em] text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors bg-transparent border-none flex items-center gap-2"
 //             >
@@ -304,7 +304,7 @@
 //           {/* --- PROBLEM TAB --- */}
 //           {activeTab === "Problem" && (
 //             <div className="bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-200 dark:border-slate-800 p-8 md:p-12">
-              
+
 //               {/* Header */}
 //               <div className="text-center mb-10 pb-6 border-b border-slate-200 dark:border-slate-800">
 //                 <div className="flex items-center justify-center gap-2.5 mb-3">
@@ -359,7 +359,7 @@
 //                         <pre className="p-4 bg-white dark:bg-slate-900 font-mono text-[13px] text-slate-800 dark:text-slate-200 m-0 whitespace-pre-wrap">
 //                           {s.input}
 //                         </pre>
-                        
+
 //                         <div className="px-3 py-1.5 bg-slate-100 dark:bg-slate-950 border-y border-slate-200 dark:border-slate-800 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
 //                           Output
 //                         </div>
@@ -386,14 +386,14 @@
 //                   Execution Results
 //                 </span>
 //               </div>
-              
+
 //               {runError && (
 //                 <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
 //                   <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">Error</div>
 //                   <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">{runError}</pre>
 //                 </div>
 //               )}
-              
+
 //               {runResults.length === 0 && !runError ? (
 //                 <div className="px-4 py-8 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
 //                   No code executed yet.
@@ -412,7 +412,7 @@
 //                             {isMatch ? "Matched" : "Mismatch"}
 //                           </span>
 //                         </div>
-                        
+
 //                         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
 //                           <div>
 //                             <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">Your Output</div>
@@ -453,8 +453,8 @@
 //               ) : (
 //                 <div className="flex flex-col gap-6">
 //                   <div className={`p-5 rounded-md border shadow-sm ${
-//                     lastResult.verdict === "AC" || lastResult.verdict === "Accepted" 
-//                     ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50" 
+//                     lastResult.verdict === "AC" || lastResult.verdict === "Accepted"
+//                     ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50"
 //                     : "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
 //                   }`}>
 //                     <h3 className={`font-mono text-[18px] font-bold tracking-wide uppercase ${lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}>
@@ -480,8 +480,8 @@
 //                               </td>
 //                               <td className="px-4 py-3 text-right">
 //                                 <span className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
-//                                   s.verdict === "AC" || s.verdict === "Accepted" 
-//                                     ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
+//                                   s.verdict === "AC" || s.verdict === "Accepted"
+//                                     ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
 //                                     : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
 //                                 }`}>
 //                                   {s.verdict === "AC" ? "Accepted" : s.verdict}
@@ -539,7 +539,7 @@
 //                         submissions.map((s, i) => (
 //                           <tr key={s.submission_id || i} className="border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/50 group">
 //                             <td className="px-4 py-3">
-//                               <span 
+//                               <span
 //                                 className="font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 cursor-pointer transition-colors"
 //                                 onClick={() => setViewCode(s)}
 //                                 title="Click to view source code"
@@ -551,7 +551,7 @@
 //                               {formatCFDate(s.submitted_at)}
 //                             </td>
 //                             <td className="px-4 py-3">
-//                               <span 
+//                               <span
 //                                 className="font-sans text-[13px] font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 cursor-pointer transition-colors"
 //                                 onClick={() => navigate(`/contests/${contestId}/solve/${s.problem_id}`)}
 //                               >
@@ -563,8 +563,8 @@
 //                             </td>
 //                             <td className="px-4 py-3 text-center">
 //                               <span className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
-//                                 s.verdict === "AC" || s.verdict === "Accepted" 
-//                                   ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
+//                                 s.verdict === "AC" || s.verdict === "Accepted"
+//                                   ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
 //                                   : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
 //                               }`}>
 //                                 {s.verdict === "AC" ? "Accepted" : s.verdict}
@@ -595,8 +595,8 @@
 //                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
 //                     SUBMISSION #{viewCode.submission_id} · {viewCode.problem_index} · {viewCode.language}
 //                   </div>
-//                   <button 
-//                     onClick={() => setViewCode(null)} 
+//                   <button
+//                     onClick={() => setViewCode(null)}
 //                     className="font-mono text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none p-1"
 //                   >
 //                     CLOSE [X]
@@ -629,6 +629,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
+import CustomTC from "../components/CustomTC";
 
 import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
@@ -704,12 +705,25 @@ export default function ContestSolveProblem() {
   const formatCFDate = (dateStr) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const month = months[d.getMonth()];
-    const day = String(d.getDate()).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, "0");
     const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const mins = String(d.getMinutes()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, "0");
+    const mins = String(d.getMinutes()).padStart(2, "0");
     return `${month}/${day}/${year} ${hours}:${mins}`;
   };
 
@@ -725,7 +739,7 @@ export default function ContestSolveProblem() {
   useEffect(() => {
     async function loadProblem() {
       const cacheKey = `contest_${contestId}_problem_${problemId}_data`;
-      
+
       const setProblemState = (problemData) => {
         setData(problemData);
         // check if the contest has ended based on current local time
@@ -742,15 +756,21 @@ export default function ContestSolveProblem() {
 
       // Network Call if no cache
       try {
-        const res = await api.get(`/contests/${contestId}/problems/${problemId}`);
+        const res = await api.get(
+          `/contests/${contestId}/problems/${problemId}`,
+        );
         sessionStorage.setItem(cacheKey, JSON.stringify(res.data));
         setProblemState(res.data);
-      } catch (err) { 
+      } catch (err) {
         // Redirect to contest page if not started or not registered
-        if (err.response?.status === 403 || err.response?.status === 404 || err.response?.data?.code === "NOT_STARTED") {
+        if (
+          err.response?.status === 403 ||
+          err.response?.status === 404 ||
+          err.response?.data?.code === "NOT_STARTED"
+        ) {
           navigate(`/contests`);
         } else {
-          console.error("Problem fetch failed"); 
+          console.error("Problem fetch failed");
         }
       }
     }
@@ -761,8 +781,8 @@ export default function ContestSolveProblem() {
     try {
       const res = await api.get(`/contests/${contestId}/my-submissions`);
       setSubmissions(res.data);
-    } catch (err) { 
-      console.error("Logs fetch failed"); 
+    } catch (err) {
+      console.error("Logs fetch failed");
     }
   }
 
@@ -814,7 +834,7 @@ export default function ContestSolveProblem() {
       setRunError(null);
       const res = await api.post("/run", { problemId, language, code });
       setRunResults(res.data.samples);
-      setActiveTab("Run"); 
+      setActiveTab("Run");
     } catch (err) {
       setRunError(err.response?.data?.error || "Run failed");
     } finally {
@@ -826,15 +846,19 @@ export default function ContestSolveProblem() {
     if (!user) return navigate("/auth");
     try {
       setSubmitting(true);
-      const res = await api.post(`/contests/${contestId}/submit`, { problemId, language, code });
+      const res = await api.post(`/contests/${contestId}/submit`, {
+        problemId,
+        language,
+        code,
+      });
       setLastResult(res.data);
       if (res.data.samples) setRunResults(res.data.samples);
-      
+
       // Invalidate the global dashboard cache so the user's solved stats update immediately!
       sessionStorage.removeItem(`dashboard_data_${user.id}`);
-      
+
       await loadSubmissions();
-      setActiveTab("Result"); 
+      setActiveTab("Result");
     } catch (err) {
       console.error("Submission failed");
     } finally {
@@ -882,7 +906,9 @@ export default function ContestSolveProblem() {
           {/* Header */}
           <div className="px-5 pt-6 pb-2 flex-shrink-0">
             <h1 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight flex items-center justify-between">
-              <span>{problem.index}. {problem.title}</span>
+              <span>
+                {problem.index}. {problem.title}
+              </span>
             </h1>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -913,18 +939,17 @@ export default function ContestSolveProblem() {
                 </button>
               ))}
             </div>
-            
-            <button 
+
+            <button
               onClick={() => navigate(`/contests/${contestId}/problems`)}
               className="px-4 py-2.5 font-mono text-[10px] cursor-pointer font-bold uppercase tracking-[0.1em] text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors bg-transparent border-none"
             >
-              ← Back to Contest
+              Back
             </button>
           </div>
 
           {/* Tab Content */}
           <div className="flex-1 overflow-y-auto px-5 py-6 text-[14px] text-slate-800 dark:text-slate-200 custom-scrollbar bg-white dark:bg-slate-950">
-            
             {/* ===== PROBLEM ===== */}
             {activeTab === "Problem" && (
               <div className="flex flex-col gap-8">
@@ -1041,7 +1066,8 @@ export default function ContestSolveProblem() {
                     ) : (
                       <div className="flex flex-col gap-5">
                         {runResults.map((r, i) => {
-                          const isMatch = r.output?.trim() === r.expected?.trim();
+                          const isMatch =
+                            r.output?.trim() === r.expected?.trim();
                           return (
                             <div
                               key={i}
@@ -1089,6 +1115,14 @@ export default function ContestSolveProblem() {
                     )}
                   </>
                 )}
+
+                <div className={`${runLoading ? "hidden" : "block"}`}>
+                  <CustomTC
+                    setRunLoading={setRunLoading}
+                    lang={language}
+                    code={code}
+                  />
+                </div>
               </div>
             )}
 
@@ -1198,13 +1232,27 @@ export default function ContestSolveProblem() {
                       <table className="w-full text-left border-collapse whitespace-nowrap">
                         <thead className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
                           <tr>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase w-20">ID</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">When</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">Problem</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">Lang</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">Verdict</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">Time</th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">Memory</th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase w-20">
+                              ID
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
+                              When
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
+                              Problem
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
+                              Lang
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
+                              Verdict
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">
+                              Time
+                            </th>
+                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">
+                              Memory
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -1214,7 +1262,7 @@ export default function ContestSolveProblem() {
                               className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
                             >
                               <td className="px-5 py-3">
-                                <span 
+                                <span
                                   className="font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 cursor-pointer transition-colors"
                                   onClick={() => setViewCode(s)}
                                 >
@@ -1225,9 +1273,13 @@ export default function ContestSolveProblem() {
                                 {formatCFDate(s.submitted_at)}
                               </td>
                               <td className="px-5 py-3">
-                                <span 
+                                <span
                                   className="font-sans text-[13px] font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 cursor-pointer transition-colors"
-                                  onClick={() => navigate(`/contests/${contestId}/solve/${s.problem_id}`)}
+                                  onClick={() =>
+                                    navigate(
+                                      `/contests/${contestId}/solve/${s.problem_id}`,
+                                    )
+                                  }
                                 >
                                   {s.problem_index} - {s.problem_title}
                                 </span>
@@ -1238,7 +1290,8 @@ export default function ContestSolveProblem() {
                               <td className="px-5 py-3 text-center">
                                 <span
                                   className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
-                                    s.verdict === "AC" || s.verdict === "Accepted"
+                                    s.verdict === "AC" ||
+                                    s.verdict === "Accepted"
                                       ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                                       : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
                                   }`}
@@ -1247,10 +1300,15 @@ export default function ContestSolveProblem() {
                                 </span>
                               </td>
                               <td className="px-5 py-3 text-right font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                                {s.time_ms !== null && s.time_ms !== undefined ? `${s.time_ms} ms` : "0 ms"}
+                                {s.time_ms !== null && s.time_ms !== undefined
+                                  ? `${s.time_ms} ms`
+                                  : "0 ms"}
                               </td>
                               <td className="px-5 py-3 text-right font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                                {s.memory_kb !== null && s.memory_kb !== undefined ? `${s.memory_kb} KB` : "0 KB"}
+                                {s.memory_kb !== null &&
+                                s.memory_kb !== undefined
+                                  ? `${s.memory_kb} KB`
+                                  : "0 KB"}
                               </td>
                             </tr>
                           ))}
@@ -1277,7 +1335,6 @@ export default function ContestSolveProblem() {
 
         {/* ===== RIGHT PANEL EDITOR ===== */}
         <section className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800">
-          
           {/* Editor Toolbar */}
           <div className="min-h-12 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
             <div className="flex items-center gap-2">
@@ -1364,15 +1421,12 @@ export default function ContestSolveProblem() {
           </div>
 
           {/* Bottom Info Bar */}
-          <div className="dark:bg-slate-900 w-full py-1.5 px-4 bg-white text-xs dark:text-slate-400 text-slate-700 font-sans flex justify-between items-center border-t border-slate-200 dark:border-slate-800">
-            <div>
-              {isEnded && (
-                <span className="font-mono text-[10px] font-bold text-red-500 tracking-[0.08em] uppercase border border-red-500/30 bg-red-500/10 px-2 py-0.5 rounded-[3px]">
-                  Contest Concluded (Submissions Closed)
-                </span>
-              )}
-            </div>
-            <div className="md:block hidden">Contest Mode IDE</div>
+          <div className="dark:bg-slate-900 w-full py-1.5 px-4 bg-white text-xs dark:text-slate-400 text-slate-700 font-sans flex justify-center items-center border-t border-slate-200 dark:border-slate-800">
+            {isEnded && (
+              <span className="font-mono text-[10px] font-bold text-red-500 tracking-[0.08em] uppercase border border-red-500/30 bg-red-500/10 px-2 py-0.5 rounded-[3px]">
+                Contest Concluded (Submissions Closed)
+              </span>
+            )}
           </div>
         </section>
 
@@ -1385,7 +1439,8 @@ export default function ContestSolveProblem() {
                 <div className="flex items-center gap-4">
                   <div className="font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                    SUBMISSION #{viewCode.submission_id} · {viewCode.problem_index} · {viewCode.language}
+                    SUBMISSION #{viewCode.submission_id} ·{" "}
+                    {viewCode.problem_index} · {viewCode.language}
                   </div>
                 </div>
                 <button
