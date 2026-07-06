@@ -4,7 +4,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { api } from "../api/client";
-import Editor, { DiffEditor } from "@monaco-editor/react";
+import Editor, { DiffEditor, useMonaco } from "@monaco-editor/react";
 import { InlineMath } from "react-katex";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -95,7 +95,7 @@ export default function SolveProblem() {
   const { user, loading: authLoading } = useAuth();
   const { theme } = useTheme();
   const [editorTheme, setEditorTheme] = useState(
-    theme === "dark" ? "vs-dark" : "light",
+    theme === "dark" ? "Dark-Algo" : "light",
   );
   const [activeTab, setActiveTab] = useState("Problem");
   const [language, setLanguage] = useState("cpp");
@@ -121,6 +121,8 @@ export default function SolveProblem() {
   const [showProblemTopics, setShowProblemTopics] = useState(true);
   const [differentiate, setDifferentiate] = useState(false);
   const [cmpCode, setCmpCode] = useState([]); // old, fin
+  const [isThemeReady, setIsThemeReady] = useState(false);
+  const monaco = useMonaco();
 
   /* ==============
   Collab States
@@ -281,6 +283,9 @@ export default function SolveProblem() {
     "#84cc16",
   ];
   useEffect(() => {
+    setEditorTheme(theme === "light" ? "light" : "Dark-Algo");
+  }, [theme]);
+  useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (collabActive) {
         e.preventDefault();
@@ -323,27 +328,54 @@ export default function SolveProblem() {
     };
   }, [collabActive]);
 
-  useEffect(() => {
-    if (!monacoRef.current) return;
-    if (editorTheme === "vs-dark") return;
-    if (editorTheme === "light") return;
+  // useEffect(() => {
+  //   if (!monacoRef.current) return;
+  //   if (editorTheme === "vs-dark") return;
+  //   if (editorTheme === "light") return;
 
-    loadMonacoTheme(monacoRef.current, editorTheme).then(() => {
-      monacoRef.current.editor.setTheme(editorTheme);
-    });
-  }, [editorTheme]);
+  //   loadMonacoTheme(monacoRef.current, editorTheme).then(() => {
+  //     monacoRef.current.editor.setTheme(editorTheme);
+  //   });
+  // }, [editorTheme]);
 
   useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  
+  if (!monaco) return;
+
+  let isMounted = true;
+  setIsThemeReady(false); 
+
+  const loadAndSetTheme = async () => {
+    
+    if (editorTheme === "light" || editorTheme === "vs-dark") {
+      monaco.editor.setTheme(editorTheme);
+      if (isMounted) setIsThemeReady(true);
+      return;
+    }
+
+    try {
+      
+      await loadMonacoTheme(monaco, editorTheme);
+      if (isMounted) setIsThemeReady(true);
+    } catch (error) {
+      console.error("Failed to load custom theme:", error);
+      
+      if (isMounted) setIsThemeReady(true); 
+    }
+  };
+
+  loadAndSetTheme();
+
+  return () => {
+    isMounted = false;
+  };
+}, [monaco, editorTheme]); 
 
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isDragging) return;
       const newWidth = (e.clientX / window.innerWidth) * 100;
-      if (newWidth > 20 && newWidth < 80) {
+      if (newWidth > 30 && newWidth < 80) {
         setLeftWidth(newWidth);
       }
     };
@@ -1214,6 +1246,12 @@ export default function SolveProblem() {
               />
             )}
           </div>
+          <p className="dark:bg-slate-950 py-1 px-2 bg-white text-xs dark:text-slate-400 text-slate-700 font-sans flex justify-between">
+            <div><span className="mr-5">Run Code: ⌘<span className="font-semibold ml-0.5">  + Shift + Enter</span></span>
+            <span>Submit Code: ⌘<span className="font-semibold ml-0.5">  + Shift + Enter</span></span></div>
+            <div className="md:block hidden">Local Autosave: Active</div>
+            
+            </p>
         </section>
         {/* ===== SUBMISSION MODAL ===== */}
         {openSubmission && (
