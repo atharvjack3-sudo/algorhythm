@@ -1308,7 +1308,7 @@ export default function SolveProblem() {
                   {openSubmission.verdict === "AC" && (
                     <button
                       onClick={() => evaluate_complexity(openSubmission.id)}
-                      disabled={complexity?.id === openSubmission.id}
+                      disabled={true || complexity?.id === openSubmission.id}
                       className="font-mono text-[10px] font-bold tracking-[0.06em] rounded-[3px] bg-transparent text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700 px-3 py-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
                     >
                       {complexity?.id === openSubmission.id
