@@ -1072,7 +1072,7 @@ export default function SolveProblem() {
           {/* Editor Toolbar */}
           <div className="min-h-12 py-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
             <div className="flex items-center gap-2">
-              <label className="font-sans text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
+              <label className="font-sans text-[12px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
                 Theme
               </label>
 
@@ -1095,7 +1095,7 @@ export default function SolveProblem() {
                   VS Light
                 </option>
               </select>
-              <label className="font-sans text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
+              <label className="font-sans text-[12px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
                 Language
               </label>
               <select
