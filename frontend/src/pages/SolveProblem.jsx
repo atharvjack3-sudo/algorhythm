@@ -362,7 +362,7 @@ export default function SolveProblem() {
     const handleMouseMove = (e) => {
       if (!isDragging) return;
       const newWidth = (e.clientX / window.innerWidth) * 100;
-      if (newWidth > 20 && newWidth < 80) {
+      if (newWidth > 20 && newWidth < 56) {
         setLeftWidth(newWidth);
       }
     };
