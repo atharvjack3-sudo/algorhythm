@@ -68,11 +68,11 @@ function MarkdownRenderer({ content, className = "" }) {
         prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
         prose-a:text-blue-600 dark:prose-a:text-blue-400
         
-        /* 1. Target INLINE code only */
+        
         [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[13px] [&_:not(pre)>code]:bg-slate-100 dark:[&_:not(pre)>code]:bg-slate-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px]
         
-        /* 2. Container PRE styles */
-        prose-pre:p-0 prose-pre:bg-slate-50 dark:prose-pre:bg-[#0d1117] prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[5px]
+        
+        prose-pre:p-0 prose-pre:bg-slate-50 dark:prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[5px]
         
         /* 3. Force highlight.js CODE block to use JetBrains Mono, 13px size, and better line height */
         [&_pre_code.hljs]:!bg-transparent [&_pre_code.hljs]:p-4 [&_pre_code.hljs]:!font-mono [&_pre_code.hljs]:!text-[13px] [&_pre_code.hljs]:!leading-[1.6]
@@ -570,8 +570,6 @@ export default function SolveProblem() {
           left: -4px;
           top: -5px;
         }
-
-        /* --- ADD THIS SYNTAX HIGHLIGHTING BLOCK --- */
         .hljs { color: #24292e; }
         .hljs-keyword, .hljs-built_in { color: #d73a49; font-weight: 600; }
         .hljs-string, .hljs-meta { color: #032f62; }
@@ -581,7 +579,6 @@ export default function SolveProblem() {
         .hljs-type { color: #005cc5; font-weight: 600; }
         .hljs-operator, .hljs-punctuation { color: #24292e; }
 
-        /* Dark Mode Colors */
         .dark .hljs { color: #c9d1d9; }
         .dark .hljs-keyword, .dark .hljs-built_in { color: #ff7b72; font-weight: 600; }
         .dark .hljs-string, .dark .hljs-meta { color: #a5d6ff; }
