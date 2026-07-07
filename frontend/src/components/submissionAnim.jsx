@@ -1,102 +1,106 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
-const EXECUTION_STEPS = [
-  { id: 1, text: "Establishing secure connection..." },
-  { id: 2, text: "Initializing isolated container..." },
-  { id: 3, text: "Mounting sandbox environment..." },
-  { id: 4, text: "Compiling source code..." },
-  { id: 5, text: "Executing against standard test cases..." },
-  { id: 6, text: "Validating hidden edge cases..." },
-  { id: 7, text: "Aggregating memory & time telemetry..." },
-  { id: 8, text: "Finalizing execution report..." },
-];
+export default function ZenLoader() {
+  const blocksRef = useRef([]);
+  const cursorRef = useRef(null);
+  const textRef = useRef(null);
+  const [dotCount, setDotCount] = useState(0);
 
-export default function SubmissionAnim() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [logs, setLogs] = useState([]);
+  // Subtle "Thinking..." dots
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDotCount((prev) => (prev + 1) % 4);
+    }, 600);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    // Halt progression right as we display the final step.
-    // Progress bar will lock at 94% indefinitely until unmounted.
-    if (currentStep >= EXECUTION_STEPS.length - 1) {
-      setProgress(94);
-      return;
-    }
+    // 1. Terminal cursor blink (hard step, no fade)
+    gsap.to(cursorRef.current, {
+      opacity: 0,
+      duration: 0.6,
+      repeat: -1,
+      ease: "steps(1)", 
+    });
 
-    // Calibrated window to average 1150ms per step (950ms to 1350ms)
-    // 7 steps * 1150ms = ~8.05 seconds total runtime to reach the final index
-    const stepDuration = Math.floor(Math.random() * 400) + 950;
+    // 2. Ultra-subtle background breathing
+    // Random blocks gently shift from 15% to 40% opacity, 
+    // simulating background memory/processing without grabbing attention.
+    blocksRef.current.forEach((block) => {
+      if (!block) return;
+      gsap.to(block, {
+        opacity: 0.4,
+        duration: "random(2, 4)", // Slow, relaxing durations
+        delay: "random(0, 2)",
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+    });
 
-    const timer = setTimeout(() => {
-      setLogs((prev) => [...prev, EXECUTION_STEPS[currentStep]]);
-      setCurrentStep((prev) => prev + 1);
-      
-      // Scale progress smoothly over the 7 initial steps up toward 90%
-      const calculatedProgress = Math.round(((currentStep + 1) / (EXECUTION_STEPS.length - 1)) * 88);
-      setProgress(calculatedProgress);
-    }, stepDuration);
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [currentStep]);
+  // Structure for our "skeleton" code lines
+  const codeLines = [
+    [40, 20],
+    [15, 30, 20],
+    [50],
+    [20, 35],
+    [30, 15, 25],
+    [60],
+  ];
 
   return (
-    <div className="w-full flex flex-col bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm overflow-hidden animate-in fade-in duration-300">
+    <div className="w-full max-w-md shadow-xl mx-auto flex flex-col dark:bg-[#020617] border dark:border-slate-800/60 border-slate-300  overflow-hidden font-mono select-none">
       
-      {/* Header */}
-      <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
-          <span className="font-mono text-[10px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
-            System Execution
-          </span>
-        </div>
-        <span className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-          {progress}%
+      {/* Minimal Header */}
+      <div className="px-5 py-2.5 border-b border-slate-300 dark:border-slate-800/60 dark:bg-[#0f172a]/50 flex items-center justify-between">
+        <span className="text-[10px] dark:text-slate-500 text-slate-600 uppercase tracking-widest">
+          Execution Code
         </span>
+        <div className="flex items-center gap-2">
+        </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full h-[3px] bg-slate-100 dark:bg-slate-800">
-        <div 
-          className="h-full bg-blue-500 transition-all duration-300 ease-out"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {/* Terminal Area */}
-      <div className="p-6 bg-[#0c0c0c] min-h-[250px] font-mono flex flex-col gap-2 relative overflow-hidden">
+      {/* Ambient Animation Area */}
+      <div className="relative h-[180px] p-6 flex flex-col justify-between">
         
-        {/* Subtle grid background for the terminal */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col gap-2">
-          {/* Completed Logs */}
-          {logs.map((log) => (
-            <div key={log.id} className="flex items-start gap-3 text-[12px] text-slate-400 animate-in slide-in-from-bottom-2 duration-200">
-              <span className="text-green-500 mt-0.5 shrink-0">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <span>{log.text} <span className="text-slate-600">[DONE]</span></span>
+        {/* Background Skeleton Code */}
+        <div className="absolute inset-0 p-6 flex flex-col gap-3 pointer-events-none">
+          {codeLines.map((line, rowIndex) => (
+            <div 
+              key={rowIndex} 
+              className="flex gap-2"
+              style={{ marginLeft: rowIndex === 1 || rowIndex === 3 || rowIndex === 4 ? "1.5rem" : "0" }}
+            >
+              {line.map((width, colIndex) => {
+                // Calculate a flat index for the ref array
+                const index = rowIndex * 10 + colIndex; 
+                return (
+                  <div
+                    key={colIndex}
+                    ref={(el) => (blocksRef.current[index] = el)}
+                    className="h-2 rounded-sm bg-slate-700"
+                    style={{ width: `${width}%`, opacity: 0.15 }}
+                  />
+                );
+              })}
             </div>
           ))}
-
-          {/* Current Active Step (Locks and spins here indefinitely on step #8) */}
-          {currentStep < EXECUTION_STEPS.length && (
-            <div className="flex items-start gap-3 text-[12px] text-blue-400 mt-1">
-              <span className="mt-0.5 shrink-0 animate-spin text-blue-500">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </span>
-              <span className="animate-pulse">
-                {EXECUTION_STEPS[currentStep]?.text}
-              </span>
-            </div>
-          )}
         </div>
+
+        {/* Foreground Status Text */}
+        <div className="relative z-10 h-full flex items-end">
+          <div className="flex items-center text-slate-400 text-sm">
+            <span>judging</span>
+            <span className="w-6 inline-block">
+              {".".repeat(dotCount)}
+            </span>
+            <span ref={cursorRef} className="w-2 h-4 bg-slate-500 ml-1" />
+          </div>
+        </div>
+
       </div>
     </div>
   );
