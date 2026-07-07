@@ -300,6 +300,9 @@ export default function SolveProblem() {
     setEditorTheme(theme === "light" ? "light" : "vs-dark");
   }, [theme]);
   useEffect(() => {
+    if (theme !== "light") setTimeout(()=>setEditorTheme("Dark-Algo"), 2000);
+  }, []);
+  useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (collabActive) {
         e.preventDefault();
@@ -1071,7 +1074,7 @@ export default function SolveProblem() {
                 onChange={(e) => setLanguage(e.target.value)}
                 className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-mono outline-none focus:border-orange-500 transition-colors cursor-pointer uppercase tracking-widest"
               >
-                <option value="cpp">C++17</option>
+                <option value="cpp">C++20</option>
                 <option value="java">Java</option>
                 <option value="python">Python 3</option>
                 <option value="javascript">JavaScript</option>
