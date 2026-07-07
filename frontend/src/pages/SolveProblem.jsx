@@ -12,7 +12,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
 import CustomTC from "../components/CustomTC";
-import "highlight.js/styles/atom-one-dark.css";
+//import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 import SubmissionAnim from "../components/submissionAnim";
 import CollabTab from "../components/CollabTab";
@@ -72,10 +72,10 @@ function MarkdownRenderer({ content, className = "" }) {
         [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[13px] [&_:not(pre)>code]:bg-slate-100 dark:[&_:not(pre)>code]:bg-slate-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px]
         
         /* 2. Container PRE styles */
-        prose-pre:p-0 prose-pre:bg-[#282c34] prose-pre:border prose-pre:border-slate-700 dark:prose-pre:border-slate-800 prose-pre:rounded-[5px]
+        prose-pre:p-0 prose-pre:bg-slate-50 dark:prose-pre:bg-[#0d1117] prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[5px]
         
         /* 3. Force highlight.js CODE block to use JetBrains Mono, 13px size, and better line height */
-        [&_pre_code.hljs]:!bg-transparent [&_pre_code.hljs]:p-4 [&_pre_code.hljs]:!text-[#abb2bf] [&_pre_code.hljs]:!font-mono [&_pre_code.hljs]:!text-[13px] [&_pre_code.hljs]:!leading-[1.6]
+        [&_pre_code.hljs]:!bg-transparent [&_pre_code.hljs]:p-4 [&_pre_code.hljs]:!font-mono [&_pre_code.hljs]:!text-[13px] [&_pre_code.hljs]:!leading-[1.6]
         
         ${className}
       `}
@@ -570,6 +570,26 @@ export default function SolveProblem() {
           left: -4px;
           top: -5px;
         }
+
+        /* --- ADD THIS SYNTAX HIGHLIGHTING BLOCK --- */
+        .hljs { color: #24292e; }
+        .hljs-keyword, .hljs-built_in { color: #d73a49; font-weight: 600; }
+        .hljs-string, .hljs-meta { color: #032f62; }
+        .hljs-number, .hljs-literal { color: #005cc5; }
+        .hljs-title, .hljs-function { color: #6f42c1; font-weight: 600; }
+        .hljs-comment { color: #6a737d; font-style: italic; }
+        .hljs-type { color: #005cc5; font-weight: 600; }
+        .hljs-operator, .hljs-punctuation { color: #24292e; }
+
+        /* Dark Mode Colors */
+        .dark .hljs { color: #c9d1d9; }
+        .dark .hljs-keyword, .dark .hljs-built_in { color: #ff7b72; font-weight: 600; }
+        .dark .hljs-string, .dark .hljs-meta { color: #a5d6ff; }
+        .dark .hljs-number, .dark .hljs-literal { color: #79c0ff; }
+        .dark .hljs-title, .dark .hljs-function { color: #d2a8ff; font-weight: 600; }
+        .dark .hljs-comment { color: #8b949e; font-style: italic; }
+        .dark .hljs-type { color: #79c0ff; font-weight: 600; }
+        .dark .hljs-operator, .dark .hljs-punctuation { color: #c9d1d9; }
       `}</style>
 
       <div className="w-full h-[calc(100dvh-56px)] overflow-y-auto md:overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row font-sans transition-colors duration-200 relative">
