@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/navico/light_mode_logo.png";
 import { NavLink } from "react-router-dom";
+import { CloudUpload } from "lucide-react";
 
 function useReveal() {
   const ref = useRef(null);
@@ -489,7 +490,6 @@ export default function AlgorhythmLanding() {
       <div className="max-w-[1100px] mx-auto px-6">
         {/* HERO */}
         <div className="py-[120px] pb-20 text-center relative">
-          
           <Reveal delay={100}>
             <h1 className="select-none text-[clamp(48px,8vw,88px)] font-medium leading-[1.04] tracking-[-0.03em] mb-6">
               Think in algorithms.
@@ -1343,142 +1343,416 @@ export default function AlgorhythmLanding() {
           </div>
         </div>
         {/* SECTION 4: DIFF VIEWER */}
-<div className="pb-[100px]">
-  <Reveal className="text-center mb-16">
-    <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff] border border-transparent">
-      Code Review
-    </span>
-    <h2 className="text-[clamp(36px,5vw,56px)] select-none font-medium tracking-[-0.025em] leading-[1.1] mt-4">
-      See what changed. Line by line.
-    </h2>
-    <p className="text-[17px] select-none text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
-      Every resubmission is diffed against your last attempt automatically.
-      No more scrolling two tabs side by side to find the one line you fixed.
-    </p>
-  </Reveal>
+        <div className="pb-[100px]">
+          <Reveal className="text-center mb-16">
+            <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-[#4d8dff]/10 text-[#2563eb] dark:text-[#4d8dff] border border-transparent">
+              Code Review
+            </span>
+            <h2 className="text-[clamp(36px,5vw,56px)] select-none font-medium tracking-[-0.025em] leading-[1.1] mt-4">
+              See what changed. Line by line.
+            </h2>
+            <p className="text-[17px] select-none text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
+              Every resubmission is diffed against your last attempt
+              automatically. No more scrolling two tabs side by side to find the
+              one line you fixed.
+            </p>
+          </Reveal>
 
-  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
-    {/* Left Bento */}
-    <Reveal className="col-span-12 md:col-span-4 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
-      <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
-        Auto-Diff
-      </span>
-      <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
-        Attempt #4 vs #3
-      </h3>
-      <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
-        We diff every submission against your last one, so you can see the
-        exact fix that flipped a Wrong Answer into an Accepted.
-      </p>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
+            {/* Left Bento */}
+            <Reveal className="col-span-12 md:col-span-4 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
+              <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
+                Auto-Diff
+              </span>
+              <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
+                Attempt #4 vs #3
+              </h3>
+              <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
+                We diff every submission against your last one, so you can see
+                the exact fix that flipped a Wrong Answer into an Accepted.
+              </p>
 
-      <div className="bg-[#f0efe9] text-center dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-5 mt-5">
-        <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
-          Lines changed
-        </div>
-        <div className="flex items-center justify-center gap-3 my-2">
-          <span className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono text-[#16a34a] dark:text-[#22c55e]">
-            +2
-          </span>
-          <span className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono text-[#e11d48] dark:text-[#fb7185]">
-            −2
-          </span>
-        </div>
-        <span className="inline-flex select-none items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] mt-1.5">
-          ✓ Accepted · Verdict flipped
-        </span>
+              <div className="bg-[#f0efe9] text-center dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-5 mt-5">
+                <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
+                  Lines changed
+                </div>
+                <div className="flex items-center justify-center gap-3 my-2">
+                  <span className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono text-[#16a34a] dark:text-[#22c55e]">
+                    +2
+                  </span>
+                  <span className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono text-[#e11d48] dark:text-[#fb7185]">
+                    −2
+                  </span>
+                </div>
+                <span className="inline-flex select-none items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] mt-1.5">
+                  ✓ Accepted · Verdict flipped
+                </span>
 
-        <div className="mt-6 select-none items-center justify-center flex gap-2">
-          
-        </div>
-      </div>
-    </Reveal>
+                <div className="mt-6 select-none items-center justify-center flex gap-2"></div>
+              </div>
+            </Reveal>
 
-    {/* Right Bento — Code Diff Mock */}
-    <Reveal
-      delay={100}
-      className="col-span-12 md:col-span-8 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden"
-    >
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185] border border-transparent">
-        Live Preview
-      </span>
-      <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
-        Inline diff view
-      </h3>
-      <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65] mb-5">
-        Removed lines in red, added lines in green — right where you'd expect
-        them, inside the editor you already know.
-      </p>
-
-      {/* Code editor mock */}
-      <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-[#f7f6f2] dark:bg-[#0d0f14] overflow-hidden font-mono text-[13px] leading-[1.7]">
-        {/* Editor tab bar */}
-        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-black/10 dark:border-white/10 bg-[#f0efe9] dark:bg-[#13151a]">
-          <div className="flex gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-          </div>
-          <span className="text-[12px] text-[#888] dark:text-[#666] ml-2">
-            solution.cpp
-          </span>
-        </div>
-
-        {/* Diff lines */}
-        {[
-          { n: 1, code: "#include <bits/stdc++.h>", type: "ctx" },
-          { n: 2, code: "using namespace std;", type: "ctx" },
-          { n: 11, code: "int t; cin >> t;", type: "ctx" },
-          { n: 12, code: "unordered_set<int> st;", type: "ctx" },
-          { n: 13, code: "// a + i = t", type: "del" },
-          { n: 13, code: "// a = t - i", type: "add" },
-          { n: 14, code: "for (int i : v) {", type: "ctx" },
-          { n: 15, code: "  if (st.find(t - i) != st.end()) {", type: "ctx" },
-          { n: 16, code: '  cout << "NO";', type: "del" },
-          { n: 16, code: '  cout << "YES";', type: "add" },
-          { n: 17, code: "  return 0;", type: "ctx" },
-          { n: 18, code: "}", type: "ctx" },
-        ].map((line, i) => (
-          <div
-            key={i}
-            className={`flex items-stretch ${
-              line.type === "del"
-                ? "bg-[#fef2f2] dark:bg-[#450a0a]/40"
-                : line.type === "add"
-                  ? "bg-[#f0fdf4] dark:bg-[#052e16]/40"
-                  : ""
-            }`}
-          >
-            <span
-              className={`w-6 shrink-0 text-center text-[11px] ${
-                line.type === "del"
-                  ? "bg-[#fecaca] dark:bg-[#7f1d1d]/50 text-[#b91c1c] dark:text-[#fb7185]"
-                  : line.type === "add"
-                    ? "bg-[#bbf7d0] dark:bg-[#166534]/50 text-[#15803d] dark:text-[#4ade80]"
-                    : ""
-              }`}
+            {/* Right Bento — Code Diff Mock */}
+            <Reveal
+              delay={100}
+              className="col-span-12 md:col-span-8 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden"
             >
-              {line.type === "del" ? "−" : line.type === "add" ? "+" : ""}
-            </span>
-            <span className="w-8 shrink-0 text-right pr-3 text-[#a3a3a3] dark:text-[#4a4d57] select-none">
-              {line.n}
-            </span>
-            <span
-              className={`pl-2 pr-4 whitespace-pre ${
-                line.type === "del"
-                  ? "text-[#991b1b] dark:text-[#fca5a5]"
-                  : line.type === "add"
-                    ? "text-[#166534] dark:text-[#86efac]"
-                    : "text-[#0d0d0d] dark:text-[#d4d4d8]"
-              }`}
-            >
-              {line.code}
-            </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#fff1f2] dark:bg-[#fb7185]/10 text-[#e11d48] dark:text-[#fb7185] border border-transparent">
+                Live Preview
+              </span>
+              <h3 className="text-[22px] font-medium tracking-[-0.02em] mt-4 mb-2.5">
+                Inline diff view
+              </h3>
+              <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65] mb-5">
+                Removed lines in red, added lines in green — right where you'd
+                expect them, inside the editor you already know.
+              </p>
+
+              {/* Code editor mock */}
+              <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-[#f7f6f2] dark:bg-[#0d0f14] overflow-hidden font-mono text-[13px] leading-[1.7]">
+                {/* Editor tab bar */}
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-black/10 dark:border-white/10 bg-[#f0efe9] dark:bg-[#13151a]">
+                  <div className="flex gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+                  </div>
+                  <span className="text-[12px] text-[#888] dark:text-[#666] ml-2">
+                    solution.cpp
+                  </span>
+                </div>
+
+                {/* Diff lines */}
+                {[
+                  { n: 1, code: "#include <bits/stdc++.h>", type: "ctx" },
+                  { n: 2, code: "using namespace std;", type: "ctx" },
+                  { n: 11, code: "int t; cin >> t;", type: "ctx" },
+                  { n: 12, code: "unordered_set<int> st;", type: "ctx" },
+                  { n: 13, code: "// a + i = t", type: "del" },
+                  { n: 13, code: "// a = t - i", type: "add" },
+                  { n: 14, code: "for (int i : v) {", type: "ctx" },
+                  {
+                    n: 15,
+                    code: "  if (st.find(t - i) != st.end()) {",
+                    type: "ctx",
+                  },
+                  { n: 16, code: '  cout << "NO";', type: "del" },
+                  { n: 16, code: '  cout << "YES";', type: "add" },
+                  { n: 17, code: "  return 0;", type: "ctx" },
+                  { n: 18, code: "}", type: "ctx" },
+                ].map((line, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-stretch ${
+                      line.type === "del"
+                        ? "bg-[#fef2f2] dark:bg-[#450a0a]/40"
+                        : line.type === "add"
+                          ? "bg-[#f0fdf4] dark:bg-[#052e16]/40"
+                          : ""
+                    }`}
+                  >
+                    <span
+                      className={`w-6 shrink-0 text-center text-[11px] ${
+                        line.type === "del"
+                          ? "bg-[#fecaca] dark:bg-[#7f1d1d]/50 text-[#b91c1c] dark:text-[#fb7185]"
+                          : line.type === "add"
+                            ? "bg-[#bbf7d0] dark:bg-[#166534]/50 text-[#15803d] dark:text-[#4ade80]"
+                            : ""
+                      }`}
+                    >
+                      {line.type === "del"
+                        ? "−"
+                        : line.type === "add"
+                          ? "+"
+                          : ""}
+                    </span>
+                    <span className="w-8 shrink-0 text-right pr-3 text-[#a3a3a3] dark:text-[#4a4d57] select-none">
+                      {line.n}
+                    </span>
+                    <span
+                      className={`pl-2 pr-4 whitespace-pre ${
+                        line.type === "del"
+                          ? "text-[#991b1b] dark:text-[#fca5a5]"
+                          : line.type === "add"
+                            ? "text-[#166534] dark:text-[#86efac]"
+                            : "text-[#0d0d0d] dark:text-[#d4d4d8]"
+                      }`}
+                    >
+                      {line.code}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
           </div>
-        ))}
-      </div>
-    </Reveal>
-  </div>
-</div>
+        </div>
+        {/* SECTION 5: CLOUD SAVES */}
+        <div className="pb-[100px]">
+          <Reveal className="text-center mb-16">
+            <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f5f3ff] dark:bg-[#a78bfa]/10 text-[#7c3aed] dark:text-[#a78bfa] border border-transparent">
+              Cloud Sync
+            </span>
+            <h2 className="text-[clamp(36px,5vw,56px)] select-none font-medium tracking-[-0.025em] leading-[1.1] mt-4">
+              Never lose a line of code.
+            </h2>
+            <p className="text-[17px] select-none text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
+              Save once and it's everywhere. Pick up your laptop, your phone, or
+              a lab machine and your code is already there waiting.
+            </p>
+          </Reveal>
+
+          <div className="mt-0">
+            <Reveal className="w-full bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-6 md:p-8 relative overflow-hidden">
+              <div className="hidden md:grid grid-cols-12 gap-8 items-center">
+                <div className="col-span-4 z-10">
+                  <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
+                    Auto-Save
+                  </span>
+                  <h3 className="text-[22px] select-none font-medium tracking-[-0.02em] mt-4 mb-2.5">
+                    Always backed up
+                  </h3>
+                  <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.65]">
+                    Hit save once and it's pushed to the cloud instantly. Open
+                    the editor on any other device and the exact same code is
+                    already loaded, no copy-pasting, no emailing yourself a
+                    file.
+                  </p>
+
+                  <div className="bg-[#f0efe9] text-center dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-5 mt-5">
+                    <div className="text-[12px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
+                      Last synced
+                    </div>
+                    <div className="text-[32px] select-none font-medium tracking-[-0.03em] font-mono my-2 text-[#0d0d0d] dark:text-[#f0f0ee]">
+                      2s ago
+                    </div>
+                    <span className="inline-flex select-none items-center gap-1 px-2.5 py-1 rounded-full text-[11px] bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] mt-1.5">
+                      ✓ solution.cpp saved
+                    </span>
+
+                    <div className="mt-6 select-none items-center justify-center flex gap-2">
+                      <button
+                        onClick={() => navigate("/auth")}
+                        className="bg-orange-500 text-white select-none border-none px-5 py-2.5 rounded-full text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px] shadow-sm"
+                      >
+                        Enable Cloud Sync
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-span-8 relative h-[380px] w-full flex items-center justify-center select-none">
+                  <div className="absolute left-[5%] top-[10%] w-[65%] max-w-[450px] drop-shadow-2xl z-0">
+                    <div className="aspect-[16/10] rounded-t-2xl border-[8px] border-[#2a2a2a] dark:border-[#1a1a1a] bg-[#1e1e1e] overflow-hidden flex flex-col relative">
+                      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#111]"></div>
+                      <div className="flex items-center gap-1.5 px-3 py-2 bg-[#2d2d2d] border-b border-[#3d3d3d] mt-3">
+                        <span className="text-[10px] text-[#999] ml-2 font-sans tracking-wide">
+                          solution.cpp
+                        </span>
+                      </div>
+                      <div className="p-4 font-mono text-[12px] leading-[1.8] text-[#d4d4d8] flex-1">
+                        <div>
+                          <span className="text-[#f92672]">#include</span>{" "}
+                          &lt;bits/stdc++.h&gt;
+                        </div>
+                        <div className="mt-1">
+                          <span className="text-[#66d9ef]">int</span>{" "}
+                          <span className="text-[#a6e22e]">main</span>() {"{"}
+                        </div>
+                        <div className="pl-4">
+                          <span className="text-[#66d9ef]">unordered_set</span>
+                          &lt;<span className="text-[#66d9ef]">int</span>&gt;
+                          st;
+                        </div>
+                        <div className="pl-4 text-[#75715e] italic">
+                          // sync
+                        </div>
+                        <div className="pl-4">
+                          <span className="text-[#66d9ef]">int</span> a = t - i;
+                        </div>
+                        <div className="pl-4">
+                          cout &lt;&lt;{" "}
+                          <span className="text-[#e6db74]">"NO\n"</span>;
+                        </div>
+                        <div className="pl-4">
+                          <span className="text-[#f92672]">return</span>{" "}
+                          <span className="text-[#ae81ff]">0</span>;
+                        </div>
+                        <div>{"}"}</div>
+                      </div>
+                    </div>
+                    <div className="relative w-[114%] -left-[7%] h-4 bg-gradient-to-b from-[#e5e5e5] to-[#c5c5c5] dark:from-[#3a3a3a] dark:to-[#1f1f1f] rounded-b-xl border-t border-[#f0f0f0] dark:border-[#4a4a4a] flex justify-center shadow-lg">
+                      <div className="w-1/5 h-1.5 bg-[#d4d4d4] dark:bg-[#2a2a2a] rounded-b-md"></div>
+                    </div>
+                  </div>
+
+                  <div className="absolute top-[35%] left-[62%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 z-20 animate-pulse">
+                    <div className="w-10 h-10 rounded-full bg-white dark:bg-[#1e1e1e] shadow-xl border border-black/5 dark:border-white/10 flex items-center justify-center text-[18px] text-blue-500">
+                      <CloudUpload size={18} />
+                    </div>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm">
+                      SYNCING
+                    </span>
+                  </div>
+
+                  <div className="absolute right-[5%] bottom-[10%] w-[130px] aspect-[9/19.5] rounded-[28px] border-[6px] border-[#2a2a2a] dark:border-[#1a1a1a] bg-[#1e1e1e] shadow-2xl z-30 overflow-hidden flex flex-col">
+                    <div className="absolute top-0 inset-x-0 h-4 flex justify-center z-10">
+                      <div className="w-[40%] h-[16px] bg-[#2a2a2a] dark:bg-[#1a1a1a] rounded-b-[10px]"></div>
+                    </div>
+                    <div className="pt-7 pb-1.5 border-b border-[#3d3d3d] bg-[#2d2d2d] flex justify-center">
+                      <span className="text-[9px] text-[#999] font-sans">
+                        solution.cpp
+                      </span>
+                    </div>
+                    <div className="p-3 font-mono text-[8px] leading-[1.8] text-[#d4d4d8] flex-1">
+                      <div>
+                        <span className="text-[#f92672]">#include</span>
+                      </div>
+                      <div>&lt;bits/stdc++.h&gt;</div>
+                      <div className="mt-1">
+                        <span className="text-[#66d9ef]">int</span>{" "}
+                        <span className="text-[#a6e22e]">main</span>() {"{"}
+                      </div>
+                      <div className="pl-2 text-[#75715e] italic">// sync</div>
+                      <div className="pl-2">
+                        <span className="text-[#66d9ef]">int</span> a = t-i;
+                      </div>
+                      <div className="pl-2">
+                        cout &lt;&lt;{" "}
+                        <span className="text-[#e6db74]">"NO"</span>;
+                      </div>
+                      <div className="pl-4">
+                        <span className="text-[#f92672]">return</span>{" "}
+                        <span className="text-[#ae81ff]">0</span>;
+                      </div>
+                      <div>{"}"}</div>
+                    </div>
+                    <div className="absolute bottom-1.5 inset-x-0 flex justify-center">
+                      <div className="w-[35%] h-1 bg-[#555] rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:hidden gap-6">
+                <div className="z-10 text-center sm:text-left">
+                  <span className="inline-flex select-none items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e] border border-transparent">
+                    Auto-Save
+                  </span>
+                  <h3 className="text-[20px] select-none font-medium tracking-[-0.02em] mt-3 mb-2">
+                    Always backed up
+                  </h3>
+                  <p className="text-[14px] select-none text-[#555] dark:text-[#a0a0a8] leading-[1.6]">
+                    Hit save once and it's pushed to the cloud instantly. Open
+                    the editor anywhere else and the code is waiting.
+                  </p>
+                </div>
+
+                <div className="relative h-[250px] sm:h-[300px] w-full flex items-center justify-center select-none mt-2">
+                  <div className="absolute left-[2%] sm:left-[10%] top-0 w-[80%] max-w-[320px] drop-shadow-xl z-0">
+                    <div className="aspect-[16/10] rounded-t-xl border-[4px] sm:border-[6px] border-[#2a2a2a] dark:border-[#1a1a1a] bg-[#1e1e1e] overflow-hidden flex flex-col relative">
+                      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#111]"></div>
+                      <div className="flex items-center gap-1.5 px-2 py-1.5 bg-[#2d2d2d] border-b border-[#3d3d3d] mt-2 sm:mt-3">
+                        <span className="text-[8px] text-[#999] ml-1 font-sans tracking-wide">
+                          solution.cpp
+                        </span>
+                      </div>
+                      <div className="p-2 sm:p-3 font-mono text-[9px] sm:text-[10px] leading-[1.6] text-[#d4d4d8] flex-1">
+                        <div>
+                          <span className="text-[#f92672]">#include</span>{" "}
+                          &lt;bits/stdc++.h&gt;
+                        </div>
+                        <div className="mt-1">
+                          <span className="text-[#66d9ef]">int</span>{" "}
+                          <span className="text-[#a6e22e]">main</span>() {"{"}
+                        </div>
+                        <div className="pl-3">
+                          <span className="text-[#66d9ef]">unordered_set</span>
+                          &lt;<span className="text-[#66d9ef]">int</span>&gt;
+                          st;
+                        </div>
+                        <div className="pl-3 text-[#75715e] italic">
+                          // sync
+                        </div>
+                        <div className="pl-3">
+                          <span className="text-[#66d9ef]">int</span> a = t - i;
+                        </div>
+                        <div className="pl-3">
+                          cout &lt;&lt;{" "}
+                          <span className="text-[#e6db74]">"NO\n"</span>;
+                        </div>
+                        <div>{"}"}</div>
+                      </div>
+                    </div>
+                    <div className="relative w-[114%] -left-[7%] h-3 sm:h-4 bg-gradient-to-b from-[#e5e5e5] to-[#c5c5c5] dark:from-[#3a3a3a] dark:to-[#1f1f1f] rounded-b-lg border-t border-[#f0f0f0] dark:border-[#4a4a4a] flex justify-center shadow-lg">
+                      <div className="w-1/5 h-1 bg-[#d4d4d4] dark:bg-[#2a2a2a] rounded-b-sm"></div>
+                    </div>
+                  </div>
+
+                  <div className="absolute top-[40%] right-[25%] sm:right-[30%] -translate-y-1/2 flex flex-col items-center gap-1.5 z-20 animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-white dark:bg-[#1e1e1e] shadow-lg border border-black/5 dark:border-white/10 flex items-center justify-center text-blue-500">
+                      <CloudUpload size={14} />
+                    </div>
+                  </div>
+
+                  <div className="absolute right-[2%] sm:right-[5%] bottom-[10%] w-[85px] sm:w-[100px] aspect-[9/19.5] rounded-[20px] sm:rounded-[24px] border-[4px] sm:border-[5px] border-[#2a2a2a] dark:border-[#1a1a1a] bg-[#1e1e1e] shadow-2xl z-30 overflow-hidden flex flex-col">
+                    <div className="absolute top-0 inset-x-0 h-3 flex justify-center z-10">
+                      <div className="w-[40%] h-[10px] bg-[#2a2a2a] dark:bg-[#1a1a1a] rounded-b-[8px]"></div>
+                    </div>
+                    <div className="pt-5 pb-1 border-b border-[#3d3d3d] bg-[#2d2d2d] flex justify-center">
+                      <span className="text-[6px] sm:text-[7px] text-[#999] font-sans">
+                        solution.cpp
+                      </span>
+                    </div>
+                    <div className="p-2 font-mono text-[6px] sm:text-[7px] leading-[1.6] text-[#d4d4d8] flex-1">
+                      <div>
+                        <span className="text-[#f92672]">#include</span>
+                      </div>
+                      <div>&lt;bits/stdc++.h&gt;</div>
+                      <div className="mt-1">
+                        <span className="text-[#66d9ef]">int</span>{" "}
+                        <span className="text-[#a6e22e]">main</span>() {"{"}
+                      </div>
+                      <div className="pl-1 text-[#75715e] italic">// sync</div>
+                      <div className="pl-1">
+                        <span className="text-[#66d9ef]">int</span> a = t-i;
+                      </div>
+                      <div className="pl-1">
+                        cout &lt;&lt;{" "}
+                        <span className="text-[#e6db74]">"NO"</span>;
+                      </div>
+                      <div>{"}"}</div>
+                    </div>
+                    <div className="absolute bottom-1 inset-x-0 flex justify-center">
+                      <div className="w-[35%] h-[3px] bg-[#555] rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#f0efe9] text-center dark:bg-[#1a1c24] border border-black/10 dark:border-white/10 rounded-2xl p-4 z-10 mt-2">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-left">
+                      <div className="text-[11px] select-none text-[#888] dark:text-[#555] uppercase tracking-[0.06em]">
+                        Last synced
+                      </div>
+                      <div className="text-[20px] select-none font-medium tracking-[-0.03em] font-mono text-[#0d0d0d] dark:text-[#f0f0ee]">
+                        2s ago
+                      </div>
+                    </div>
+                    <span className="inline-flex select-none items-center gap-1 px-2 py-1 rounded-full text-[10px] bg-[#f0fdf4] dark:bg-[#22c55e]/10 text-[#16a34a] dark:text-[#22c55e]">
+                      ✓ solution.cpp saved
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className="w-full bg-orange-500 text-white select-none border-none px-5 py-3 rounded-xl text-[13px] font-medium cursor-pointer transition-all hover:opacity-90 active:scale-[0.98] shadow-sm"
+                  >
+                    Enable Cloud Sync
+                  </button>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
 
         {/* SECTION 4: DISCUSSION */}
         <div className="pb-[100px]">
@@ -1551,7 +1825,8 @@ export default function AlgorhythmLanding() {
                     <code className="bg-white dark:bg-[#13151a] px-1.5 py-[1px] rounded text-[12px] font-mono text-[#2563eb] dark:text-[#4d8dff]">
                       O(E + V)
                     </code>
-                    . Since we have an unweighted graph, regular queue maintains the ordering naturally. Try keeping a{" "}
+                    . Since we have an unweighted graph, regular queue maintains
+                    the ordering naturally. Try keeping a{" "}
                     <code className="bg-white dark:bg-[#13151a] px-1.5 py-[1px] rounded text-[12px] font-mono text-[#2563eb] dark:text-[#4d8dff]">
                       dist[]
                     </code>{" "}
@@ -1592,7 +1867,6 @@ export default function AlgorhythmLanding() {
                   );
                 })}
               </div>
-              
 
               <div className="mt-3.5 flex justify-between items-center">
                 <div className="text-[12px] text-[#888] dark:text-[#555]">
@@ -1613,25 +1887,28 @@ export default function AlgorhythmLanding() {
               Teamwork makes the Dreamwork.
             </h2>
             <p className="text-[17px] text-[#555] dark:text-[#a0a0a8] max-w-[520px] mx-auto mt-4 leading-[1.6]">
-              Work, debug, solve problems together on a shared Integrated Development Environment with your friends. Whether is a complex DP state machine, or a clever Greedy problem.
+              Work, debug, solve problems together on a shared Integrated
+              Development Environment with your friends. Whether is a complex DP
+              state machine, or a clever Greedy problem.
             </p>
           </Reveal>
 
-<div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-0">
             {/* Bento */}
             <Reveal className="col-span-12 bg-white dark:bg-[#13151a] border border-black/10 dark:border-white/10 rounded-3xl p-8 relative overflow-hidden">
               <p className="w-full flex justify-center items-center">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-orange-600/10 text-orange-400 dark:text-orange-400 border border-transparent">
-                Live Collaborations
-              </span></p>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.06em] uppercase bg-[#eff4ff] dark:bg-orange-600/10 text-orange-400 dark:text-orange-400 border border-transparent">
+                  Live Collaborations
+                </span>
+              </p>
               <h3 className="text-[22px] text-center font-medium tracking-[-0.02em] mt-4 mb-2.5">
                 Solve Together
               </h3>
               <p className="text-[14px] text-[#555] dark:text-[#a0a0a8] leading-[1.65] text-center">
-                Hop into the same editor as your teammates and work the
-                problem together, live — watch each other's cursors move,
-                edit code side by side, and figure out the tricky parts in
-                real time instead of across separate threads.
+                Hop into the same editor as your teammates and work the problem
+                together, live — watch each other's cursors move, edit code side
+                by side, and figure out the tricky parts in real time instead of
+                across separate threads.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
@@ -1648,8 +1925,12 @@ export default function AlgorhythmLanding() {
 
                   <div className="font-mono text-[12.5px] leading-[1.7] text-[#555] dark:text-[#a0a0a8]">
                     <div>
-                      <span className="text-[#2563eb] dark:text-[#4d8dff]">def</span>{" "}
-                      <span className="text-[#0d0d0d] dark:text-[#f0f0ee]">solve</span>
+                      <span className="text-[#2563eb] dark:text-[#4d8dff]">
+                        def
+                      </span>{" "}
+                      <span className="text-[#0d0d0d] dark:text-[#f0f0ee]">
+                        solve
+                      </span>
                       (graph, start):
                     </div>
                     <div className="pl-4 relative">
