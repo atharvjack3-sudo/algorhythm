@@ -806,7 +806,7 @@ export default function SolveProblem() {
                     )}
 
                     {runResults.length === 0 ? (
-                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans font-semibold text-[14px] tracking-[0.06em] text-slate-500 dark:text-slate-400">
+                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans font-semibold text-[12px] text-slate-500 dark:text-slate-400">
                         Run your code to evaluate sample test cases.
                       </div>
                     ) : (
@@ -879,7 +879,7 @@ export default function SolveProblem() {
                 ) : (
                   <>
                     {!lastResult ? (
-                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans text-[14px] tracking-[0.06em] text-slate-500 dark:text-slate-400 ">
+                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans text-[12px] text-slate-500 dark:text-slate-400 ">
                         Submit code to view final verdict.
                       </div>
                     ) : (
@@ -986,7 +986,7 @@ export default function SolveProblem() {
             {activeTab === "Submissions" && (
               <div className="flex flex-col gap-4">
                 {submissions.length === 0 ? (
-                  <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                  <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans text-[12px] text-slate-500 dark:text-slate-400">
                     No past submissions.
                   </div>
                 ) : (
