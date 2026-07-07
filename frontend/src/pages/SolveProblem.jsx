@@ -300,6 +300,7 @@ export default function SolveProblem() {
   }, [handleSubmit, handleRun]);
   useEffect(() => {
     if (theme === "light") setEditorTheme("light");
+    else if (editorTheme !== "vs-dark") setEditorTheme("Dark-Algo");
    // setEditorTheme(theme === "light" ? "light" : theme);
   }, [theme]);
 
