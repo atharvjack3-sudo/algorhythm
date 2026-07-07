@@ -101,6 +101,7 @@ export default function SolveProblem() {
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
   const [openSubmission, setOpenSubmission] = useState(null);
+  const [ideInit, setIdeInit] = useState(false);
 
   const [runLoading, setRunLoading] = useState(false);
   const [runResults, setRunResults] = useState([]);
@@ -166,6 +167,7 @@ export default function SolveProblem() {
         handleRunRef.current();
       },
     );
+    applyTheme(monaco);
   }
   function handleBeforeMount(monaco) {
     monacoRef.current = monaco;
@@ -297,11 +299,10 @@ export default function SolveProblem() {
     handleRunRef.current = handleRun;
   }, [handleSubmit, handleRun]);
   useEffect(() => {
-    setEditorTheme(theme === "light" ? "light" : "vs-dark");
+    if (theme === "light") setEditorTheme("light");
+   // setEditorTheme(theme === "light" ? "light" : theme);
   }, [theme]);
-  useEffect(() => {
-    if (theme !== "light") setTimeout(()=>setEditorTheme("Dark-Algo"), 2000);
-  }, []);
+
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (collabActive) {
@@ -354,6 +355,15 @@ export default function SolveProblem() {
       monacoRef.current.editor.setTheme(editorTheme);
     });
   }, [editorTheme]);
+
+  async function applyTheme() {
+    if (theme === "light") {
+      setEditorTheme("light");
+    } else {
+      await loadMonacoTheme(monacoRef.current, "Dark-Algo");
+      setEditorTheme("Dark-Algo");
+    }
+  }
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
