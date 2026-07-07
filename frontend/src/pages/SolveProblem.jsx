@@ -806,7 +806,7 @@ export default function SolveProblem() {
                     )}
 
                     {runResults.length === 0 ? (
-                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans font-semibold text-[14px] tracking-[0.06em] text-slate-500 dark:text-slate-400">
                         Run your code to evaluate sample test cases.
                       </div>
                     ) : (
@@ -879,7 +879,7 @@ export default function SolveProblem() {
                 ) : (
                   <>
                     {!lastResult ? (
-                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-mono text-[11px] tracking-[0.06em] text-slate-500 dark:text-slate-400 uppercase">
+                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans text-[14px] tracking-[0.06em] text-slate-500 dark:text-slate-400 ">
                         Submit code to view final verdict.
                       </div>
                     ) : (
@@ -1101,7 +1101,7 @@ export default function SolveProblem() {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-sans outline-none focus:border-orange-500 transition-colors cursor-pointer uppercase tracking-widest"
+                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-sans outline-none focus:border-orange-500 transition-colors cursor-pointer tracking-widest"
               >
                 <option value="cpp">C++20</option>
                 <option value="java">Java</option>
