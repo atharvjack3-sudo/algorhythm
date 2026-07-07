@@ -743,8 +743,10 @@ if (problem.is_hidden) {
 
     const results = [];
     
-    // ENCODE SOURCE CODE
     const codeBase64 = Buffer.from(code).toString("base64");
+    const multipliers = LIMIT_MULTIPLIERS[language] || { time: 2.0, memory: 2.0 };
+    const timeLimit = BASE_TIME_LIMIT_SEC * multipliers.time;
+    const memoryLimit = BASE_MEMORY_LIMIT_KB * multipliers.memory;
 
     for (let i = 0; i < samples.length; i++) {
       const tc = samples[i];
@@ -753,14 +755,13 @@ if (problem.is_hidden) {
         path.join(process.cwd(), tc.input_path),
         "utf-8"
       );
-      
-      // ENCODE INPUT
       const inputBase64 = Buffer.from(input).toString("base64");
 
       const expected = await fs.readFile(
         path.join(process.cwd(), tc.output_path),
         "utf-8"
       );
+      const expectedBase64 = Buffer.from(expected).toString("base64");
 
       const judgeRes = await axios.post(
         JUDGE0_URL,
@@ -768,6 +769,9 @@ if (problem.is_hidden) {
           source_code: codeBase64,
           language_id: LANGUAGE_MAP[language],
           stdin: inputBase64,
+          expected_output: expectedBase64,
+          cpu_time_limit: timeLimit,     
+          memory_limit: memoryLimit
         },
         {
           headers: {
@@ -777,20 +781,34 @@ if (problem.is_hidden) {
         }
       );
 
-      const status = judgeRes.data.status.description;
-      
-      // DECODE OUTPUT
-      const stdoutBase64 = judgeRes.data.stdout || "";
+      const obj = judgeRes.data;
+      const statusId = obj.status.id;
+      const time = Math.round(parseFloat(obj.time || "0") * 1000);
+      const mem = obj.memory || 0;
+      const verdict = statusId === 3 ? "AC" : mapVerdict(obj.status.description);
+      const stdoutBase64 = obj.stdout || "";
       const stdout = stdoutBase64 ? Buffer.from(stdoutBase64, "base64").toString("utf-8").trim() : "";
-      
       const expectedTrimmed = expected.trim();
-      const passed = status === "Accepted" && stdout === expectedTrimmed;
+
+      let finalCO = null;
+      let finalErr = null;
+      if (statusId !== 3 && statusId !== 4) { 
+        if (obj.compile_output) {
+          finalCO = Buffer.from(obj.compile_output, "base64").toString("utf-8");
+        }
+        if (obj.stderr) {
+          finalErr = Buffer.from(obj.stderr, "base64").toString("utf-8");
+        }
+      }
 
       results.push({
         sample: i + 1,
-        verdict: passed ? "AC" : mapVerdict(status),
+        verdict: verdict,
+        time: time,
+        memory: mem,
         output: stdout,
         expected: expectedTrimmed,
+        error: finalCO || finalErr || null,
       });
     }
 

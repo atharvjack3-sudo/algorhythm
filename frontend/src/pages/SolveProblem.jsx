@@ -16,7 +16,15 @@ import CustomTC from "../components/CustomTC";
 import "katex/dist/katex.min.css";
 import SubmissionAnim from "../components/submissionAnim";
 import CollabTab from "../components/CollabTab";
-import { Copy, RotateCcw, CloudUpload, History, Check, X, Info } from "lucide-react";
+import {
+  Copy,
+  RotateCcw,
+  CloudUpload,
+  History,
+  Check,
+  X,
+  Info,
+} from "lucide-react";
 import "./css/scrollbar.css";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
@@ -301,7 +309,7 @@ export default function SolveProblem() {
   useEffect(() => {
     if (theme === "light") setEditorTheme("light");
     else if (editorTheme !== "vs-dark") setEditorTheme("Dark-Algo");
-   // setEditorTheme(theme === "light" ? "light" : theme);
+    // setEditorTheme(theme === "light" ? "light" : theme);
   }, [theme]);
 
   useEffect(() => {
@@ -461,7 +469,7 @@ export default function SolveProblem() {
           verdict: result.verdict,
           submitted_at: new Date().toISOString(),
           language,
-          code: code
+          code: code,
         },
         ...prev,
       ]);
@@ -492,7 +500,7 @@ export default function SolveProblem() {
     } finally {
       setRunLoading(false);
     }
-  };
+  }
 
   async function evaluate_complexity(id) {
     try {
@@ -812,26 +820,47 @@ export default function SolveProblem() {
                     ) : (
                       <div className="flex flex-col gap-5">
                         {runResults.map((r, i) => {
-                          const isMatch =
-                            r.output?.trim() === r.expected?.trim();
+                          const isMatch = r.verdict === "AC";
+                          const isWA = r.verdict === "WA";
+
+                          const verdictDisplay = isMatch
+                            ? "Matched"
+                            : isWA
+                              ? "Mismatch"
+                              : r.verdict;
+
                           return (
                             <div
                               key={i}
-                              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm"
+                              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm flex flex-col"
                             >
                               <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
-                                <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">
-                                  Test Case {r.sample || r.index || i + 1}
-                                </span>
-                                <span
-                                  className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
-                                    isMatch
-                                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                  }`}
-                                >
-                                  {isMatch ? "Matched" : "Mismatch"}
-                                </span>
+                                <div className="flex items-center gap-3">
+                                  <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">
+                                    Test Case {r.sample || r.index || i + 1}
+                                  </span>
+                                  <span
+                                    className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
+                                      isMatch
+                                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                        : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                    }`}
+                                  >
+                                    {verdictDisplay}
+                                  </span>
+                                </div>
+
+                                <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wider">
+                                  {r.time !== undefined
+                                    ? `${r.time} ms`
+                                    : "- ms"}
+                                  <span className="mx-2 text-slate-300 dark:text-slate-700 font-normal">
+                                    |
+                                  </span>
+                                  {r.memory !== undefined
+                                    ? `${r.memory} KB`
+                                    : "- KB"}
+                                </div>
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
@@ -842,7 +871,11 @@ export default function SolveProblem() {
                                   <pre
                                     className={`p-4 m-0 font-mono text-[12px] whitespace-pre-wrap ${isMatch ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
                                   >
-                                    {r.output || "(empty output)"}
+                                    {r.output || (
+                                      <span className="italic text-slate-400 dark:text-slate-600">
+                                        No output
+                                      </span>
+                                    )}
                                   </pre>
                                 </div>
                                 <div>
@@ -854,6 +887,17 @@ export default function SolveProblem() {
                                   </pre>
                                 </div>
                               </div>
+
+                              {r.error && (
+                                <div className="border-t border-slate-200 dark:border-slate-800">
+                                  <div className="px-4 py-2 bg-red-50/50 dark:bg-red-950/20 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-red-500 uppercase tracking-[0.1em]">
+                                    Error / Stderr
+                                  </div>
+                                  <pre className="p-4 m-0 font-mono text-[12px] text-red-600 dark:text-red-400 whitespace-pre-wrap bg-red-50/30 dark:bg-red-950/10 max-h-48 overflow-y-auto">
+                                    {r.error}
+                                  </pre>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
@@ -1270,7 +1314,7 @@ export default function SolveProblem() {
           </div>
           <div className="dark:bg-slate-950 w-full py-1 px-2 bg-white text-xs dark:text-slate-400 text-slate-700 font-sans flex justify-between">
             <div className="flex">
-              <Info size={15}/> 
+              <Info size={15} />
               <span className="mr-5 ml-2">
                 Run Code: ⌘
                 <span className="font-semibold ml-0.5"> + Shift + Enter</span>
