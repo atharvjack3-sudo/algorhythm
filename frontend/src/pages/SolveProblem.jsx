@@ -1072,7 +1072,7 @@ export default function SolveProblem() {
           {/* Editor Toolbar */}
           <div className="min-h-12 py-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
             <div className="flex items-center gap-2">
-              <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">
+              <label className="font-sans text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
                 Theme
               </label>
 
@@ -1081,7 +1081,7 @@ export default function SolveProblem() {
                 onChange={async (e) => {
                   setEditorTheme(e.target.value);
                 }}
-                className="bg-slate-50 custom-scrollbar dark:bg-slate-950 border border-slate-900 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] pl-2 py-1 text-[11px] font-mono outline-none focus:border-orange-500 transition-colors cursor-pointer"
+                className="bg-slate-50 custom-scrollbar dark:bg-slate-950 border border-slate-900 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] pl-2 py-1 text-[11px] font-sans outline-none focus:border-orange-500 transition-colors cursor-pointer"
               >
                 {AVAILABLE_THEMES.map((theme) => (
                   <option key={theme} value={theme}>
@@ -1095,13 +1095,13 @@ export default function SolveProblem() {
                   VS Light
                 </option>
               </select>
-              <label className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">
+              <label className="font-sans text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
                 Language
               </label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-mono outline-none focus:border-orange-500 transition-colors cursor-pointer uppercase tracking-widest"
+                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-sans outline-none focus:border-orange-500 transition-colors cursor-pointer uppercase tracking-widest"
               >
                 <option value="cpp">C++20</option>
                 <option value="java">Java</option>
