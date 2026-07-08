@@ -136,4 +136,54 @@ router.get(
   }
 );
 
+router.put("/discussions/:discussionId/upvote", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { discussionId } = req.params;
+
+  let conn;
+  try {
+    conn = await db.connect();
+    const { ExistenceRow } = await conn.query("SELECT 1 FROM problem_discussion WHERE id = $1", [discussionId]);
+    if (ExistenceRow.length === 0) {
+      return res.status(404).json({ message: "Discussion Not Found" });
+    }
+    const { alreadyVoted } = await conn.query("SELECT vote FROM discussion_votes WHERE user_id = $1 AND discussion_id = $2", [userId, discussionId]);
+    if (alreadyVoted.length) {
+      if (alreadyVoted[0].vote == "1") return res.status(200).json({ message : "Already Voted" });
+      await conn.query("UPDATE discussion_votes SET vote = 1 WHERE user_id = $1 AND discussion_id = $2", [userId, discussionId]);
+    }
+    else await conn.query("INSERT INTO discussion_votes (user_id, discussion_id, vote) VALUES ($1, $2, 1)", [userId, discussionId]);
+    res.status(200).json({ message : "Upvoted" });
+  } catch (err) {
+    res.status(500).json({ message : "An internal server error occured" });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
+router.put("/discussions/:discussionId/downvote", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { discussionId } = req.params;
+
+  let conn;
+  try {
+    conn = await db.connect();
+    const { ExistenceRow } = await conn.query("SELECT 1 FROM problem_discussion WHERE id = $1", [discussionId]);
+    if (ExistenceRow.length === 0) {
+      return res.status(404).json({ message: "Discussion Not Found" });
+    }
+    const { alreadyVoted } = await conn.query("SELECT vote FROM discussion_votes WHERE user_id = $1 AND discussion_id = $2", [userId, discussionId]);
+    if (alreadyVoted.length) {
+      if (alreadyVoted[0].vote == "-1") return res.status(200).json({ message : "Already Voted" });
+      await conn.query("UPDATE discussion_votes SET vote = -1 WHERE user_id = $1 AND discussion_id = $2", [userId, discussionId]);
+    }
+    else await conn.query("INSERT INTO discussion_votes (user_id, discussion_id, vote) VALUES ($1, $2, -1)", [userId, discussionId]);
+    res.status(200).json({ message : "Upvoted" });
+  } catch (err) {
+    res.status(500).json({ message : "An internal server error occured" });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
 export default router;
