@@ -60,18 +60,27 @@ router.get(
       const { rows } = await db.query(
         `
         SELECT
-          d.id,
-          d.title,
-          d.upvotes,
-          d.views,
-          d.reply_count,
-          d.created_at,
-          u.username
+        d.id,
+        d.title,
+        d.views,
+        d.reply_count,
+        d.created_at,
+        u.username,
+        COALESCE(v.votes, 0) AS votes
         FROM problem_discussions d
-        JOIN users u ON u.id = d.user_id
+        JOIN users u
+        ON u.id = d.user_id
+        LEFT JOIN (
+          SELECT
+          discussion_id,
+          SUM(vote) AS votes
+          FROM discussion_votes
+          GROUP BY discussion_id
+        ) v
+        ON v.discussion_id = d.id
         WHERE d.problem_id = $1
-          AND d.is_deleted = 0
-        ORDER BY d.is_pinned DESC, d.created_at DESC
+        AND d.is_deleted = 0
+        ORDER BY d.is_pinned DESC, d.created_at DESC;
         `,
         [problemId]
       );
