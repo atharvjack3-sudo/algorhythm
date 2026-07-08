@@ -791,9 +791,9 @@ export default function SolveProblem() {
             )}
 
             {/* ===== EDITORIAL ===== */}
-            {activeTab === "Editorial" && (
+            <div className={`${activeTab === "Editorial" ? "block" : "hidden"}`}>
               <MarkdownRenderer content={content.editorial} />
-            )}
+            </div>
 
             {/* ===== RUN ===== */}
             <div className={`${activeTab === "Run" ? "block" : "hidden"}`}>
