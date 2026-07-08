@@ -1,142 +1,178 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import {
+  Trophy,
+  Diamond,
+  Star,
+  Activity,
+  Target,
+  BookOpen,
+  Rocket,
+  Briefcase,
+  CheckSquare,
+  TerminalSquare,
+} from "lucide-react";
 
 function Premium() {
-  const [billingCycle, setBillingCycle] = useState('monthly');
+  const [billingCycle, setBillingCycle] = useState("monthly");
 
   const features = [
     {
-      icon: '🏆',
-      title: 'Exclusive Premium Contests',
-      description: 'Participate in premium-only contests with bigger prizes and recognition. Compete with the best coders.',
+      icon: <Trophy size={18} className="text-amber-600 dark:text-amber-500" />,
+      title: "Exclusive Contests",
+      description:
+        "Participate in premium-only contests with bigger prizes and recognition. Compete with the best.",
     },
     {
-      icon: '💎',
-      title: 'Access Premium Problems',
-      description: 'Unlock 200+ exclusive premium problems curated from top tech companies and interview questions.',
+      icon: (
+        <Diamond size={18} className="text-amber-600 dark:text-amber-500" />
+      ),
+      title: "Premium Problems",
+      description:
+        "Unlock 200+ exclusive problems curated from top tech companies and interview questions.",
     },
     {
-      icon: '⭐',
-      title: 'Daily Premium Challenge',
-      description: 'Get access to special problem of the day designed to prepare you for real-world coding interviews.',
+      icon: <Star size={18} className="text-amber-600 dark:text-amber-500" />,
+      title: "Daily Challenge",
+      description:
+        "Get access to special problem of the day designed to prepare you for real-world interviews.",
     },
     {
-      icon: '📊',
-      title: 'Advanced Analytics',
-      description: 'Deep dive into your performance with detailed statistics, progress tracking, and personalized insights.',
+      icon: (
+        <Activity size={18} className="text-amber-600 dark:text-amber-500" />
+      ),
+      title: "Advanced Analytics",
+      description:
+        "Deep dive into your performance with detailed statistics, progress tracking, and insights.",
     },
     {
-      icon: '🎯',
-      title: 'Company-Specific Prep',
-      description: 'Access problems tagged by company with real interview questions from FAANG and top startups.',
+      icon: <Target size={18} className="text-amber-600 dark:text-amber-500" />,
+      title: "Company-Specific Prep",
+      description:
+        "Access problems tagged by company with real interview questions from FAANG and top startups.",
     },
     {
-      icon: '📚',
-      title: 'Solution Walkthroughs',
-      description: 'Watch video explanations and detailed editorial solutions for all premium problems.',
+      icon: (
+        <BookOpen size={18} className="text-amber-600 dark:text-amber-500" />
+      ),
+      title: "Solution Walkthroughs",
+      description:
+        "Watch video explanations and detailed editorial solutions for all premium problems.",
     },
     {
-      icon: '🚀',
-      title: 'Priority Support',
-      description: 'Get your questions answered faster with dedicated premium support team.',
+      icon: <Rocket size={18} className="text-amber-600 dark:text-amber-500" />,
+      title: "Priority Support",
+      description:
+        "Get your questions answered faster with a dedicated premium support team.",
     },
     {
-      icon: '💼',
-      title: 'Interview Prep Resources',
-      description: 'Access exclusive interview guides, tips, and strategies from industry professionals.',
+      icon: (
+        <Briefcase size={18} className="text-amber-600 dark:text-amber-500" />
+      ),
+      title: "Interview Resources",
+      description:
+        "Access exclusive interview guides, tips, and strategies from industry professionals.",
     },
   ];
 
   const plans = [
     {
-      name: 'Monthly',
-      price: '$15',
-      period: '/month',
-      billingCycle: 'monthly',
+      name: "Monthly",
+      price: "$15",
+      period: "/month",
+      billingCycle: "monthly",
       popular: false,
     },
     {
-      name: 'Annual',
-      price: '$120',
-      period: '/year',
-      billingCycle: 'annual',
+      name: "Annual",
+      price: "$120",
+      period: "/year",
+      billingCycle: "annual",
       popular: true,
-      savings: 'Save $60',
+      savings: "SAVE $60",
     },
   ];
 
   const testimonials = [
     {
-      name: 'Sarah Chen',
-      role: 'Software Engineer at Google',
-      avatar: 'S',
-      text: 'Premium problems helped me land my dream job at Google. The company-specific questions were invaluable!',
+      name: "Sarah Chen",
+      role: "SWE @ Google",
+      avatar: "S",
+      text: "Premium problems helped me land my dream job at Google. The company-specific questions were invaluable!",
     },
     {
-      name: 'Michael Rodriguez',
-      role: 'Full Stack Developer',
-      avatar: 'M',
-      text: 'The premium contests pushed me to become a better coder. Worth every penny!',
+      name: "Michael Rodriguez",
+      role: "Full Stack Dev",
+      avatar: "M",
+      text: "The premium contests pushed me to become a better coder. Worth every penny!",
     },
     {
-      name: 'Emily Watson',
-      role: 'Senior Developer at Amazon',
-      avatar: 'E',
-      text: 'Daily premium challenges kept me sharp and prepared for technical interviews.',
+      name: "Emily Watson",
+      role: "Senior Dev @ Amazon",
+      avatar: "E",
+      text: "Daily premium challenges kept me sharp and prepared for technical interviews.",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0a0c10] font-sans transition-colors duration-300">
-      
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-white dark:bg-[#0a0c10] border-b border-amber-100 dark:border-amber-900/30 transition-colors">
-        {/* Background Gradients */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-400/20 dark:bg-amber-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-0 w-72 h-72 bg-orange-400/20 dark:bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2"></div>
-        </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0c10] font-sans transition-colors duration-300">
+      <div className="relative bg-white dark:bg-[#050608] border-b border-slate-200 dark:border-slate-800 transition-colors overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-32 text-center z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-xs font-bold mb-8 shadow-md shadow-orange-500/20 uppercase tracking-widest">
-            <span>✨</span>
-            <span>Algorhythm Premium</span>
-          </div>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
-            Unlock Your Full <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">Potential</span>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-20 md:py-28 text-center flex flex-col items-center z-10">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-tight font-sans max-w-4xl">
+            Unlock Your Full{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-500 dark:from-amber-400 dark:to-orange-500">
+              Potential
+            </span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
-            Get unlimited access to premium problems, exclusive contests, and advanced features to accelerate your coding journey and land your dream job.
+
+          <p className="text-[15px] font-semibold font-sans text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Get unlimited access to premium problems, exclusive contests, and
+            advanced features to accelerate your coding journey and land your
+            dream job. <br /> <br />
+            Note that this page is a mockup. Algorhythm premium is in works as
+            of now. <br /> - Atharv Dubey
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all active:scale-95">
-              Get Premium Now
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:w-auto">
+            <button className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-500 hover:to-orange-400 text-white rounded-[3px] font-sans font-semibold text-[13px] tracking-wide transition-all border-none shadow-md shadow-orange-500/10 active:scale-[0.98]">
+              Get Premium
             </button>
-            <button className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-lg border-2 border-slate-200 dark:border-slate-800 hover:border-amber-500 dark:hover:border-amber-500 transition-all active:scale-95 shadow-sm">
-              Learn More
+            <button className="w-full sm:w-auto px-8 py-3 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-[3px] font-sans text-[13px] font-semibold tracking-wide transition-all active:scale-[0.98]">
+              View Docs
             </button>
           </div>
         </div>
       </div>
 
       {/* Features Grid */}
-      <div className="bg-[#f8f9fa] dark:bg-[#0a0c10] py-20 md:py-24 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Everything You Need to Succeed</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">Premium gives you the definitive edge in your coding journey</p>
+      <div className="bg-slate-50 dark:bg-[#0a0c10] py-20 transition-colors border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="mb-12 flex flex-col items-center md:items-start">
+            <h2 className="font-mono text-[12px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-[0.15em] mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+              System Capabilities
+            </h2>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Everything You Need to Succeed
+            </h3>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-slate-900 rounded-3xl p-8 hover:shadow-xl hover:shadow-amber-500/10 dark:hover:shadow-none transition-all border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-500/50 group"
+                className="bg-white dark:bg-slate-950 rounded-[3px] p-6 border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500/50 hover:-translate-y-0.5 transition-all duration-300 group flex flex-col shadow-sm hover:shadow-md"
               >
-                <div className="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300 border border-amber-100 dark:border-amber-500/20">
+                <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900 rounded-[3px] flex items-center justify-center mb-5 border border-slate-200 dark:border-slate-800 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/10 group-hover:border-amber-200 dark:group-hover:border-amber-500/30 transition-colors">
                   {feature.icon}
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 tracking-tight">{feature.title}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{feature.description}</p>
+                <h3 className="text-[14px] font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
+                  {feature.title}
+                </h3>
+                <p className="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed flex-1">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -144,206 +180,233 @@ function Premium() {
       </div>
 
       {/* Premium Benefits Highlight */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-        <div className="grid lg:grid-cols-3 gap-8">
-          
-          {/* Exclusive Contests */}
-          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-colors">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl mb-8 shadow-lg shadow-purple-500/20">
-                🏆
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 border-b border-slate-200 dark:border-slate-800">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Benefit 1 */}
+          <div className="bg-white dark:bg-slate-950 rounded-[3px] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col shadow-sm">
+            <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center gap-2">
+              <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                MODULE: CONTESTS
+              </span>
+            </div>
+            <div className="p-6 flex-1 flex flex-col">
+              <div className="w-10 h-10 bg-slate-100 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] flex items-center justify-center mb-5">
+                <Trophy
+                  size={20}
+                  className="text-slate-700 dark:text-slate-300"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Premium Contests</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium leading-relaxed">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
+                Premium Contests
+              </h3>
+              <p className="text-[13px] text-slate-600 dark:text-slate-400 mb-6">
                 Compete in exclusive premium-only contests with:
               </p>
-              <ul className="space-y-4">
+              <ul className="space-y-3 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                 {[
                   "Higher prize pools",
                   "Harder problem sets",
-                  "Exclusive badges & titles",
-                  "Recognition in rankings"
+                  "Exclusive badges",
+                  "Ranking recognition",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-purple-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-slate-700 dark:text-slate-300 font-bold">{item}</span>
+                  <li key={i} className="flex items-center gap-3">
+                    <CheckSquare size={14} className="text-amber-500" /> {item}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Premium Problems */}
-          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-colors">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl mb-8 shadow-lg shadow-blue-500/20">
-                💎
+          {/* Benefit 2 */}
+          <div className="bg-white dark:bg-slate-950 rounded-[3px] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col shadow-sm">
+            <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center gap-2">
+              <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                MODULE: PROBLEMS
+              </span>
+            </div>
+            <div className="p-6 flex-1 flex flex-col">
+              <div className="w-10 h-10 bg-slate-100 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] flex items-center justify-center mb-5">
+                <Diamond
+                  size={20}
+                  className="text-slate-700 dark:text-slate-300"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Premium Problems</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium leading-relaxed">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
+                Premium Problems
+              </h3>
+              <p className="text-[13px] text-slate-600 dark:text-slate-400 mb-6">
                 Access 200+ exclusive problems featuring:
               </p>
-              <ul className="space-y-4">
+              <ul className="space-y-3 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                 {[
                   "Real interview questions",
                   "Company-tagged problems",
                   "Detailed solutions",
-                  "Video walkthroughs"
+                  "Video walkthroughs",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-slate-700 dark:text-slate-300 font-bold">{item}</span>
+                  <li key={i} className="flex items-center gap-3">
+                    <CheckSquare size={14} className="text-amber-500" /> {item}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Daily Challenge */}
-          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-colors">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-white text-3xl mb-8 shadow-lg shadow-orange-500/20">
-                ⭐
+          {/* Benefit 3 */}
+          <div className="bg-white dark:bg-slate-950 rounded-[3px] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col shadow-sm">
+            <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center gap-2">
+              <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                MODULE: CHALLENGES
+              </span>
+            </div>
+            <div className="p-6 flex-1 flex flex-col">
+              <div className="w-10 h-10 bg-slate-100 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] flex items-center justify-center mb-5">
+                <Star
+                  size={20}
+                  className="text-slate-700 dark:text-slate-300"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Daily Challenge</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium leading-relaxed">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
+                Daily Challenge
+              </h3>
+              <p className="text-[13px] text-slate-600 dark:text-slate-400 mb-6">
                 Master coding with daily challenges:
               </p>
-              <ul className="space-y-4">
+              <ul className="space-y-3 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                 {[
                   "Curated daily problems",
                   "Interview-focused topics",
                   "Progress tracking",
-                  "Streak rewards"
+                  "Streak rewards",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-slate-700 dark:text-slate-300 font-bold">{item}</span>
+                  <li key={i} className="flex items-center gap-3">
+                    <CheckSquare size={14} className="text-amber-500" /> {item}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-          
         </div>
       </div>
 
       {/* Pricing Section */}
-      <div className="bg-[#f8f9fa] dark:bg-[#0a0c10] py-20 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Choose Your Plan</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">Flexible pricing that grows with you</p>
+      <div className="bg-slate-50 dark:bg-[#0a0c10] py-20 transition-colors border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="font-mono text-[12px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-[0.15em] mb-2">
+              Subscription Plans
+            </h2>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Flexible pricing that grows with you
+            </h3>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6">
             {plans.map((plan) => (
               <div
                 key={plan.billingCycle}
-                className={`relative bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 p-8 md:p-10 transition-all ${
-                  plan.popular 
-                    ? 'border-amber-500 shadow-2xl shadow-orange-500/10 dark:shadow-none' 
-                    : 'border-slate-200 dark:border-slate-800 shadow-sm'
-                }`}
+                className={`flex flex-col bg-white dark:bg-slate-950 rounded-[3px] border hover:-translate-y-0.5 transition-transform duration-300 ${
+                  plan.popular
+                    ? "border-amber-500 dark:border-amber-500 shadow-md shadow-amber-500/10"
+                    : "border-slate-200 dark:border-slate-800 shadow-sm"
+                } relative`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="px-5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[11px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-orange-500/30 border border-white dark:border-slate-900">
-                      Most Popular
-                    </span>
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-amber-500 text-white font-mono text-[9px] font-bold px-3 py-1 uppercase tracking-widest rounded-[3px]">
+                    MOST POPULAR
                   </div>
                 )}
-                
-                <div className="text-center mb-10">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{plan.name}</h3>
-                  {plan.savings && (
-                    <span className="inline-block px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider rounded-md mb-6 border border-emerald-200 dark:border-emerald-500/20">
-                      {plan.savings}
+
+                <div className="p-8 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-6">
+                    <h3 className="font-sans text-xl font-bold text-slate-900 dark:text-white">
+                      {plan.name}
+                    </h3>
+                    {plan.savings && (
+                      <span className="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 text-[9px] font-mono font-bold uppercase tracking-widest rounded-[3px]">
+                        {plan.savings}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-baseline gap-1 mb-8">
+                    <span className="font-mono text-4xl font-bold text-slate-900 dark:text-white tracking-tighter">
+                      {plan.price}
                     </span>
-                  )}
-                  <div className="flex items-end justify-center gap-1.5">
-                    <span className="text-6xl font-black text-slate-900 dark:text-white tracking-tighter">{plan.price}</span>
-                    <span className="text-slate-500 dark:text-slate-400 text-lg font-bold mb-2">{plan.period}</span>
+                    <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                      {plan.period}
+                    </span>
                   </div>
-                </div>
 
-                <div className="space-y-5 mb-10">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">All premium features included</span>
+                  <div className="space-y-4 mb-10 flex-1 font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                    <div className="flex items-center gap-3">
+                      <span className="text-amber-500">[{">"}]</span> All
+                      premium features
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-amber-500">[{">"}]</span> Cancel
+                      anytime
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-amber-500">[{">"}]</span> Priority
+                      support
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Cancel anytime</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Priority customer support</span>
-                  </div>
-                </div>
 
-                <button
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all active:scale-95 ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {plan.popular ? 'Get Started' : 'Choose Plan'}
-                </button>
+                  <button
+                    className={`w-full py-3 rounded-[3px] font-mono text-[11px] font-bold uppercase tracking-widest transition-all border-none cursor-pointer active:scale-[0.98] ${
+                      plan.popular
+                        ? "bg-amber-500 text-white hover:bg-amber-600 shadow-sm"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {plan.popular ? "SELECT PLAN" : "SELECT PLAN"}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-
-          <p className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 mt-10">
-            All plans include a 7-day money-back guarantee. No questions asked.
+          <p className="text-center font-mono text-[10px] text-slate-500 dark:text-slate-500 mt-8 uppercase tracking-widest">
+            * All plans include a 7-day money-back guarantee.
           </p>
         </div>
       </div>
 
       {/* Testimonials */}
-      <div className="bg-white dark:bg-slate-900 border-t border-b border-slate-200 dark:border-slate-800 py-20 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Loved by Developers</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">See what our premium members have to say</p>
+      <div className="bg-white dark:bg-slate-950 py-20 transition-colors border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="mb-12">
+            <h2 className="font-mono text-[12px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-[0.15em] mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+              User Feedback
+            </h2>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Loved by Developers
+            </h3>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-4">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 transition-colors">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
+              <div
+                key={index}
+                className="bg-slate-50 dark:bg-[#0d1117] rounded-[3px] p-6 border border-slate-200 dark:border-slate-800 flex flex-col"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-[3px] flex items-center justify-center text-slate-700 dark:text-slate-300 font-mono font-bold text-[12px] uppercase">
                     {testimonial.avatar}
                   </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 dark:text-white tracking-tight">{testimonial.name}</h4>
-                    <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{testimonial.role}</p>
+                  <div className="flex flex-col">
+                    <h4 className="font-sans font-bold text-[13px] text-slate-900 dark:text-white">
+                      {testimonial.name}
+                    </h4>
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-500">
+                      {testimonial.role}
+                    </p>
                   </div>
                 </div>
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed mb-6">"{testimonial.text}"</p>
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
+                <p className="text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed italic border-l-2 border-amber-500/50 pl-3">
+                  "{testimonial.text}"
+                </p>
               </div>
             ))}
           </div>
@@ -351,23 +414,21 @@ function Premium() {
       </div>
 
       {/* Final CTA */}
-      <div className="bg-gradient-to-br from-slate-900 to-black dark:from-black dark:to-slate-950 py-24 relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/20 rounded-full blur-[100px] pointer-events-none"></div>
-        
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
-            Ready to Level Up?
+      <div className="relative bg-slate-900 dark:bg-[#050608] py-24 overflow-hidden border-t border-slate-800">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20"></div>
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight font-sans">
+            Ready to Succeed?
           </h2>
-          <p className="text-xl text-slate-300 mb-10 font-medium max-w-2xl mx-auto">
-            Join thousands of developers who upgraded their skills and accelerated their careers with Premium.
+          <p className="text-[14px] text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed">
+            Join thousands of developers who upgraded their skills and
+            accelerated their careers with Algorhythm Pro.
           </p>
-          <button className="px-10 py-5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-lg shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 transition-all active:scale-95">
-            Start Your Premium Journey
+          <button className="px-8 py-3 bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-500 hover:to-orange-400 cursor-pointer text-white rounded-[3px] font-mono text-[12px] font-bold uppercase tracking-widest transition-all active:scale-[0.98] border-none shadow-md shadow-orange-500/20">
+            START PREMIUM JOURNEY
           </button>
         </div>
       </div>
-      
     </div>
   );
 }
