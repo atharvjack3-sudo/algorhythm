@@ -167,7 +167,7 @@ export default function ProblemSet() {
             {/* Premium Card */}
             <div
               onClick={() => navigate("/premium")}
-              className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-xl p-6 flex flex-col cursor-pointer hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-xl dark:hover:shadow-[0_8px_30px_rgba(245,158,11,0.15)] transition-all duration-300 group relative overflow-hidden"
+              className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-md p-6 flex flex-col cursor-pointer hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md dark:hover:shadow-[0_8px_30px_rgba(245,158,11,0.15)] transition-all duration-300 group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110" />
               <div className="flex items-center gap-2.5 mb-4">
@@ -189,7 +189,7 @@ export default function ProblemSet() {
             {/* Leaderboards Card */}
             <div
               onClick={() => navigate("/leaderboard")}
-              className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-xl p-6 flex flex-col cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] transition-all duration-300 group relative overflow-hidden"
+              className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-md p-6 flex flex-col cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] transition-all duration-300 group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110" />
               <div className="flex items-center gap-2.5 mb-4">
@@ -211,7 +211,7 @@ export default function ProblemSet() {
             {/* My Lists Card */}
             <div
               onClick={() => navigate("/my-lists")}
-              className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-xl p-6 flex flex-col cursor-pointer hover:border-rose-400 dark:hover:border-rose-500 hover:shadow-xl dark:hover:shadow-[0_8px_30px_rgba(244,63,94,0.15)] transition-all duration-300 group relative overflow-hidden"
+              className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-md p-6 flex flex-col cursor-pointer hover:border-rose-400 dark:hover:border-rose-500 hover:shadow-md dark:hover:shadow-[0_8px_30px_rgba(244,63,94,0.15)] transition-all duration-300 group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110" />
               <div className="flex items-center gap-2.5 mb-4">
