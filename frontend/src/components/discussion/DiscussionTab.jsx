@@ -55,78 +55,74 @@ export default function DiscussionTab() {
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
-          <MessageSquare className="w-5 h-5 text-orange-600 dark:text-orange-500" />
+      <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+        <h2 className="font-sans text-[14px] font-semibold text-slate-700 dark:text-slate-300 tracking-wide flex items-center gap-2">
+          
           Discussions
         </h2>
 
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 cursor-pointer text-white rounded-sm text-sm font-bold shadow-md shadow-orange-600/20 transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:opacity-85 cursor-pointer text-white rounded-[3px] text-[12px] font-sans font-bold tracking-wider transition-opacity"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           New Post
         </button>
       </div>
 
       {/* Discussion List */}
       {loading ? (
-        <div className="py-16 flex flex-col items-center justify-center">
-          <div className="relative w-10 h-10 flex items-center justify-center mb-4">
-            <div className="absolute inset-0 rounded-full border-[3px] border-slate-200 dark:border-slate-800"></div>
-            <div className="absolute inset-0 rounded-full border-[3px] border-blue-600 dark:border-blue-500 border-t-transparent border-r-transparent animate-[spin_0.8s_linear_infinite]"></div>
-          </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading discussions...</p>
+        <div className="py-20 flex items-center justify-center">
+          <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse uppercase">
+            Loading Discussions...
+          </span>
         </div>
       ) : discussions.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 transition-colors">
-          <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center border border-slate-100 dark:border-slate-700">
-            <MessageSquare className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+        <div className="text-center py-16 bg-slate-100 dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 transition-colors">
+          <div className="font-sans text-[13px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide mb-4">
+            No Discussions Found.
           </div>
-          <h4 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white mb-1">No discussions yet</h4>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">Be the first to start a conversation!</p>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-6 py-2.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-sm text-sm font-semibold shadow-md transition-all active:scale-95"
+            className="px-6 py-2 cursor-pointer bg-transparent border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] text-[12px] font-sans font-semibold tracking-wide transition-colors"
           >
             Start Discussion
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-4">
           {discussions.map((d) => (
             <div 
               key={d.id} 
               onClick={() => navigate(`/problemset/${problemId}/discussions/${d.id}`)}
-              className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md hover:shadow-md hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-orange-300 dark:hover:border-orange-700 transition-all cursor-pointer group"
+              className="p-5 bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md hover:border-orange-400 dark:hover:border-orange-500/80 transition-colors cursor-pointer group flex flex-col gap-4"
             >
-              <h3 className="text-[15px] font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors mb-3 tracking-tight">
+              <h3 className="text-[15px] font-sans font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors leading-snug">
                 {d.title}
               </h3>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-medium text-slate-500 dark:text-slate-400">
+              <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800/60 pt-4">
                 
-                {/* Author */}
-                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                  <div className="w-5 h-5 bg-blue-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full flex items-center justify-center text-[10px] font-bold border border-orange-100 dark:border-orange-500/20">
-                    {d.username.charAt(0).toUpperCase()}
+                {/* Author Info */}
+                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                  <div className="w-6 h-6 bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-[3px] flex items-center justify-center text-[11px] font-mono font-bold uppercase transition-colors">
+                    {d.username.charAt(0)}
                   </div>
-                  {d.username}
+                  <span className="font-sans text-[13px] font-bold group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors">
+                    {d.username}
+                  </span>
                 </span>
 
-                <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
-
                 {/* Stats */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 font-sans text-[12px] tracking-wide text-slate-500 dark:text-slate-500">
                   <span className="flex items-center gap-1.5 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
-                    <MessageCircle className="w-4 h-4" />
-                    {d.reply_count} replies
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    {d.reply_count} <span className="hidden sm:inline">Replies</span>
                   </span>
                   
                   <span className="flex items-center gap-1.5 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
-                    <ArrowUpCircle className="w-4 h-4" />
-                    {d.upvotes} upvotes
+                    <ArrowUpCircle className="w-3.5 h-3.5" />
+                    {d.upvotes} <span className="hidden sm:inline">Votes</span>
                   </span>
                 </div>
 
