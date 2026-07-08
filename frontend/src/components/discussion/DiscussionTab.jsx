@@ -16,6 +16,7 @@ export default function DiscussionTab() {
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -36,7 +37,7 @@ export default function DiscussionTab() {
 
   const createDiscussion = async () => {
     if (!title.trim() || !body.trim()) return;
-
+    setIsCreating(true);
     try {
       await api.post(`/problems/${problemId}/discussions`, { title, body });
       setTitle("");
@@ -45,6 +46,8 @@ export default function DiscussionTab() {
       fetchDiscussions();
     } catch (err) {
       console.error("CREATE DISCUSSION ERROR", err);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -106,7 +109,7 @@ export default function DiscussionTab() {
                 
                 {/* Author */}
                 <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                  <div className="w-5 h-5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-[10px] font-bold border border-blue-100 dark:border-blue-500/20">
+                  <div className="w-5 h-5 bg-blue-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full flex items-center justify-center text-[10px] font-bold border border-orange-100 dark:border-orange-500/20">
                     {d.username.charAt(0).toUpperCase()}
                   </div>
                   {d.username}
@@ -142,6 +145,7 @@ export default function DiscussionTab() {
         body={body}
         setBody={setBody}
         onSubmit={createDiscussion}
+        isSubmitting={isCreating}
       />
     </div>
   );
