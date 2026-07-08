@@ -849,7 +849,7 @@ export default function ContestSolveProblem() {
 
           {/* Bottom Info Bar */}
           <div className="dark:bg-slate-950 w-full py-1.5 px-4 bg-white text-xs dark:text-slate-400 text-slate-700 font-sans flex justify-center items-center border-t border-white dark:border-slate-950">
-            {false && isEnded ? (
+            {isEnded ? (
               <span className="font-mono text-[10px] font-bold text-red-500 tracking-[0.08em] uppercase border border-red-500/30 bg-red-500/10 px-2 py-0.5 rounded-[3px]">
                 Contest Concluded (Submissions Closed)
               </span>
