@@ -122,7 +122,7 @@ export default function DiscussionTab() {
                   
                   <span className="flex items-center gap-1.5 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
                     <ArrowUpCircle className="w-3.5 h-3.5" />
-                    {d.upvotes} <span className="hidden sm:inline">Votes</span>
+                    {d.votes} <span className="hidden sm:inline">Votes</span>
                   </span>
                 </div>
 
