@@ -107,23 +107,30 @@ router.get(
       const { rows } = await db.query(
         `
         SELECT
-          d.id,
-          d.title,
-          d.body,
-          d.upvotes,
-          d.views,
-          d.reply_count,
-          d.created_at,
-          u.username
+        d.id,
+        d.title,
+        d.body,
+        d.views,
+        d.reply_count,
+        d.created_at,
+        u.username,
+        COALESCE(
+          (SELECT SUM(vote)
+          FROM discussion_votes dv
+          WHERE dv.discussion_id = d.id),
+          0
+        ) AS votes
         FROM problem_discussions d
-        JOIN users u ON u.id = d.user_id
-        WHERE d.id = $1 AND d.is_deleted = 0
+        JOIN users u
+        ON u.id = d.user_id
+        WHERE d.id = $1
+        AND d.is_deleted = 0;
         `,
         [discussionId]
       );
       
       const discussion = rows[0];
-
+// SELECT SUM(vote) FROM discussion_votes WHERE discussion_id = $1
       if (!discussion) {
         return res.status(404).json({ error: "Discussion not found" });
       }
