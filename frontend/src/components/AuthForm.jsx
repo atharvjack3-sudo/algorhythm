@@ -192,7 +192,7 @@ export default function AuthForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-6 w-full py-2.5 bg-orange-500 text-white border-none rounded-[3px] text-[13px] font-sans font-semibold hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex justify-center items-center"
+        className="mt-6 w-full py-2.5 bg-orange-500 text-white border-none rounded-[3px] text-[13px] font-sans font-semibold hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex justify-center items-center cursor-pointer"
       >
         {isSubmitting && mode === "signup" ? "Signing Up..." : "Sign Up"}
       </button>
