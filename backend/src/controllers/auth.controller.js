@@ -235,7 +235,7 @@ await resend.emails.send({
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7; padding:40px 0;">
         <tr>
           <td align="center">
-            <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:6px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
               <tr>
                 <td style="background-color:#111827; padding:32px 40px; text-align:center;">
                   <h1 style="margin:0; color:#ffffff; font-size:22px; font-weight:700; letter-spacing:-0.5px;">
@@ -256,7 +256,7 @@ await resend.emails.send({
                   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
                     <tr>
                       <td style="border-radius:8px; background-color:#f97316;">
-                        <a href="${verificationLink}" target="_blank" style="display:inline-block; padding:14px 32px; color:#ffffff; font-size:15px; font-weight:600; text-decoration:none; border-radius:8px;">
+                        <a href="${verificationLink}" target="_blank" style="display:inline-block; padding:14px 32px; color:#ffffff; font-size:15px; font-weight:600; text-decoration:none; border-radius:4px;">
                           Verify Email
                         </a>
                       </td>

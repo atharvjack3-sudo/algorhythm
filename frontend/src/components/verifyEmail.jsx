@@ -70,8 +70,8 @@ export default function VerifyEmail() {
             <h2 className="font-sans text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
               Hold Tight, we're setting your account up.
             </h2>
-            <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-2 animate-pulse">
-              [PROCESSING TOKEN]
+            <p className="font-sans text-[12px] text-slate-500 dark:text-slate-400 tracking-widest mt-2 animate-pulse">
+              Processing... 
             </p>
           </div>
         )}
