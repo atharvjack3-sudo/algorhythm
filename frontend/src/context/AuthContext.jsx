@@ -8,10 +8,7 @@ export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Always-current token for interceptors
   const tokenRef = useRef(null);
-
-  // prevent refresh during initial bootstrap
   const bootstrappingRef = useRef(true);
 
   useEffect(() => {
@@ -19,9 +16,7 @@ export function AuthProvider({ children }) {
   }, [accessToken]);
 
   /* =========================
-      INITIAL AUTH BOOTSTRAP
-     - NEVER logs out on abort
-     - NEVER blocks UI forever
+     INITIAL AUTH BOOTSTRAP
   ========================= */
   useEffect(() => {
     let mounted = true;
@@ -36,7 +31,6 @@ export function AuthProvider({ children }) {
     async function init() {
       try {
         const r = await api.post("/auth/refresh");
-
         if (!mounted) return;
 
         const token = r.data.accessToken;
@@ -51,14 +45,9 @@ export function AuthProvider({ children }) {
           setUser(me.data);
         }
       } catch (err) {
-        
-        if (
-          err?.name === "CanceledError" ||
-          err?.name === "AbortError"
-        ) {
+        if (err?.name === "CanceledError" || err?.name === "AbortError") {
           return;
         }
-
         if (mounted) {
           setUser(null);
           setAccessToken(null);
@@ -80,10 +69,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   /* =========================
-      AXIOS INTERCEPTORS
-     - NO QUEUES
-     - NO GLOBAL LOCKS
-     - FAIL FAST
+     AXIOS INTERCEPTORS
   ========================= */
   useEffect(() => {
     const reqInterceptor = api.interceptors.request.use((config) => {
@@ -98,22 +84,18 @@ export function AuthProvider({ children }) {
       async (error) => {
         const original = error.config;
 
-        // Never intercept auth routes
         if (original?.url?.includes("/auth/")) {
           return Promise.reject(error);
         }
 
-        //  handle 401
         if (error.response?.status !== 401) {
           return Promise.reject(error);
         }
 
-        // Never retry twice
         if (original._retry) {
           return Promise.reject(error);
         }
 
-        // Never refresh during bootstrap
         if (bootstrappingRef.current) {
           return Promise.reject(error);
         }
@@ -130,7 +112,6 @@ export function AuthProvider({ children }) {
           original.headers.Authorization = `Bearer ${newToken}`;
           return api(original);
         } catch (refreshErr) {
-          // FAIL FAST — DO NOT BLOCK OTHER REQUESTS
           setUser(null);
           setAccessToken(null);
           tokenRef.current = null;
@@ -146,7 +127,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   /* =========================
-      AUTH ACTIONS
+     AUTH ACTIONS
   ========================= */
   const login = async (email, password) => {
     const r = await api.post("/auth/login", { email, password });
@@ -163,13 +144,17 @@ export function AuthProvider({ children }) {
   };
 
   const signup = async (username, email, password) => {
-    const r = await api.post("/auth/signup", {
+    await api.post("/auth/signup", {
       username,
       email,
       password,
     });
-    const token = r.data.accessToken;
+  };
 
+  const verifyAccount = async (tokenString) => {
+    const r = await api.post("/auth/verify-user", { token: tokenString });
+    
+    const token = r.data.accessToken;
     setAccessToken(token);
     tokenRef.current = token;
 
@@ -192,7 +177,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, signup, logout }}
+      value={{ user, loading, login, signup, verifyAccount, logout }}
     >
       {children}
     </AuthContext.Provider>

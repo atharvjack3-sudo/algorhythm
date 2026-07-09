@@ -3,21 +3,18 @@ import {
   signup,
   login,
   refresh,
-  logout
+  logout,
+  registerUser,
+  verifyEmail
 } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
-// create account + issue tokens
-router.post("/signup", signup);
 
-// login + issue tokens
+router.post("/signup", registerUser);
+router.post("/verify-user", verifyEmail);
 router.post("/login", login);
-
-// get new access token using refresh token
 router.post("/refresh", refresh);
-
-// revoke refresh token + logout
 router.post("/logout", logout);
 
 export default router;

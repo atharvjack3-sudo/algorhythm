@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 export default function AuthForm() {
   const { login, signup, user, loading: authLoading } = useAuth();
 
-  // 'login' or 'signup'
   const [mode, setMode] = useState("login");
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   const [form, setForm] = useState({
     username: "",
@@ -33,13 +33,15 @@ export default function AuthForm() {
         await login(form.email, form.password);
       } else {
         await signup(form.username, form.email, form.password);
+        // Intercept success and display the verification message
+        setSignupSuccess(true);
       }
     } catch (err) {
       console.error(err);
       setError(
         err.response?.data?.error ||
           err.message ||
-          "Authentication failed. Please try again.",
+          "Authentication failed. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -49,6 +51,7 @@ export default function AuthForm() {
   const toggleMode = () => {
     setMode((prev) => (prev === "login" ? "signup" : "login"));
     setError("");
+    setSignupSuccess(false);
     setForm((prev) => ({ ...prev, password: "" }));
   };
 
@@ -131,7 +134,39 @@ export default function AuthForm() {
     </form>
   );
 
-  const signupFormContent = (
+  const signupFormContent = signupSuccess ? (
+    <div className="w-full max-w-[340px] mx-auto flex flex-col justify-center h-full">
+      <div className="mb-8 text-left border-b border-slate-200 dark:border-slate-800 pb-4">
+        <h2 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">
+          Verification Required
+        </h2>
+        <p className="font-sans text-[12px] tracking-wide font-semibold text-green-600 dark:text-green-500">
+          Account staged successfully
+        </p>
+      </div>
+
+      <div className="space-y-4 text-left">
+        <p className="font-sans text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed">
+          A secure verification link has been dispatched to:
+          <br />
+          <span className="inline-block mt-2 font-mono text-[11px] font-bold text-slate-800 dark:text-slate-200 bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded-[2px]">
+            {form.email}
+          </span>
+        </p>
+        <p className="font-sans text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed">
+          Please check your inbox (and spam folder) to activate your account before attempting to authenticate.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={toggleMode}
+        className="mt-8 w-full py-2.5 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-none rounded-[3px] text-[13px] font-sans font-semibold hover:opacity-85 transition-opacity flex justify-center items-center cursor-pointer"
+      >
+        Return to Login
+      </button>
+    </div>
+  ) : (
     <form
       onSubmit={(e) => handleSubmit(e, "signup")}
       className="w-full max-w-[340px] mx-auto flex flex-col justify-center h-full"
