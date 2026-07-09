@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import crypto from 'node:crypto';
 import { db } from "../config/db.js";
 import {
   signAccessToken,
