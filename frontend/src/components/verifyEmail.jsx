@@ -22,10 +22,8 @@ export default function VerifyEmail() {
       try {
         await verifyAccount(token);
         setStatus("success");
-        
-        setTimeout(() => {
-          navigate("/problemset");
-        }, 2000);
+        navigate("/problemset");
+      
 
       } catch (err) {
         console.error("Verification Error:", err);
