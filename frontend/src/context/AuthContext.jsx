@@ -2,239 +2,186 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { api } from "../api/client";
 
 const AuthContext = createContext(null);
-const CACHE_KEY = "algorhythm_user_cache";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [accessToken, setAccessToken] = useState(null);
-  const [loading, setLoading] = useState(!localStorage.getItem(CACHE_KEY));
+  const tokenRef = useRef(null);
+  const bootstrappingRef = useRef(true);
 
-  const tokenRef = useRef(null);
-  const refreshLockRef = useRef(null);
-  const sessionVersion = useRef(0);
+  useEffect(() => {
+    tokenRef.current = accessToken;
+  }, [accessToken]);
 
-  useEffect(() => {
-    tokenRef.current = accessToken;
-  }, [accessToken]);
+  /* =========================
+     INITIAL AUTH BOOTSTRAP
+  ========================= */
+  useEffect(() => {
+    let mounted = true;
 
-  const handleSessionUpdate = (userData) => {
-    setUser(userData);
-    if (userData) {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(userData));
-    } else {
-      localStorage.removeItem(CACHE_KEY);
-    }
-  };
+    const timeoutId = setTimeout(() => {
+      if (mounted) {
+        console.warn("Auth init timeout, forcing UI");
+        setLoading(false);
+      }
+    }, 4000);
 
-  /* =========================
-     CROSS-TAB SYNCHRONIZATION
-  ========================= */
-  useEffect(() => {
-    const syncLogout = (e) => {
-      if (e.key === CACHE_KEY && !e.newValue) {
-        setUser(null);
-        setAccessToken(null);
-        tokenRef.current = null;
-        sessionVersion.current++; 
-      }
-    };
-    window.addEventListener("storage", syncLogout);
-    return () => window.removeEventListener("storage", syncLogout);
-  }, []);
+    async function init() {
+      try {
+        const r = await api.post("/auth/refresh");
+        if (!mounted) return;
 
-  /* =========================
-     INITIAL AUTH BOOTSTRAP
-  ========================= */
-  useEffect(() => {
-    let mounted = true;
+        const token = r.data.accessToken;
+        setAccessToken(token);
+        tokenRef.current = token;
 
-    async function init() {
-      if (!localStorage.getItem(CACHE_KEY)) {
-        if (mounted) setLoading(false);
-        return;
-      }
+        const me = await api.get("/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      const currentVersion = sessionVersion.current;
-      let resolveLock;
-      refreshLockRef.current = new Promise((resolve) => { resolveLock = resolve; });
+        if (mounted) {
+          setUser(me.data);
+        }
+      } catch (err) {
+        if (err?.name === "CanceledError" || err?.name === "AbortError") {
+          return;
+        }
+        if (mounted) {
+          setUser(null);
+          setAccessToken(null);
+          tokenRef.current = null;
+        }
+      } finally {
+        bootstrappingRef.current = false;
+        clearTimeout(timeoutId);
+        if (mounted) setLoading(false);
+      }
+    }
 
-      try {
-        const r = await api.post("/auth/refresh", {}, { timeout: 10000 });
-        
-        if (!mounted || currentVersion !== sessionVersion.current) return;
+    init();
 
-        const token = r.data.accessToken;
-        setAccessToken(token);
-        tokenRef.current = token;
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
-        const me = await api.get("/me");
+  /* =========================
+     AXIOS INTERCEPTORS
+  ========================= */
+  useEffect(() => {
+    const reqInterceptor = api.interceptors.request.use((config) => {
+      if (tokenRef.current) {
+       config.headers.Authorization = `Bearer ${tokenRef.current}`;
+      }
+      return config;
+    });
 
-        if (mounted && currentVersion === sessionVersion.current) {
-          handleSessionUpdate(me.data);
-        }
+    const resInterceptor = api.interceptors.response.use(
+      (res) => res,
+      async (error) => {
+        const original = error.config;
 
-      } catch (err) {
-        if (err?.name === "CanceledError" || err?.name === "AbortError") return;
-        if (mounted) {
-          handleSessionUpdate(null);
-          setAccessToken(null);
-          tokenRef.current = null;
-        }
-      } finally {
-        resolveLock?.();
-        refreshLockRef.current = null;
-        if (mounted) setLoading(false);
-      }
-    }
+        if (original?.url?.includes("/auth/")) {
+          return Promise.reject(error);
+        }
 
-    init();
+        if (error.response?.status !== 401) {
+          return Promise.reject(error);
+        }
 
-    return () => { mounted = false; };
-  }, []);
+        if (original._retry) {
+          return Promise.reject(error);
+        }
 
-  /* =========================
-     AXIOS INTERCEPTORS
-  ========================= */
-  useEffect(() => {
-    const reqInterceptor = api.interceptors.request.use(async (config) => {
-      if (refreshLockRef.current && !config.url?.includes("/auth/refresh")) {
-        try { await refreshLockRef.current; } catch (e) {}
-      }
+        if (bootstrappingRef.current) {
+          return Promise.reject(error);
+        }
 
-      if (tokenRef.current) {
-        config.headers = config.headers ?? {};
-        config.headers.Authorization = `Bearer ${tokenRef.current}`;
-      }
-      return config;
-    });
+        original._retry = true;
 
-    const resInterceptor = api.interceptors.response.use(
-      (res) => res,
-      async (error) => {
-        const original = error.config;
+        try {
+          const r = await api.post("/auth/refresh");
+          const newToken = r.data.accessToken;
 
-        if (original?.url?.includes("/auth/")) return Promise.reject(error);
-        if (error.response?.status !== 401) return Promise.reject(error);
-        if (original._retry) return Promise.reject(error);
+          setAccessToken(newToken);
+          tokenRef.current = newToken;
 
-        original._retry = true;
+          original.headers.Authorization = `Bearer ${newToken}`;
+          return api(original);
+        } catch (refreshErr) {
+          setUser(null);
+          setAccessToken(null);
+          tokenRef.current = null;
+          return Promise.reject(refreshErr);
+        }
+      }
+    );
 
-        if (refreshLockRef.current) {
-          try {
-            await refreshLockRef.current;
-            if (!tokenRef.current) return Promise.reject(error);
+    return () => {
+      api.interceptors.request.eject(reqInterceptor);
+      api.interceptors.response.eject(resInterceptor);
+    };
+  }, []);
 
-            original.headers = original.headers ?? {};
-            original.headers.Authorization = `Bearer ${tokenRef.current}`;
-            return api(original);
-          } catch (e) {
-             return Promise.reject(error);
-          }
-        }
+  /* =========================
+     AUTH ACTIONS
+  ========================= */
+  const login = async (email, password) => {
+    const r = await api.post("/auth/login", { email, password });
+    const token = r.data.accessToken;
 
-        const currentVersion = sessionVersion.current;
-        let resolveLock;
-        refreshLockRef.current = new Promise((resolve) => { resolveLock = resolve; });
+    setAccessToken(token);
+    tokenRef.current = token;
 
-        try {
-          const r = await api.post("/auth/refresh", {}, { timeout: 10000 });
-          
-          if (currentVersion !== sessionVersion.current) {
-             return Promise.reject(new Error("Session invalidated during refresh"));
-          }
+    const me = await api.get("/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-          const newToken = r.data.accessToken;
-          setAccessToken(newToken);
-          tokenRef.current = newToken;
-          if (currentVersion !== sessionVersion.current) {
-            return Promise.reject(new Error("Session invalidated immediately before retry"));
-          }
+    setUser(me.data);
+  };
 
-          original.headers = original.headers ?? {};
-          original.headers.Authorization = `Bearer ${newToken}`;
-          
-          return api(original);
-        } catch (refreshErr) {
-          handleSessionUpdate(null);
-          setAccessToken(null);
-          tokenRef.current = null;
-          return Promise.reject(refreshErr);
-        } finally {
-          resolveLock?.();
-          refreshLockRef.current = null;
-        }
-      }
-    );
+  const signup = async (username, email, password) => {
+    await api.post("/auth/signup", {
+      username,
+      email,
+      password,
+    });
+  };
 
-    return () => {
-      api.interceptors.request.eject(reqInterceptor);
-      api.interceptors.response.eject(resInterceptor);
-    };
-  }, []);
+  const verifyAccount = async (tokenString) => {
+    const r = await api.post("/auth/verify-user", { token: tokenString });
+    
+    const token = r.data.accessToken;
+    setAccessToken(token);
+    tokenRef.current = token;
 
-  /* =========================
-     AUTH ACTIONS
-  ========================= */
-  const login = async (email, password) => {
-    try {
-      const r = await api.post("/auth/login", { email, password });
-      const token = r.data.accessToken;
-      setAccessToken(token);
-      tokenRef.current = token;
-      
-      const me = await api.get("/me");
-      handleSessionUpdate(me.data);
-    } catch (error) {
-      setAccessToken(null);
-      tokenRef.current = null;
-      throw error;
-    }
-  };
+    const me = await api.get("/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  const signup = async (username, email, password) => {
-    await api.post("/auth/signup", { username, email, password });
-  };
+    setUser(me.data);
+  };
 
-  const verifyAccount = async (tokenString) => {
-    try {
-      const r = await api.post("/auth/verify-user", { token: tokenString });
-      const token = r.data.accessToken;
-      setAccessToken(token);
-      tokenRef.current = token;
-      
-      const me = await api.get("/me");
-      handleSessionUpdate(me.data);
-    } catch (error) {
-       setAccessToken(null);
-       tokenRef.current = null;
-       throw error;
-    }
-  };
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } finally {
+      setUser(null);
+      setAccessToken(null);
+      tokenRef.current = null;
+    }
+  };
 
-  const logout = async () => {
-    sessionVersion.current++; 
-    try {
-      await api.post("/auth/logout");
-    } finally {
-      handleSessionUpdate(null);
-      setAccessToken(null);
-      tokenRef.current = null;
-    }
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, loading, login, signup, verifyAccount, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return (
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, verifyAccount, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);
