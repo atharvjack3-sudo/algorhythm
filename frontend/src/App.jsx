@@ -25,6 +25,7 @@ import Coach from "./pages/Coach";
 import PublicApi from "./pages/PublicApi";
 import UserContestSubmissions from './pages/UserContestSubmissions';
 import UserProfile from './pages/UserProfile';
+import VerifyEmail from "./components/verifyEmail";
 
 
 export default function App() {
@@ -51,7 +52,7 @@ export default function App() {
         <Route path="/publicapi" element={<PublicApi />} />
 	<Route path="/contests/:contestId/:userId/submissions" element={<UserContestSubmissions />} />
         <Route path="/profile/:username" element={<UserProfile />} />
-
+        <Route path="/verify/:token" element={<VerifyEmail />} />
         {/* Blog routes */}
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/mine" element={<MyBlogs />} />
