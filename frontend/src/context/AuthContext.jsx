@@ -4,184 +4,193 @@ import { api } from "../api/client";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("user");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  const tokenRef = useRef(null);
-  const bootstrappingRef = useRef(true);
+  const [accessToken, setAccessToken] = useState(() => {
+    return sessionStorage.getItem("accessToken") || null;
+  });
 
-  useEffect(() => {
-    tokenRef.current = accessToken;
-  }, [accessToken]);
+  const [loading, setLoading] = useState(!sessionStorage.getItem("accessToken"));
 
-  /* =========================
-     INITIAL AUTH BOOTSTRAP
-  ========================= */
-  useEffect(() => {
-    let mounted = true;
+  const tokenRef = useRef(accessToken);
+  const bootstrappingRef = useRef(true);
 
-    const timeoutId = setTimeout(() => {
-      if (mounted) {
-        console.warn("Auth init timeout, forcing UI");
-        setLoading(false);
-      }
-    }, 4000);
+  const updateAuth = (token, userData) => {
+    setAccessToken(token);
+    tokenRef.current = token;
+    setUser(userData);
 
-    async function init() {
-      try {
-        const r = await api.post("/auth/refresh");
-        if (!mounted) return;
+    if (token && userData) {
+      sessionStorage.setItem("accessToken", token);
+      sessionStorage.setItem("user", JSON.stringify(userData));
+    } else {
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("user");
+    }
+  };
 
-        const token = r.data.accessToken;
-        setAccessToken(token);
-        tokenRef.current = token;
+  /* =========================
+     INITIAL AUTH BOOTSTRAP
+  ========================= */
+  useEffect(() => {
+    let mounted = true;
 
-        const me = await api.get("/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    const timeoutId = setTimeout(() => {
+      if (mounted) {
+        console.warn("Auth init timeout, forcing UI");
+        setLoading(false);
+      }
+    }, 4000);
 
-        if (mounted) {
-          setUser(me.data);
-        }
-      } catch (err) {
-        if (err?.name === "CanceledError" || err?.name === "AbortError") {
-          return;
-        }
-        if (mounted) {
-          setUser(null);
-          setAccessToken(null);
-          tokenRef.current = null;
-        }
-      } finally {
-        bootstrappingRef.current = false;
-        clearTimeout(timeoutId);
-        if (mounted) setLoading(false);
-      }
-    }
+    async function init() {
+      try {
+        const r = await api.post("/auth/refresh");
+        if (!mounted) return;
 
-    init();
+        const token = r.data.accessToken;
+        
+        const me = await api.get("/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    return () => {
-      mounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, []);
+        if (mounted) {
+          updateAuth(token, me.data);
+        }
+      } catch (err) {
+        if (err?.name === "CanceledError" || err?.name === "AbortError") {
+          return;
+        }
+        
+        if (mounted) {
+          updateAuth(null, null);
+        }
+      } finally {
+        bootstrappingRef.current = false;
+        clearTimeout(timeoutId);
+        if (mounted) setLoading(false);
+      }
+    }
 
-  /* =========================
-     AXIOS INTERCEPTORS
-  ========================= */
-  useEffect(() => {
-    const reqInterceptor = api.interceptors.request.use((config) => {
-      if (tokenRef.current) {
-       config.headers.Authorization = `Bearer ${tokenRef.current}`;
-      }
-      return config;
-    });
+    init();
 
-    const resInterceptor = api.interceptors.response.use(
-      (res) => res,
-      async (error) => {
-        const original = error.config;
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
-        if (original?.url?.includes("/auth/")) {
-          return Promise.reject(error);
-        }
+  /* =========================
+     AXIOS INTERCEPTORS
+  ========================= */
+  useEffect(() => {
+    const reqInterceptor = api.interceptors.request.use((config) => {
+      if (tokenRef.current) {
+        config.headers.Authorization = `Bearer ${tokenRef.current}`;
+      }
+      return config;
+    });
 
-        if (error.response?.status !== 401) {
-          return Promise.reject(error);
-        }
+    const resInterceptor = api.interceptors.response.use(
+      (res) => res,
+      async (error) => {
+        const original = error.config;
 
-        if (original._retry) {
-          return Promise.reject(error);
-        }
+        if (original?.url?.includes("/auth/")) {
+          return Promise.reject(error);
+        }
 
-        if (bootstrappingRef.current) {
-          return Promise.reject(error);
-        }
+        if (error.response?.status !== 401) {
+          return Promise.reject(error);
+        }
 
-        original._retry = true;
+        if (original._retry) {
+          return Promise.reject(error);
+        }
 
-        try {
-          const r = await api.post("/auth/refresh");
-          const newToken = r.data.accessToken;
+        if (bootstrappingRef.current) {
+          return Promise.reject(error);
+        }
 
-          setAccessToken(newToken);
-          tokenRef.current = newToken;
+        original._retry = true;
 
-          original.headers.Authorization = `Bearer ${newToken}`;
-          return api(original);
-        } catch (refreshErr) {
-          setUser(null);
-          setAccessToken(null);
-          tokenRef.current = null;
-          return Promise.reject(refreshErr);
-        }
-      }
-    );
+        try {
+          const r = await api.post("/auth/refresh");
+          const newToken = r.data.accessToken;
 
-    return () => {
-      api.interceptors.request.eject(reqInterceptor);
-      api.interceptors.response.eject(resInterceptor);
-    };
-  }, []);
+          setAccessToken(newToken);
+          tokenRef.current = newToken;
+          sessionStorage.setItem("accessToken", newToken);
 
-  /* =========================
-     AUTH ACTIONS
-  ========================= */
-  const login = async (email, password) => {
-    const r = await api.post("/auth/login", { email, password });
-    const token = r.data.accessToken;
+          original.headers.Authorization = `Bearer ${newToken}`;
+          return api(original);
+        } catch (refreshErr) {
+          updateAuth(null, null);
+          return Promise.reject(refreshErr);
+        }
+      }
+    );
 
-    setAccessToken(token);
-    tokenRef.current = token;
+    return () => {
+      api.interceptors.request.eject(reqInterceptor);
+      api.interceptors.response.eject(resInterceptor);
+    };
+  }, []);
 
-    const me = await api.get("/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  /* =========================
+     AUTH ACTIONS
+  ========================= */
+  const login = async (email, password) => {
+    const r = await api.post("/auth/login", { email, password });
+    const token = r.data.accessToken;
 
-    setUser(me.data);
-  };
+    const me = await api.get("/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  const signup = async (username, email, password) => {
-    await api.post("/auth/signup", {
-      username,
-      email,
-      password,
-    });
-  };
+    updateAuth(token, me.data);
+  };
 
-  const verifyAccount = async (tokenString) => {
-    const r = await api.post("/auth/verify-user", { token: tokenString });
-    
-    const token = r.data.accessToken;
-    setAccessToken(token);
-    tokenRef.current = token;
+  const signup = async (username, email, password) => {
+    await api.post("/auth/signup", {
+      username,
+      email,
+      password,
+    });
+  };
 
-    const me = await api.get("/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  const verifyAccount = async (tokenString) => {
+    const r = await api.post("/auth/verify-user", { token: tokenString });
+    const token = r.data.accessToken;
 
-    setUser(me.data);
-  };
+    const me = await api.get("/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  const logout = async () => {
-    try {
-      await api.post("/auth/logout");
-    } finally {
-      setUser(null);
-      setAccessToken(null);
-      tokenRef.current = null;
-    }
-  };
+    updateAuth(token, me.data);
+  };
 
-  return (
-    <AuthContext.Provider
-      value={{ user, loading, login, signup, verifyAccount, logout }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } finally {
+      updateAuth(null, null);
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, verifyAccount, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);
