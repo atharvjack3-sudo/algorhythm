@@ -219,17 +219,78 @@ export async function registerUser(req, res) {
 
     const verificationLink = `https://algorhythm-xi.vercel.app/verify/${verifyToken}`;
     
-    await resend.emails.send({
-      from: 'Algorhythm <noreply@mail.atharvdev.me>',
-      to: email,
-      subject: 'Verify your Algorhythm Account',
-      html: `
-        <h2>Welcome to Algorhythm</h2>
-        <p>Click the link below to activate your account.</p>
-        <a href="${verificationLink}">Verify Email</a>
-        <p>This link expires in 24 hours.</p>
-      `
-    });
+await resend.emails.send({
+  from: 'Algorhythm <noreply@mail.atharvdev.me>',
+  to: email,
+  subject: 'Verify your Algorhythm Account',
+  html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0; padding:0; background-color:#f4f4f7; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7; padding:40px 0;">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+              <tr>
+                <td style="background-color:#111827; padding:32px 40px; text-align:center;">
+                  <h1 style="margin:0; color:#ffffff; font-size:22px; font-weight:700; letter-spacing:-0.5px;">
+                    Algorhythm
+                  </h1>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:40px;">
+                  <h2 style="margin:0 0 16px; color:#111827; font-size:20px; font-weight:600;">
+                    Welcome to Algorhythm
+                  </h2>
+                  <p style="margin:0 0 24px; color:#4b5563; font-size:15px; line-height:1.6;">
+                    Thanks for signing up! Please confirm your email address to activate your account and get started.
+                  </p>
+
+                  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                    <tr>
+                      <td style="border-radius:8px; background-color:#f97316;">
+                        <a href="${verificationLink}" target="_blank" style="display:inline-block; padding:14px 32px; color:#ffffff; font-size:15px; font-weight:600; text-decoration:none; border-radius:8px;">
+                          Verify Email
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="margin:0 0 8px; color:#9ca3af; font-size:13px; line-height:1.5;">
+                    This link will expire in 24 hours for security reasons.
+                  </p>
+                  <p style="margin:0; color:#9ca3af; font-size:13px; line-height:1.5;">
+                    If the button doesn't work, copy and paste this link into your browser:<br>
+                    <a href="${verificationLink}" style="color:#f97316; word-break:break-all;">${verificationLink}</a>
+                  </p>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:24px 40px; background-color:#f9fafb; text-align:center; border-top:1px solid #f0f0f0;">
+                  <p style="margin:0; color:#9ca3af; font-size:12px;">
+                    If you didn't create an Algorhythm account, you can safely ignore this email.
+                  </p>
+                  <p style="margin:8px 0 0; color:#9ca3af; font-size:12px;">
+                    © ${new Date().getFullYear()} Algorhythm. By Atharv Dubey.
+                  </p>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `
+});
 
     return res.status(201).json({ message: "Registration successful. Please check your email to verify." });
 
