@@ -29,6 +29,7 @@ import "./css/scrollbar.css";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { MonacoBinding } from "y-monaco";
+import DiscussionTab from "../components/discussion/DiscussionTab";
 
 const themeModules = import.meta.glob("../themes/*.json");
 export const AVAILABLE_THEMES = Object.keys(themeModules)
@@ -36,9 +37,6 @@ export const AVAILABLE_THEMES = Object.keys(themeModules)
   .sort();
 const loadedThemes = new Set();
 
-const DiscussionTab = lazy(
-  () => import("../components/discussion/DiscussionTab"),
-);
 
 export async function loadMonacoTheme(monaco, themeName) {
   const path = `../themes/${themeName}.json`;
