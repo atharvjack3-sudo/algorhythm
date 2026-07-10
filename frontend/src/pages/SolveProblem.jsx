@@ -74,13 +74,12 @@ function MarkdownRenderer({ content, className = "" }) {
         prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
         prose-a:text-blue-600 dark:prose-a:text-blue-400
         
-        
         [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[13px] [&_:not(pre)>code]:bg-slate-100 dark:[&_:not(pre)>code]:bg-slate-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px]
         
+        [&_:not(pre)>code::before]:content-none [&_:not(pre)>code::after]:content-none
         
         prose-pre:p-0 prose-pre:bg-slate-50 dark:prose-pre:bg-[#0d1117] prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[5px]
         
-        /* 3. Force highlight.js CODE block to use JetBrains Mono, 13px size, and better line height */
         [&_pre_code.hljs]:!bg-transparent [&_pre_code.hljs]:p-4 [&_pre_code.hljs]:!font-mono [&_pre_code.hljs]:!text-[13px] [&_pre_code.hljs]:!leading-[1.6]
         
         ${className}
