@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   });
 
   const [loading, setLoading] = useState(true);
+  const [interceptorsReady, setInterceptorsReady] = useState(false);
 
   const tokenRef = useRef(accessToken);
   const bootstrappingRef = useRef(true);
@@ -150,6 +151,8 @@ export function AuthProvider({ children }) {
       }
     );
 
+    setInterceptorsReady(true);
+
     return () => {
       api.interceptors.request.eject(reqInterceptor);
       api.interceptors.response.eject(resInterceptor);
@@ -204,6 +207,10 @@ export function AuthProvider({ children }) {
   const resetPassword = async (token, newPassword) => {
     await api.post("/auth/reset-password", { token, newPassword });
   };
+
+  if (!interceptorsReady) {
+    return null; 
+  }
 
   return (
     <AuthContext.Provider
