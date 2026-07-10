@@ -374,3 +374,161 @@ export async function verifyEmail(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+/* =========================
+   FORGOT PASSWORD
+========================= */
+export async function forgotPassword(req, res) {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  try {
+    const { rows: userRows } = await db.query(
+      `SELECT id FROM users WHERE email = $1 LIMIT 1`,
+      [email]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(200).json({ message: "If that email exists, a reset link was sent." });
+    }
+
+    const userId = userRows[0].id;
+    await db.query(
+      `DELETE FROM user_tokens WHERE user_id = $1 AND type = 'PASSWORD_RESET'`,
+      [userId]
+    );
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    await db.query(
+      `INSERT INTO user_tokens (user_id, token, type, expires_at)
+       VALUES ($1, $2, 'PASSWORD_RESET', NOW() + INTERVAL '15 minutes')`,
+      [userId, resetToken]
+    );
+
+    const resetLink = `https://algorhythm-xi.vercel.app/reset-password/${resetToken}`;
+
+    await resend.emails.send({
+      from: 'Algorhythm <noreply@mail.atharvdev.me>',
+      to: email,
+      subject: 'Reset your Algorhythm Password',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f4f7; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f7; padding:40px 0;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:6px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                  <tr>
+                    <td style="background-color:#111827; padding:32px 40px; text-align:center;">
+                      <h1 style="margin:0; color:#ffffff; font-size:22px; font-weight:700; letter-spacing:-0.5px;">
+                        Algorhythm
+                      </h1>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:40px;">
+                      <h2 style="margin:0 0 16px; color:#111827; font-size:20px; font-weight:600;">
+                        Password Reset Request
+                      </h2>
+                      <p style="margin:0 0 24px; color:#4b5563; font-size:15px; line-height:1.6;">
+                        We received a request to reset your password. Click the button below to choose a new one.
+                      </p>
+
+                      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                        <tr>
+                          <td style="border-radius:8px; background-color:#f97316;">
+                            <a href="${resetLink}" target="_blank" style="display:inline-block; padding:14px 32px; color:#ffffff; font-size:15px; font-weight:600; text-decoration:none; border-radius:4px;">
+                              Reset Password
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin:0 0 8px; color:#ef4444; font-size:13px; font-weight:600; line-height:1.5;">
+                        This link will expire in 15 minutes.
+                      </p>
+                      <p style="margin:0; color:#9ca3af; font-size:13px; line-height:1.5;">
+                        If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:24px 40px; background-color:#f9fafb; text-align:center; border-top:1px solid #f0f0f0;">
+                      <p style="margin:0; color:#9ca3af; font-size:12px;">
+                        © ${new Date().getFullYear()} Algorhythm. By Atharv Dubey.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    });
+
+    return res.status(200).json({ message: "If that email exists, a reset link was sent." });
+
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function resetPassword(req, res) {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+
+    const { rows: tokenRows } = await db.query(
+      `SELECT user_id FROM user_tokens 
+       WHERE token = $1 AND type = 'PASSWORD_RESET' AND expires_at > NOW()`,
+      [token]
+    );
+
+    if (tokenRows.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+
+    const userId = tokenRows[0].user_id;
+
+    const hash = await bcrypt.hash(newPassword, 10);
+
+    await db.query(
+      `UPDATE users SET password_hash = $1 WHERE id = $2`,
+      [hash, userId]
+    );
+
+    await db.query(
+      `DELETE FROM user_tokens WHERE user_id = $1 AND type = 'PASSWORD_RESET'`,
+      [userId]
+    );
+
+    await db.query(
+      `DELETE FROM refresh_tokens WHERE user_id = $1`,
+      [userId]
+    );
+
+    return res.status(200).json({ success: true, message: "Password updated successfully" });
+
+  } catch (err) {
+    console.error("Reset password error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

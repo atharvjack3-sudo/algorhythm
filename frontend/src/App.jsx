@@ -26,6 +26,7 @@ import PublicApi from "./pages/PublicApi";
 import UserContestSubmissions from './pages/UserContestSubmissions';
 import UserProfile from './pages/UserProfile';
 import VerifyEmail from "./components/verifyEmail";
+import ResetPass from "./components/ResetPass";
 
 
 export default function App() {
@@ -53,6 +54,7 @@ export default function App() {
 	<Route path="/contests/:contestId/:userId/submissions" element={<UserContestSubmissions />} />
         <Route path="/profile/:username" element={<UserProfile />} />
         <Route path="/verify/:token" element={<VerifyEmail />} />
+        <Route path="/reset-password/:token" element={<ResetPass />} />
         {/* Blog routes */}
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/mine" element={<MyBlogs />} />
