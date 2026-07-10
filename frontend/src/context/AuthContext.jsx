@@ -30,9 +30,11 @@ export function AuthProvider({ children }) {
     if (token && userData) {
       sessionStorage.setItem("accessToken", token);
       sessionStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("lastInitTime", Date.now().toString());
     } else {
       sessionStorage.removeItem("accessToken");
       sessionStorage.removeItem("user");
+      sessionStorage.removeItem("lastInitTime");
     }
   };
 
@@ -50,6 +52,16 @@ export function AuthProvider({ children }) {
     }, 4000);
 
     async function init() {
+      const lastInit = sessionStorage.getItem("lastInitTime");
+      const tenMinutes = 30 * 60 * 1000;
+
+      if (lastInit && (Date.now() - parseInt(lastInit, 10) < tenMinutes)) {
+        bootstrappingRef.current = false;
+        clearTimeout(timeoutId);
+        if (mounted) setLoading(false);
+        return;
+      }
+
       try {
         const r = await api.post("/auth/refresh");
         if (!mounted) return;
@@ -127,6 +139,7 @@ export function AuthProvider({ children }) {
           setAccessToken(newToken);
           tokenRef.current = newToken;
           sessionStorage.setItem("accessToken", newToken);
+          sessionStorage.setItem("lastInitTime", Date.now().toString());
 
           original.headers.Authorization = `Bearer ${newToken}`;
           return api(original);
