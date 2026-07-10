@@ -510,7 +510,7 @@ export default function Navbar() {
                   (!(user?.profile)) ? user.username.charAt(0).toUpperCase() : <img className="rounded-lg" src={user?.profile}></img>
                 }
                   </div>
-                  <span className="nb-username">{user.username}</span>
+                  <span className="font-sans dark:text-white text-slate-700 font-semibold text-xs tracking-wide">{user.username}</span>
                   <svg className="nb-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                   </svg>
