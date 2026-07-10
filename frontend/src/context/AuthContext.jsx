@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
     return sessionStorage.getItem("accessToken") || null;
   });
 
-  const [loading, setLoading] = useState(!sessionStorage.getItem("accessToken"));
+  const [loading, setLoading] = useState(true);
 
   const tokenRef = useRef(accessToken);
   const bootstrappingRef = useRef(true);
