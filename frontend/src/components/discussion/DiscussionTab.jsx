@@ -19,9 +19,8 @@ export default function DiscussionTab() {
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
     fetchDiscussions();
-  }, [problemId, user]);
+  }, [problemId]);
 
   const fetchDiscussions = async () => {
     try {
@@ -62,13 +61,15 @@ export default function DiscussionTab() {
         </h2>
 
         <button
+          disabled={authLoading || !user}
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:opacity-85 cursor-pointer text-white rounded-[3px] text-[12px] font-sans font-bold tracking-wider transition-opacity"
+          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:opacity-85 cursor-pointer text-white rounded-[3px] text-[12px] font-sans font-bold tracking-wider transition-opacity disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Plus className="w-3.5 h-3.5" />
           New Post
         </button>
       </div>
+      {!authLoading && !user && <p className="text-center text-[10px] font-semibold tracking-wide dark:text-red-500 text-red-600 font-mono uppercase">Sign in to create discussion posts</p>}
 
       {/* Discussion List */}
       {loading ? (
@@ -78,13 +79,14 @@ export default function DiscussionTab() {
           </span>
         </div>
       ) : discussions.length === 0 ? (
-        <div className="text-center py-16 bg-slate-100 dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 transition-colors">
+        <div className="text-center py-16 bg-slate-50 dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 transition-colors">
           <div className="font-sans text-[13px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide mb-4">
             No Discussions Found.
           </div>
           <button
+            disabled={authLoading || !user}
             onClick={() => setShowCreate(true)}
-            className="px-6 py-2 cursor-pointer bg-transparent border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] text-[12px] font-sans font-semibold tracking-wide transition-colors"
+            className="px-6 disabled:cursor-not-allowed disabled:opacity-60 py-2 cursor-pointer bg-transparent border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] text-[12px] font-sans font-semibold tracking-wide transition-colors"
           >
             Start Discussion
           </button>
