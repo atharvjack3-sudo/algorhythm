@@ -278,6 +278,8 @@ function CollabTab({
         </div>
       </div>
 
+      { !authLoading && !user && <p className="font-mono text-[10px] uppercase text-red-600 dark:text-red-500 text-center font-semibold">Sign in to host and join a collab room</p> }
+
       {/* Global Error Notice */}
       {error && (
         <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 px-4 py-3 text-[11px] font-mono font-bold uppercase tracking-widest border border-red-200 dark:border-red-900/50 rounded-[3px]">
