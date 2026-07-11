@@ -224,6 +224,7 @@ function CollabTab({
             Initialize a live session to collaborate on this problem with peers. You will be assigned a unique room code.
           </p>
           <button
+            disabled={isCreating || authLoading || !user}
             onClick={async (e) => {
               e.preventDefault();
               if (!window.confirm("Initialize a new live session?")) return;
@@ -231,7 +232,6 @@ function CollabTab({
               await handleRoomCreation();
               setIsCreating(false);
             }}
-            disabled={isCreating}
             className="w-full flex justify-center items-center gap-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 py-2.5 bg-orange-500 text-white border-none rounded-[3px] text-[13px] font-sans font-semibold hover:opacity-85 transition-opacity"
           >
             {isCreating ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : "Initialize Session"}
@@ -269,7 +269,7 @@ function CollabTab({
             />
             <button
               type="submit"
-              disabled={isJoining}
+              disabled={isJoining || authLoading || !user}
               className="px-6 cursor-pointer disabled:cursor-not-allowed flex justify-center items-center gap-2 disabled:opacity-50 bg-slate-800 hover:bg-slate-900 dark:bg-slate-200 dark:hover:bg-white text-white dark:text-slate-900 transition-colors h-9 rounded-[3px] font-sans text-[12px] font-bold tracking-wide"
             >
               {isJoining ? <Loader2 className="w-4 h-4 animate-spin" /> : "Join"}

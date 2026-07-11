@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 
 function CustomTC({ setRunLoading, lang, code }) {
   const [testCases, setTestCases] = useState([""]);
   const [customRunRes, setCustomRunRes] = useState([]);
+  const { user, loading: authLoading } = useAuth(); 
 
   const handleAddTestCase = () => {
     if (testCases.length < 3) {
@@ -129,11 +131,13 @@ function CustomTC({ setRunLoading, lang, code }) {
 
           <button
             type="submit"
-            className="px-6 py-2 text-xs bg-orange-500 hover:bg-orange-600 dark:hover:bg-orange-400 text-white font-semibold tracking-wide rounded-xs cursor-pointer transition-colors shadow-sm"
+            disabled={authLoading || !user}
+            className="px-6 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-70 bg-orange-500 hover:bg-orange-600 dark:hover:bg-orange-400 text-white font-semibold tracking-wide rounded-xs cursor-pointer transition-colors shadow-sm"
           >
             Run Custom
           </button>
         </div>
+        { !authLoading && !user && <p className="text-center font-mono uppercase tracking-wide text-[10px] mt-1 dark:text-red-500 font-semibold text-red-600">Sign in to run custom testcases</p>}
       </form>
 
       {/* Execution Results Section */}

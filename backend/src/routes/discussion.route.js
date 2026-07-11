@@ -52,7 +52,6 @@ router.post(
  */
 router.get(
   "/problems/:problemId/discussions",
-  authMiddleware,
   async (req, res) => {
     try {
       const { problemId } = req.params;
@@ -98,7 +97,6 @@ router.get(
  */
 router.get(
   "/problems/:problemId/discussions/:discussionId",
-  authMiddleware,
   async (req, res) => {
     try {
       const { discussionId } = req.params;
