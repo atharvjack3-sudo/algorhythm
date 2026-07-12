@@ -99,11 +99,11 @@ export default function ProblemSet() {
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
       case "easy":
-        return "text-emerald-600 dark:text-emerald-500";
+        return "text-emerald-600 dark:text-emerald-500 bg-emerald-500/10 bg-emerald-500/20";
       case "medium":
-        return "text-amber-600 dark:text-amber-500";
+        return "text-amber-600 dark:text-amber-500 bg-amber-500/10 bg-amber-500/20";
       case "hard":
-        return "text-red-600 dark:text-red-500";
+        return "text-red-600 dark:text-red-500 dark:bg-red-500/10 bg-red-500/20";
       default:
         return "text-slate-600 dark:text-slate-400";
     }
@@ -215,7 +215,7 @@ export default function ProblemSet() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 border-t border-slate-200 dark:border-slate-800 pt-4">
+      <div className="flex flex-col gap-4 border-t-3 border-slate-400 rounded-xs dark:border-slate-700 pt-4">
         <div className="flex items-center justify-between">
           <div className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
             Filter Settings
@@ -253,7 +253,7 @@ export default function ProblemSet() {
                   className={`px-3 py-1 rounded-[3px] font-sans text-[10px] font-semibold tracking-wide border transition-colors cursor-pointer ${
                     active
                       ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                      : "bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:hover:text-orange-400 hover:text-orange-500 border-slate-300 dark:border-slate-700 hover:bg-orange-500/20 hover:border-orange-400 dark:hover:border-orange-500"
                   }`}
                 >
                   {d.label}
@@ -284,7 +284,7 @@ export default function ProblemSet() {
                   className={`px-2 py-1 cursor-pointer rounded-[3px] font-sans text-[10px] tracking-wide border transition-colors ${
                     active
                       ? "bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
-                      : "bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600"
+                      : "bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-600"
                   }`}
                 >
                   {tag.name}
@@ -302,7 +302,7 @@ export default function ProblemSet() {
       {theme === "light" ? (
         <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.300/40%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.300/40%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
       ) : (
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.slate.800/40%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800/40%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
       )}
 
       <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
@@ -398,7 +398,7 @@ export default function ProblemSet() {
                       Difficulty
                     </th>
                     <th className="px-5 py-3 font-mono text-[10px] font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase text-center w-20">
-                      Action
+                      Add
                     </th>
                   </tr>
                 </thead>
@@ -473,7 +473,7 @@ export default function ProblemSet() {
                         </td>
                         <td className="px-5 py-4 text-center">
                           <span
-                            className={`font-sans text-[11px] bg-slate-900 px-2 rounded-xs py-1 font-semibold tracking-wide capitalize ${getDifficultyColor(problem.difficulty)}`}
+                            className={`font-sans text-[11px] border px-2 rounded-xs py-1 font-semibold tracking-wide capitalize ${getDifficultyColor(problem.difficulty)}`}
                           >
                             {problem.difficulty ? problem.difficulty : "N/A"}
                           </span>
