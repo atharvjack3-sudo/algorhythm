@@ -122,7 +122,7 @@ export default function ProblemSet() {
           className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           {/* Slanted Accent Background */}
-          <div className="absolute inset-y-0 -left-6 w-[55%] bg-orange-50 dark:bg-orange-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
+          <div className="absolute inset-y-0 -left-6 w-[55%] bg-orange-100 dark:bg-orange-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
 
           {/* Content (Z-10 to stay above background) */}
           <div className="relative z-10 flex items-center gap-3 w-full">
@@ -147,7 +147,7 @@ export default function ProblemSet() {
           className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           {/* Slanted Accent Background */}
-          <div className="absolute inset-y-0 -left-6 w-[55%] bg-blue-50 dark:bg-blue-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
+          <div className="absolute inset-y-0 -left-6 w-[55%] bg-blue-100 dark:bg-blue-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
 
           {/* Content (Z-10 to stay above background) */}
           <div className="relative z-10 flex items-center gap-3 w-full">
@@ -182,7 +182,7 @@ export default function ProblemSet() {
           className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           {/* Slanted Accent Background */}
-          <div className="absolute inset-y-0 -left-6 w-[55%] bg-emerald-50 dark:bg-emerald-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
+          <div className="absolute inset-y-0 -left-6 w-[55%] bg-emerald-100 dark:bg-emerald-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
 
           {/* Content (Z-10 to stay above background) */}
           <div className="relative z-10 flex items-center gap-3 w-full">
