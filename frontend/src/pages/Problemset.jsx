@@ -186,7 +186,7 @@ export default function ProblemSet() {
                   className={`px-3 py-1 rounded-[3px] font-sans text-[10px] font-semibold tracking-wide border transition-colors cursor-pointer ${
                     active
                       ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-slate-50 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                      : "bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
                   }`}
                 >
                   {d.label}
