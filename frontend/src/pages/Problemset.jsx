@@ -66,6 +66,10 @@ export default function ProblemSet() {
   const openAddToList = async (problem) => {
     setActiveProblem(problem);
     setShowAddToList(true);
+    if (userLists.length > 0) {
+      // setUserLists(userLists);
+      return;
+    };
     setListsLoading(true);
 
     try {
