@@ -273,7 +273,8 @@ export default function ProblemSet() {
             Topics
           </span>
           <div className="flex flex-wrap gap-1.5 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
-            {allTags.map((tag) => {
+            
+            {allTags.length > 0 ? allTags.map((tag) => {
               const active = selectedTags.includes(tag.id);
               return (
                 <button
@@ -294,7 +295,7 @@ export default function ProblemSet() {
                   {tag.name}
                 </button>
               );
-            })}
+            }) : <p className="text-xs font-semibold font-sans text-slate-700 dark:text-slate-400">Fetching Tags...</p>}
           </div>
         </div>
       </div>
