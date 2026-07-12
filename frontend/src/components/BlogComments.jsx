@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
-
+import { useNavigate } from "react-router-dom";
 export default function BlogComments({ blogId }) {
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     api.get(`/blogs/${blogId}/comments`)
@@ -53,11 +54,11 @@ export default function BlogComments({ blogId }) {
   return (
     <div className="space-y-8">
       {/* Comment Input */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-md p-4 sm:p-6 border border-slate-200 dark:border-slate-800 transition-colors">
         <textarea
           value={text}
           onChange={e => setText(e.target.value)}
-          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-[15px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none shadow-sm shadow-slate-100/50 dark:shadow-none"
+          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md p-4 font-sans text-[14px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none shadow-sm shadow-slate-100/50 dark:shadow-none"
           placeholder="Share your thoughts or ask a question..."
           rows="3"
         />
@@ -68,7 +69,7 @@ export default function BlogComments({ blogId }) {
           <button 
             onClick={submitComment}
             disabled={!text.trim() || posting}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-md shadow-blue-600/20 flex items-center gap-2"
+            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-sm text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-md shadow-orange-600/20 flex items-center gap-2"
           >
             {posting ? (
               <>
@@ -101,17 +102,17 @@ export default function BlogComments({ blogId }) {
       ) : (
         <div className="space-y-5">
           {comments.map(c => (
-            <div key={c.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:shadow-slate-200/40 dark:hover:shadow-none hover:border-blue-200 dark:hover:border-slate-700 transition-all duration-300 group">
+            <div key={c.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-5 sm:p-6 hover:shadow-lg hover:shadow-slate-200/40 dark:hover:shadow-none hover:border-blue-200 dark:hover:border-slate-700 transition-all duration-300 group">
               <div className="flex items-start gap-4">
                 
                 {/* Avatar */}
-                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 border border-blue-100 dark:border-blue-500/20">
+                <div className="w-10 h-10 bg-blue-50 dark:bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500 dark:text-orange-400 font-bold text-sm flex-shrink-0 border border-orange-100 dark:border-orange-500/20">
                   {c.username.charAt(0).toUpperCase()}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-                    <span className="font-semibold text-slate-900 dark:text-white">{c.username}</span>
+                    <span onClick={() => navigate(`/profile/${c.username}`)} className="font-semibold cursor-pointer text-slate-900 dark:text-white">{c.username}</span>
                     <span className="text-slate-300 dark:text-slate-600 hidden sm:inline">•</span>
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       {c.created_at && new Date(c.created_at).toLocaleDateString('en-US', {
@@ -122,7 +123,7 @@ export default function BlogComments({ blogId }) {
                     </span>
                   </div>
                   
-                  <p className="text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed mb-4 whitespace-pre-wrap">
+                  <p className="text-[14px] font-sans text-slate-700 dark:text-slate-300 leading-relaxed mb-4 whitespace-pre-wrap">
                     {c.content}
                   </p>
                   
@@ -141,7 +142,7 @@ export default function BlogComments({ blogId }) {
                       <svg className="w-4 h-4 group-hover/btn:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                       </svg>
-                      <span>Reply</span>
+                      <span className="text-xs translate-y-0.5 font-sans">Reply</span>
                     </button>
                   </div>
                 </div>

@@ -73,7 +73,7 @@ export default function Blogs() {
 
             <Link
               to="/blogs/new"
-              className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-blue-600 text-white border-none px-6 py-2.5 hover:opacity-85 flex items-center gap-2 whitespace-nowrap shrink-0"
+              className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-2.5 hover:opacity-85 flex items-center gap-2 whitespace-nowrap shrink-0"
             >
               WRITE A BLOG →
             </Link>

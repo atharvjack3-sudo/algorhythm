@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
 import BlogComments from "../../components/BlogComments";
 import MarkdownRenderer from "../../components/MarkdownRenderer";
@@ -8,7 +8,7 @@ export default function BlogDetail() {
   const { slug } = useParams();
   const [blog, setBlog] = useState(null);
   const [liked, setLiked] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     api.get(`/blogs/${slug}`).then((res) => {
       setBlog(res.data);
@@ -85,11 +85,11 @@ export default function BlogDetail() {
               
               {/* Author Info */}
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[3px] flex items-center justify-center font-sans text-base font-bold text-white shadow-sm border border-black/10 dark:border-white/10 bg-blue-600 dark:bg-blue-500">
+                <div className="w-9 h-9 rounded-[3px] flex items-center justify-center font-sans text-base font-bold text-white shadow-sm border border-black/10 dark:border-white/10 bg-orange-500 dark:bg-orange-500">
                   {blog.author.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-sans text-[14px] font-bold text-slate-900 dark:text-white leading-tight">
+                  <span onClick={() => navigate(`/profile/${blog.author}`)} className="font-sans cursor-pointer text-[14px] font-bold text-slate-900 dark:text-white leading-tight">
                     {blog.author}
                   </span>
                   <span className="font-mono text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
@@ -141,16 +141,16 @@ export default function BlogDetail() {
                 <span>{blog.likes_count}</span>
               </button>
 
-              <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-[0.1em] rounded-[3px] bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 uppercase select-none">
+              <div className="flex items-center gap-2 font-sans text-[11px] font-semibold rounded-[3px] bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 select-none">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <span>{blog.comments_count} COMMENTS</span>
+                <span>{blog.comments_count} Comments</span>
               </div>
               
               <div className="flex-1"></div>
 
-              {/* Extras (Share/Bookmark placeholders) */}
+              {/* Extras (Share/Bookmark placeholders)
               <button className="p-2 font-mono text-[11px] font-bold rounded-[3px] bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -160,12 +160,12 @@ export default function BlogDetail() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
-              </button>
+              </button> */}
             </div>
           </div>
 
           {/* Blog Content */}
-          <article className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-8 shadow-sm transition-colors cf-markdown">
+          <article className="bg-white dark:bg-slate-900 border font-sans border-slate-200 dark:border-slate-800 rounded-md p-8 shadow-sm transition-colors cf-markdown">
             <MarkdownRenderer content={blog.content} />
           </article>
 
