@@ -110,7 +110,6 @@ export default function ProblemSet() {
 
   const totalPages = Math.ceil(total / limit);
 
-  // --- REUSABLE SIDEBAR CONTENT ---
   const SidebarContent = () => (
     <div className="flex flex-col gap-6 w-full">
       {/* Quick Navigation */}
@@ -120,7 +119,7 @@ export default function ProblemSet() {
         </div>
         <button
           onClick={() => navigate("/premium")}
-          className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500 rounded-[3px] transition-colors group text-left cursor-pointer"
+          className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           <div className="text-orange-500 group-hover:scale-110 transition-transform">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/></svg>
@@ -133,7 +132,7 @@ export default function ProblemSet() {
 
         <button
           onClick={() => navigate("/leaderboard")}
-          className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-500 rounded-[3px] transition-colors group text-left cursor-pointer"
+          className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           <div className="text-blue-500 group-hover:scale-110 transition-transform">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
@@ -146,7 +145,7 @@ export default function ProblemSet() {
 
         <button
           onClick={() => navigate("/my-lists")}
-          className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-500 rounded-[3px] transition-colors group text-left cursor-pointer"
+          className="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           <div className="text-emerald-500 group-hover:scale-110 transition-transform">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
@@ -187,7 +186,7 @@ export default function ProblemSet() {
                   className={`px-3 py-1 rounded-[3px] font-sans text-[10px] font-semibold tracking-wide border transition-colors cursor-pointer ${
                     active
                       ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-transparent text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                      : "bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
                   }`}
                 >
                   {d.label}
@@ -210,7 +209,7 @@ export default function ProblemSet() {
                   className={`px-2 py-1 cursor-pointer rounded-[3px] font-sans text-[10px] tracking-wide border transition-colors ${
                     active
                       ? "bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
-                      : "bg-white dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600"
+                      : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600"
                   }`}
                 >
                   {tag.name}
@@ -224,7 +223,7 @@ export default function ProblemSet() {
   );
 
   return (
-    <div className="min-h-[calc(100vh-56px)] w-full bg-slate-50 dark:bg-[#0a0c10] text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300">
+    <div className="min-h-[calc(100vh-56px)] w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
         
         {/* ===== DESKTOP SIDEBAR ===== */}
@@ -321,7 +320,7 @@ export default function ProblemSet() {
                       <tr
                         key={problem.id}
                         onClick={() => navigate(`/problemset/${problem.id}`)}
-                        className="hover:bg-slate-50 dark:hover:bg-[#0d1117] transition-colors duration-200 cursor-pointer group relative"
+                        className="hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors duration-200 cursor-pointer group relative"
                       >
                         <td className="px-5 py-4 text-center relative">
                            <div className="absolute inset-y-0 left-0 w-0.5 bg-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -336,7 +335,7 @@ export default function ProblemSet() {
                         </td>
                         <td className="px-5 py-4 text-center">
                           <div className="flex flex-col items-center gap-1 w-full max-w-[80px] mx-auto">
-                            <span className="font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                            <span className="font-mono font-semibold text-[11px] text-slate-600 dark:text-slate-400">
                               {problem.acceptance_rate !== null ? `${problem.acceptance_rate}%` : "N/A"}
                             </span>
                             {problem.acceptance_rate !== null && (
