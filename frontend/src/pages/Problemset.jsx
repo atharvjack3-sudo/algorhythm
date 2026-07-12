@@ -186,7 +186,7 @@ export default function ProblemSet() {
                   className={`px-3 py-1 rounded-[3px] font-sans text-[10px] font-semibold tracking-wide border transition-colors cursor-pointer ${
                     active
                       ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                      : "bg-slate-50 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
                   }`}
                 >
                   {d.label}
@@ -209,7 +209,7 @@ export default function ProblemSet() {
                   className={`px-2 py-1 cursor-pointer rounded-[3px] font-sans text-[10px] tracking-wide border transition-colors ${
                     active
                       ? "bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
-                      : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600"
+                      : "bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600"
                   }`}
                 >
                   {tag.name}
@@ -223,7 +223,7 @@ export default function ProblemSet() {
   );
 
   return (
-    <div className="min-h-[calc(100vh-56px)] w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300">
+    <div className="min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
         
         {/* ===== DESKTOP SIDEBAR ===== */}
