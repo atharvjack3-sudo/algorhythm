@@ -219,7 +219,7 @@ export default function ProblemSet() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 border-t-3 border-slate-400 rounded-xs dark:border-slate-700 pt-4">
+      <div className="flex flex-col gap-4 border-slate-400 rounded-xs dark:border-slate-700 pt-4">
         <div className="flex items-center justify-between">
           <div className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
             Filter Settings

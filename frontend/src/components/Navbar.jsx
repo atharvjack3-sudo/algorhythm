@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext";
 //import darklogo from "../assets/navico/main_logo.png";
 import logo from "../assets/navico/light_mode_logo.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { History, Play, Pause, RotateCcw } from "lucide-react";
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
@@ -12,6 +13,9 @@ export default function Navbar() {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [playStopwatch, setPlayStopwatch] = useState(false); // 0 = stop, 1 = play
+  const [clock, setClock] = useState(0);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -26,19 +30,40 @@ export default function Navbar() {
   const isActive = (path) => location.pathname.startsWith(path);
 
   if (loading) return null;
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const NAV_LINKS = [
-    { name: "Problems",  path: "/problemset" },
-    { name: "Contests",  path: "/contests" },
-    { name: "Premium",   path: "/premium" },
-    { name: "Blogs",     path: "/blogs" },
+    { name: "Problems", path: "/problemset" },
+    { name: "Contests", path: "/contests" },
+    { name: "Premium", path: "/premium" },
+    { name: "Blogs", path: "/blogs" },
   ];
 
   const DROPDOWN_LINKS = [
-    { name: "Dashboard",      path: "/dashboard",       icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-    { name: "My Lists",       path: "/my-lists",        icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
-    { name: "My Blogs",       path: "/blogs/mine",      icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" },
-    { name: "Playground",     path: "/playground",      icon: "M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+    },
+    {
+      name: "My Lists",
+      path: "/my-lists",
+      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
+    },
+    {
+      name: "My Blogs",
+      path: "/blogs/mine",
+      icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+    },
+    {
+      name: "Playground",
+      path: "/playground",
+      icon: "M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+    },
   ];
 
   return (
@@ -477,7 +502,6 @@ export default function Navbar() {
 
       <nav className="nb-root">
         <div className="nb-inner">
-
           {/* Logo */}
           <div className="nb-logo" onClick={() => navigate("/")}>
             <img src={logo} alt="Algorhythm" />
@@ -485,7 +509,7 @@ export default function Navbar() {
 
           {/* Center Links */}
           <div className="nb-links">
-            {NAV_LINKS.map(item => (
+            {NAV_LINKS.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
@@ -497,38 +521,63 @@ export default function Navbar() {
           </div>
 
           {/* Right */}
-          <div className="nb-right" ref={dropdownRef} style={{ position: "relative" }}>
+          <div
+            className="nb-right"
+            ref={dropdownRef}
+            style={{ position: "relative" }}
+          >
             {user ? (
               <>
                 <button
                   className={`nb-avatar-btn${open ? " open" : ""}`}
-                  onClick={() => setOpen(v => !v)}
+                  onClick={() => setOpen((v) => !v)}
                   aria-expanded={open}
                 >
-                  <div className={`nb-avatar ${user?.is_premium ? "premium" : "standard"}`}>
-                    {
-                  (!(user?.profile)) ? user.username.charAt(0).toUpperCase() : <img className="rounded-lg" src={user?.profile}></img>
-                }
+                  <div
+                    className={`nb-avatar ${user?.is_premium ? "premium" : "standard"}`}
+                  >
+                    {!user?.profile ? (
+                      user.username.charAt(0).toUpperCase()
+                    ) : (
+                      <img className="rounded-lg" src={user?.profile}></img>
+                    )}
                   </div>
-                  <span className="font-sans dark:text-white text-slate-700 font-semibold text-xs tracking-wide">{user.username}</span>
-                  <svg className="nb-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  <span className="font-sans dark:text-white text-slate-700 font-semibold text-xs tracking-wide">
+                    {user.username}
+                  </span>
+                  <svg
+                    className="nb-chevron"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
                 {/* Dropdown */}
                 <div className={`nb-dropdown ${open ? "open-d" : "closed"}`}>
-
                   {/* Header */}
                   <div className="nb-dd-header">
-                    <div className={`nb-dd-avatar ${user?.is_premium ? "premium" : "standard"}`}>
-                      {
-                  (!(user?.profile)) ? user.username.charAt(0).toUpperCase() : <img className="rounded-lg" src={user?.profile}></img>
-                }
+                    <div
+                      className={`nb-dd-avatar ${user?.is_premium ? "premium" : "standard"}`}
+                    >
+                      {!user?.profile ? (
+                        user.username.charAt(0).toUpperCase()
+                      ) : (
+                        <img className="rounded-lg" src={user?.profile}></img>
+                      )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="nb-dd-name">{user.username}</div>
-                      <div className={`nb-dd-tier ${user?.is_premium ? "premium" : "standard"}`}>
+                      <div
+                        className={`nb-dd-tier ${user?.is_premium ? "premium" : "standard"}`}
+                      >
                         {user?.is_premium ? "Premium Member" : "Standard User"}
                       </div>
                     </div>
@@ -538,16 +587,55 @@ export default function Navbar() {
                   <div className="nb-theme-row">
                     <div className="nb-theme-track">
                       {[
-                        { key: "light", label: "Light", icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /> },
-                        { key: "dark",  label: "Dark",  icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /> },
-                        { key: "system",label: "Auto",  icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /> },
-                      ].map(t => (
+                        {
+                          key: "light",
+                          label: "Light",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                            />
+                          ),
+                        },
+                        {
+                          key: "dark",
+                          label: "Dark",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                            />
+                          ),
+                        },
+                        {
+                          key: "system",
+                          label: "Auto",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                          ),
+                        },
+                      ].map((t) => (
                         <button
                           key={t.key}
                           className={`nb-theme-btn${theme === t.key ? " active" : ""}`}
                           onClick={() => setTheme(t.key)}
                         >
-                          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">{t.icon}</svg>
+                          <svg
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            {t.icon}
+                          </svg>
                           {t.label}
                         </button>
                       ))}
@@ -556,20 +644,53 @@ export default function Navbar() {
 
                   {/* Links */}
                   <div className="nb-dd-links">
-                    {DROPDOWN_LINKS.map(link => (
-                      <Link key={link.name} to={link.path} className="nb-dd-link" onClick={() => setOpen(false)}>
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
+                    {DROPDOWN_LINKS.map((link) => (
+                      <Link
+                        key={link.name}
+                        to={link.path}
+                        className="nb-dd-link"
+                        onClick={() => setOpen(false)}
+                      >
+                        <svg
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d={link.icon}
+                          />
                         </svg>
                         {link.name}
                       </Link>
                     ))}
 
                     {/* Performance */}
-                    <Link to="/performance/mine" className="nb-dd-link" onClick={() => setOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="currentColor" style={{ width:15, height:15, color:"var(--nb-dd-link-icon)", flexShrink:0, transition:"color .12s" }}
-                        onMouseEnter={e => e.currentTarget.style.color="var(--nb-accent)"}
-                        onMouseLeave={e => e.currentTarget.style.color="var(--nb-dd-link-icon)"}>
+                    <Link
+                      to="/performance/mine"
+                      className="nb-dd-link"
+                      onClick={() => setOpen(false)}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        style={{
+                          width: 15,
+                          height: 15,
+                          color: "var(--nb-dd-link-icon)",
+                          flexShrink: 0,
+                          transition: "color .12s",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.color = "var(--nb-accent)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.color =
+                            "var(--nb-dd-link-icon)")
+                        }
+                      >
                         <rect x="3" y="10" width="4" height="11" rx="1" />
                         <rect x="10" y="6" width="4" height="15" rx="1" />
                         <rect x="17" y="3" width="4" height="18" rx="1" />
@@ -582,8 +703,13 @@ export default function Navbar() {
                   {/* Mobile nav links */}
                   <div className="nb-mobile-links">
                     <div className="nb-mobile-label">Navigation</div>
-                    {NAV_LINKS.map(link => (
-                      <Link key={`m-${link.name}`} to={link.path} className="nb-mobile-link" onClick={() => setOpen(false)}>
+                    {NAV_LINKS.map((link) => (
+                      <Link
+                        key={`m-${link.name}`}
+                        to={link.path}
+                        className="nb-mobile-link"
+                        onClick={() => setOpen(false)}
+                      >
                         {link.name}
                       </Link>
                     ))}
@@ -591,20 +717,80 @@ export default function Navbar() {
 
                   {/* Logout */}
                   <div className="nb-dd-footer">
-                    <button className="nb-logout" onClick={() => { logout(); setOpen(false); }}>
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <button
+                      className="nb-logout"
+                      onClick={() => {
+                        logout();
+                        setOpen(false);
+                      }}
+                    >
+                      <svg
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        />
                       </svg>
                       Sign out
                     </button>
+                    <div className="w-full flex h-8 mt-2 items-center justify-between rounded-md dark:bg-slate-900/50 px-3 text-xs font-medium font-sans border-slate-800/60 text-slate-400">
+                      <div className="flex items-center gap-2">
+                        <History className="text-slate-500" size={14} />
+                        <span className="font-sans text-slate-500">
+                          {formatTime(clock)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            if (playStopwatch) {
+                              clearInterval(intervalRef.current);
+                              setPlayStopwatch(false);
+                              return;
+                            }
+                            intervalRef.current = setInterval(() => {
+                              setClock((prev) => prev + 1);
+                            }, 1000);
+                            setPlayStopwatch(true);
+                          }}
+                          className="p-1 hover:bg-slate-300 cursor-pointer dark:hover:bg-slate-800 hover:text-slate-200 rounded transition-colors duration-150"
+                          title={playStopwatch ? "Pause" : "Start"}
+                        >
+                          {playStopwatch ? (
+                            <Pause size={12} className="text-slate-700"/>
+                          ) : (
+                            <Play size={12} className="text-slate-700" fill="currentColor" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            clearInterval(intervalRef.current);
+                            setPlayStopwatch(false);
+                            setClock(0);
+                          }}
+                          className="p-1 hover:bg-slate-300 cursor-pointer dark:hover:bg-slate-800 hover:text-rose-400 rounded transition-colors duration-150"
+                          title="Reset"
+                        >
+                          <RotateCcw size={12} className="text-slate-700 " />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </>
             ) : (
-              <Link to="/auth" className="nb-signin">Sign In →</Link>
+              <Link to="/auth" className="nb-signin">
+                Sign In →
+              </Link>
             )}
           </div>
-
         </div>
       </nav>
     </>
