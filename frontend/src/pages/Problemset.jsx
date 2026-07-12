@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
+import { useTheme } from "../context/ThemeContext";
 
 export default function ProblemSet() {
   const [problems, setProblems] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const { theme, setTheme } = useTheme();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const [allTags, setAllTags] = useState([]);
@@ -297,8 +298,14 @@ export default function ProblemSet() {
   );
 
   return (
-    <div className="min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-gray-950 text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
+    <div className="min-h-[calc(100vh-56px)] relative w-full bg-slate-100 dark:bg-gray-950 text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300">
+      {theme === "light" ? (
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.300/40%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.300/40%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
+      ) : (
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
+      )}
+
+      <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
         {/* ===== DESKTOP SIDEBAR ===== */}
         <aside className="hidden md:flex w-64 flex-shrink-0 flex-col">
           <SidebarContent />
@@ -312,7 +319,6 @@ export default function ProblemSet() {
               <h1 className="font-sans text-2xl md:text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">
                 Problem Set
               </h1>
-              
             </div>
 
             <div className="flex items-center gap-2">
@@ -467,7 +473,7 @@ export default function ProblemSet() {
                         </td>
                         <td className="px-5 py-4 text-center">
                           <span
-                            className={`font-sans text-[11px] font-semibold tracking-wide capitalize ${getDifficultyColor(problem.difficulty)}`}
+                            className={`font-sans text-[11px] bg-slate-900 px-2 rounded-xs py-1 font-semibold tracking-wide capitalize ${getDifficultyColor(problem.difficulty)}`}
                           >
                             {problem.difficulty ? problem.difficulty : "N/A"}
                           </span>
