@@ -297,7 +297,7 @@ router.get("/problems/:problemId", async (req, res) => {
 router.get("/problem-list", async (req, res) => {
   try {
     const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.min(Number(req.query.limit) || 15, 50);
+    const limit = Math.min(Number(req.query.limit) || 12, 50);
     const offset = (page - 1) * limit;
 
     const search = req.query.searchQuery?.trim() || "";
