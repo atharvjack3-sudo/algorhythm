@@ -70,7 +70,7 @@ export default function ProblemSet() {
   ];
 
   const navigate = useNavigate();
-  const limit = 10;
+  const limit = 12;
 
   useEffect(() => {
     api.get("/topics").then((res) => {
@@ -166,10 +166,8 @@ export default function ProblemSet() {
           onClick={() => navigate("/premium")}
           className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
-          {/* Slanted Accent Background */}
           <div className="absolute inset-y-0 -left-6 w-[55%] bg-orange-100 dark:bg-orange-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
 
-          {/* Content (Z-10 to stay above background) */}
           <div className="relative z-10 flex items-center gap-3 w-full">
             <div className="text-orange-500 group-hover:scale-110 transition-transform">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -344,72 +342,88 @@ export default function ProblemSet() {
         </div>
       </div>
       {/* Calendar */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] mb-1 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
-              POTD Calendar
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[10px] mb-1 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
+            POTD Calendar (coming soon)
+          </span>
+          <div className="flex items-center gap-1 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <button
+              onClick={handlePrevMonth}
+              className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
+            >
+              &lt;
+            </button>
+            <span className="w-16 font-sans text-[10px] font-medium text-center ">
+              {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </span>
-            <div className="flex items-center gap-1 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
-              <button 
-                onClick={handlePrevMonth}
-                className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
-              >
-                &lt;
-              </button>
-              <span className="w-16 font-sans text-[10px] font-medium text-center ">
-                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-              </span>
-              <button 
-                onClick={handleNextMonth}
-                className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
-              >
-                &gt;
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-[3px] p-3 shadow-sm">
-            {/* Days of week */}
-            <div className="grid grid-cols-7 mb-2 gap-1">
-              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(day => (
-                <div key={day} className="text-center font-mono text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                  {day}
-                </div>
-              ))}
-            </div>
-            
-            {/* Days Grid */}
-            <div className="grid grid-cols-7 gap-1">
-              {/* Empty slots for first day offset */}
-              {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                <div key={`empty-${i}`} className="w-full aspect-square" />
-              ))}
-              
-              {/* Calendar Days */}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1;
-                const isSelected = selectedDate?.getDate() === day && selectedDate?.getMonth() === currentMonth.getMonth() && selectedDate?.getFullYear() === currentMonth.getFullYear();
-                const isToday = new Date().getDate() === day && new Date().getMonth() === currentMonth.getMonth() && new Date().getFullYear() === currentMonth.getFullYear();
-                
-                return (
-                  <button
-                    key={day}
-                    onClick={() => setSelectedDate(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day))}
-                    className={`w-full aspect-square flex items-center justify-center font-mono text-[10px] rounded-[3px] transition-colors cursor-pointer border ${
-                      isSelected
-                        ? "bg-orange-500 text-white font-bold border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.2)]"
-                        : isToday
-                        ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50 font-bold hover:bg-orange-100 dark:hover:bg-orange-500/20"
-                        : "bg-transparent text-slate-600 dark:text-slate-400 border-transparent hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                    }`}
-                  >
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
+            <button
+              onClick={handleNextMonth}
+              className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
+            >
+              &gt;
+            </button>
           </div>
         </div>
+
+        <div className="bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-[3px] p-3 shadow-sm">
+          {/* Days of week */}
+          <div className="grid grid-cols-7 mb-2 gap-1">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              <div
+                key={day}
+                className="text-center font-mono text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Days Grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+              <div key={`empty-${i}`} className="w-full aspect-square" />
+            ))}
+
+            {/* Calendar Days */}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
+              const isSelected =
+                selectedDate?.getDate() === day &&
+                selectedDate?.getMonth() === currentMonth.getMonth() &&
+                selectedDate?.getFullYear() === currentMonth.getFullYear();
+              const isToday =
+                new Date().getDate() === day &&
+                new Date().getMonth() === currentMonth.getMonth() &&
+                new Date().getFullYear() === currentMonth.getFullYear();
+
+              return (
+                <button
+                  key={day}
+                  onClick={() =>
+                    setSelectedDate(
+                      new Date(
+                        currentMonth.getFullYear(),
+                        currentMonth.getMonth(),
+                        day,
+                      ),
+                    )
+                  }
+                  className={`w-full aspect-square flex items-center justify-center font-semibold font-sans text-[10px] rounded-[3px] transition-colors cursor-pointer border ${
+                    isSelected
+                      ? "bg-orange-500 text-white font-bold border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.2)]"
+                      : isToday
+                        ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50 font-bold hover:bg-orange-100 dark:hover:bg-orange-500/20"
+                        : "bg-transparent text-slate-600 dark:text-slate-400 border-transparent hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -555,7 +569,7 @@ export default function ProblemSet() {
                       <tr
                         key={problem.id}
                         onClick={() => navigate(`/problemset/${problem.id}`)}
-                        className="odd:bg-white even:bg-slate-50
+                        className="odd:bg-white even:bg-slate-100
     dark:odd:bg-slate-950 dark:even:bg-slate-900/40
     hover:!bg-orange-50 dark:hover:!bg-gray-900
     transition-colors duration-200
