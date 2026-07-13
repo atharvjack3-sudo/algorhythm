@@ -22,6 +22,46 @@ export default function ProblemSet() {
 
   const [loading, setLoading] = useState(true);
   const [listsLoading, setListsLoading] = useState(false);
+  // Calendar State
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const daysInMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() + 1,
+    0,
+  ).getDate();
+  const firstDayOfMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+    1,
+  ).getDay();
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1),
+    );
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
+    );
+  };
 
   const difficultyOptions = [
     { id: "easy", label: "Easy" },
@@ -69,7 +109,7 @@ export default function ProblemSet() {
     if (userLists.length > 0) {
       // setUserLists(userLists);
       return;
-    };
+    }
     setListsLoading(true);
 
     try {
@@ -217,7 +257,6 @@ export default function ProblemSet() {
           </div>
         </button>
       </div>
-
       {/* Filters */}
       <div className="flex flex-col gap-4 border-slate-400 rounded-xs dark:border-slate-700 pt-4">
         <div className="flex items-center justify-between">
@@ -273,32 +312,104 @@ export default function ProblemSet() {
             Topics
           </span>
           <div className="flex flex-wrap gap-1.5 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
-            
-            {allTags.length > 0 ? allTags.map((tag) => {
-              const active = selectedTags.includes(tag.id);
-              return (
-                <button
-                  key={tag.id}
-                  onClick={() =>
-                    setSelectedTags((prev) =>
+            {allTags.length > 0 ? (
+              allTags.map((tag) => {
+                const active = selectedTags.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    onClick={() =>
+                      setSelectedTags((prev) =>
+                        active
+                          ? prev.filter((t) => t !== tag.id)
+                          : [...prev, tag.id],
+                      )
+                    }
+                    className={`px-2 py-1 cursor-pointer rounded-[3px] font-sans text-[10px] tracking-wide border transition-colors ${
                       active
-                        ? prev.filter((t) => t !== tag.id)
-                        : [...prev, tag.id],
-                    )
-                  }
-                  className={`px-2 py-1 cursor-pointer rounded-[3px] font-sans text-[10px] tracking-wide border transition-colors ${
-                    active
-                      ? "bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
-                      : "bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-600"
-                  }`}
-                >
-                  {tag.name}
-                </button>
-              );
-            }) : <p className="text-xs font-semibold font-sans text-slate-700 dark:text-slate-400">Fetching Tags...</p>}
+                        ? "bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
+                        : "bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-600"
+                    }`}
+                  >
+                    {tag.name}
+                  </button>
+                );
+              })
+            ) : (
+              <p className="text-xs font-semibold font-sans text-slate-700 dark:text-slate-400">
+                Fetching Tags...
+              </p>
+            )}
           </div>
         </div>
       </div>
+      {/* Calendar */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] mb-1 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
+              POTD Calendar
+            </span>
+            <div className="flex items-center gap-1 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
+              <button 
+                onClick={handlePrevMonth}
+                className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
+              >
+                &lt;
+              </button>
+              <span className="w-16 font-sans text-[10px] font-medium text-center ">
+                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              </span>
+              <button 
+                onClick={handleNextMonth}
+                className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
+              >
+                &gt;
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-[3px] p-3 shadow-sm">
+            {/* Days of week */}
+            <div className="grid grid-cols-7 mb-2 gap-1">
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(day => (
+                <div key={day} className="text-center font-mono text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  {day}
+                </div>
+              ))}
+            </div>
+            
+            {/* Days Grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {/* Empty slots for first day offset */}
+              {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                <div key={`empty-${i}`} className="w-full aspect-square" />
+              ))}
+              
+              {/* Calendar Days */}
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day = i + 1;
+                const isSelected = selectedDate?.getDate() === day && selectedDate?.getMonth() === currentMonth.getMonth() && selectedDate?.getFullYear() === currentMonth.getFullYear();
+                const isToday = new Date().getDate() === day && new Date().getMonth() === currentMonth.getMonth() && new Date().getFullYear() === currentMonth.getFullYear();
+                
+                return (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDate(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day))}
+                    className={`w-full aspect-square flex items-center justify-center font-mono text-[10px] rounded-[3px] transition-colors cursor-pointer border ${
+                      isSelected
+                        ? "bg-orange-500 text-white font-bold border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.2)]"
+                        : isToday
+                        ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50 font-bold hover:bg-orange-100 dark:hover:bg-orange-500/20"
+                        : "bg-transparent text-slate-600 dark:text-slate-400 border-transparent hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
     </div>
   );
 
