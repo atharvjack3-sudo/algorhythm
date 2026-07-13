@@ -555,7 +555,11 @@ export default function ProblemSet() {
                       <tr
                         key={problem.id}
                         onClick={() => navigate(`/problemset/${problem.id}`)}
-                        className="hover:bg-orange-50 dark:hover:bg-gray-900 transition-colors duration-200 cursor-pointer group relative"
+                        className="odd:bg-white even:bg-slate-50
+    dark:odd:bg-slate-950 dark:even:bg-slate-900/40
+    hover:!bg-orange-50 dark:hover:!bg-gray-900
+    transition-colors duration-200
+    cursor-pointer group relative "
                       >
                         <td className="px-5 py-4 text-center relative">
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
