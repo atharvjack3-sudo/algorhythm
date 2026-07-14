@@ -297,6 +297,12 @@ export default function Contests() {
   const rColor = getRatingColor(stats?.contest_rating);
 
   // ── Render ─────────────────────────────────────────────────────────────────
+  function getRankCol(s) {
+    if (s == null || s > 3) return "dark:text-white text-slate-700";
+    if (s == 1) return "text-yellow-600";
+    if (s == 2) return "text-silver-500";
+    return "text-brown-600";
+  }
 
   return (
     <>
@@ -330,7 +336,7 @@ export default function Contests() {
             
             <div className="flex gap-6 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 pt-6 md:pt-0 md:pl-8">
               <div className="flex flex-col">
-                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Global Rating</span>
+                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Rating</span>
                 <span className="font-mono text-2xl font-bold" style={{ color: rColor }}>
                   {stats?.contest_rating || 0}
                 </span>
@@ -339,6 +345,18 @@ export default function Contests() {
                 <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contests</span>
                 <span className="font-mono text-2xl font-bold text-slate-900 dark:text-white">
                   {stats?.contests_participated || 0}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">AC Rate</span>
+                <span className="font-mono text-2xl font-bold text-slate-900 dark:text-white">
+                  {stats?.contest_acceptance_rate || 0}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Rank</span>
+                <span className={`font-mono text-2xl font-bold ${getRankCol(stats?.contest_global_rank)}`}>
+                  {stats?.contest_global_rank || 0}
                 </span>
               </div>
             </div>
@@ -557,8 +575,8 @@ export default function Contests() {
                       {user.role === "moderator" && (
                         <InputField label="Creation Token" required value={form.token} onChange={e => setForm({...form, token: e.target.value})} placeholder="TOKEN_76" />
                       )}
-                      <button type="submit" className="w-full bg-orange-500 text-white border border-orange-500 rounded-[3px] p-3 font-mono text-[11px] font-bold tracking-[0.15em] uppercase cursor-pointer mt-2 hover:bg-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.2)] transition-all">
-                        DEPLOY CONTEST
+                      <button type="submit" className="w-full bg-orange-500 text-white border border-orange-500 rounded-[3px] p-3 font-mono text-[11px] font-bold tracking-[0.15em] uppercase cursor-pointer mt-2 hover:bg-orange-600 transition-all">
+                        Schedule Contest
                       </button>
                     </form>
                   </div>
