@@ -41,16 +41,13 @@ export default function Blogs() {
         .font-sans { font-family: 'DM Sans', sans-serif; }
       `}</style>
 
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 pb-16">
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 text-slate-800 dark:text-slate-200 pb-16">
         <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-8">
           
           {/* --- Header --- */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2.5">
-              <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-              <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
-                Community
-              </span>
+              
             </div>
             <h1 className="font-sans text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
               Blogs
@@ -60,8 +57,7 @@ export default function Blogs() {
             </p>
           </div>
 
-          {/* --- Write Blog CTA Banner --- */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
             <div className="flex-1">
               <h2 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-2">
                 Share Your Knowledge

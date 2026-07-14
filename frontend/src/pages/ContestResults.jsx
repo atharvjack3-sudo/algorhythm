@@ -61,7 +61,7 @@ export default function ContestResults() {
         .font-sans { font-family: 'DM Sans', sans-serif; }
       `}</style>
 
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200">
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 text-slate-800 dark:text-slate-200">
         <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-10">
           
           {/* --- HEADER --- */}

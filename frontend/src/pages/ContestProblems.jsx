@@ -124,7 +124,7 @@ export default function ContestProblems() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 dark:bg-gray-950 flex items-center justify-center">
         <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse">
           Loading Contest Dashboard...
         </span>
@@ -142,11 +142,11 @@ export default function ContestProblems() {
         .animate-blink { animation: blink 1s infinite; }
       `}</style>
 
-      <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 pb-12">
+      <div className="min-h-screen w-full bg-slate-100 dark:bg-gray-950 text-slate-800 dark:text-slate-200 pb-12">
         <div className="max-w-6xl mx-auto py-10 px-6 flex flex-col md:flex-row gap-8">
-          {/* --- MAIN CONTENT COLUMN (LEFT) --- */}
+          
           <div className="flex-1 flex flex-col gap-10">
-            {/* Header */}
+          
             <div className="border-b border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2.5 mb-1">

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export default function BlogCard({ blog }) {
   return (
     <Link to={`/blogs/${blog.slug}`} className="block group">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-6 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-orange-400 dark:hover:border-orange-500/50 transition-all duration-300">
+      <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-md p-6 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-none hover:border-orange-400 dark:hover:border-orange-500/50 transition-all duration-300">
         
         <div className="flex items-start justify-between gap-4 mb-5">
           <div className="flex-1 min-w-0">
