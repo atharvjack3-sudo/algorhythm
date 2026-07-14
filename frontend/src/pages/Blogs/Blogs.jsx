@@ -13,7 +13,7 @@ export default function Blogs() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) navigate("/auth");
+    if (!user) navigate("/auth?error=sign_in_to_view_blogs");
   }, [user, authLoading, navigate]);
 
   useEffect(() => {

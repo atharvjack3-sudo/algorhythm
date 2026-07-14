@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 // Reusable spinner component for the buttons
 const LoadingSpinner = () => (
@@ -29,6 +29,9 @@ const LoadingSpinner = () => (
 export default function AuthForm() {
   // Assuming forgotPassword is added to your AuthContext
   const { login, signup, forgotPassword, user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  const [err, setErr] = useState(searchParams.get("error")?.replaceAll("_", " ") || null);
 
   // 'login' | 'signup' | 'forgot-password'
   const [mode, setMode] = useState("login");
@@ -400,9 +403,9 @@ export default function AuthForm() {
   );
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 font-sans transition-colors">
-      
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 font-sans transition-colors">
       {/* MOBILE VIEW */}
+      {err && <p className="w-[60%] rounded-md bg-red-600/10 border border-red-500/20 text-center mb-3 text-sm font-semibold dark:text-red-500 p-2">{err}</p>}
       <div className="md:hidden w-full max-w-md bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 transition-colors">
         {mode === "login"
           ? loginFormContent
@@ -425,6 +428,7 @@ export default function AuthForm() {
           </div>
         )}
       </div>
+      
 
       {/* DESKTOP SPLIT VIEW */}
       <div className="hidden md:flex relative w-full max-w-[900px] h-[550px] bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">

@@ -1178,7 +1178,7 @@ export default function SolveProblem() {
                 <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   <a
                     href="/auth"
-                    className="text-blue-600 dark:text-blue-400 hover:underline font-bold"
+                    className="text-orange-600 dark:text-orange-400 hover:underline font-bold"
                   >
                     SIGN IN
                   </a>{" "}

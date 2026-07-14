@@ -21,7 +21,10 @@ export default function MyList() {
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/auth?error=sign_in_to_access_my_lists");
+    
+  }, [user, authLoading])
   useEffect(() => {
     if (!user) return;
 

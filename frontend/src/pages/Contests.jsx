@@ -3,7 +3,7 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-// ─── Helpers (unchanged) ──────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────
 
 const formatIST = (dateStr, isDateOnly = false) => {
   if (!dateStr) return "---";
@@ -29,7 +29,7 @@ const formatDuration = (mins) => {
   return `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m`;
 };
 
-// ─── Countdown Timer (unchanged logic) ───────────────────────────────────────
+// ─── Countdown Timer ───────────────────────────────────────
 
 const CountdownTimer = ({ targetDateStr, format = "full", onComplete }) => {
   const [timeLeft, setTimeLeft] = useState("");
@@ -64,7 +64,7 @@ const CountdownTimer = ({ targetDateStr, format = "full", onComplete }) => {
   return <span className="font-mono">{timeLeft}</span>;
 };
 
-// ─── Rating Graph (unchanged logic) ───────────────────────────────────────────
+// ─── Rating Graph ───────────────────────────────────────────
 
 const RatingGraph = ({ history }) => {
   if (!history || history.length === 0) {
@@ -242,7 +242,7 @@ export default function Contests() {
   }
 
   useEffect(() => { if (!authLoading && user) loadArenaData(false); }, [authLoading, user]);
-  useEffect(() => { if (!authLoading && !user) navigate("/auth"); }, [authLoading, user, navigate]);
+  useEffect(() => { if (!authLoading && !user) navigate("/auth?error=sign_in_to_view_contests"); }, [authLoading, user, navigate]);
 
   async function register(id) {
     try { await api.post(`/contests/${id}/register`); loadArenaData(); }
