@@ -3,12 +3,22 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
 import BlogComments from "../../components/BlogComments";
 import MarkdownRenderer from "../../components/MarkdownRenderer";
+import { 
+  ChevronLeft, 
+  FileText, 
+  Heart, 
+  MessageSquare, 
+  Eye, 
+  User, 
+  Calendar 
+} from "lucide-react";
 
 export default function BlogDetail() {
   const { slug } = useParams();
   const [blog, setBlog] = useState(null);
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
+  
   useEffect(() => {
     api.get(`/blogs/${slug}`).then((res) => {
       setBlog(res.data);
@@ -56,136 +66,155 @@ export default function BlogDetail() {
         .dark { --code-bg: rgba(30, 41, 59, 0.5); --pre-bg: #0f172a; --border-color: #1e293b; }
       `}</style>
 
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 pb-16 transition-colors duration-200">
-        <div className="max-w-4xl mx-auto px-6 py-10 flex flex-col gap-6">
+      <div className="relative min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-gray-950 text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300 overflow-hidden">
+        
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col-reverse lg:flex-row gap-6 lg:gap-8">
           
-          {/* Back Button */}
-          <Link 
-            to="/blogs" 
-            className="font-mono text-[11px] font-semibold tracking-[0.06em] text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors uppercase self-start mb-2 flex items-center gap-2"
-          >
-            ← BACK TO BLOGS
-          </Link>
-
-          {/* Blog Header Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-8 shadow-sm transition-colors">
+          <main className="flex-1 min-w-0 flex flex-col gap-6">
             
-            <div className="flex items-center gap-2.5 mb-4">
-              <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-              <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
-                Article
-              </span>
-            </div>
-
-            <h1 className="font-sans text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight mb-6">
-              {blog.title}
-            </h1>
-            
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-slate-800">
-              
-              {/* Author Info */}
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[3px] flex items-center justify-center font-sans text-base font-bold text-white shadow-sm border border-black/10 dark:border-white/10 bg-orange-500 dark:bg-orange-500">
-                  {blog.author.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex flex-col">
-                  <span onClick={() => navigate(`/profile/${blog.author}`)} className="font-sans cursor-pointer text-[14px] font-bold text-slate-900 dark:text-white leading-tight">
-                    {blog.author}
-                  </span>
-                  <span className="font-mono text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
-                    Author
+            {/* Article Content */}
+            <article className="bg-white dark:bg-[#0d1117] rounded-[3px] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden">
+              <div className="px-6 py-5 md:px-10 md:py-8 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText size={14} className="text-blue-500" />
+                  <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    Blog
                   </span>
                 </div>
+                <h1 className="font-sans text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+                  {blog.title}
+                </h1>
+              </div>
+
+              <div className="p-6 md:p-10 font-sans text-[14px] leading-relaxed transition-colors cf-markdown">
+                <MarkdownRenderer content={blog.content} />
+              </div>
+            </article>
+
+            {/* Comments Section */}
+            <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
+              <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-3">
+                <MessageSquare size={16} className="text-orange-500" />
+                <h2 className="font-sans text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  Discussion
+                </h2>
+                <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
+                  [{blog.comments_count}]
+                </span>
               </div>
               
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-4 text-slate-600 dark:text-slate-400 font-mono text-[10px] font-semibold uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>
-                    {new Date(blog.created_at).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
-                  </span>
-                </div>
+              <div className="p-6 md:p-10">
+                <BlogComments blogId={blog.id} />
+              </div>
+            </div>
+
+          </main>
+
+          <aside className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-6">
+            
+            <Link 
+              to="/blogs" 
+              className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-500 rounded-[3px] transition-colors shadow-sm font-mono text-[11px] font-bold uppercase tracking-widest group"
+            >
+              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              BACK TO BLOGS
+            </Link>
+
+            <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Engagement
+                </span>
+              </div>
+              <div className="p-5 flex flex-col gap-5">
                 
-                <span className="hidden md:inline text-slate-300 dark:text-slate-700">|</span>
-                
-                <div className="flex items-center gap-2">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <span>{blog.views_count} VIEWS</span>
+                <div className="flex flex-col gap-3 pb-5 border-b border-slate-100 dark:border-slate-800/60">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-slate-600 dark:text-slate-400">Total Likes</span>
+                    <span className="font-mono text-[15px] font-bold text-slate-900 dark:text-white">
+                      {blog.likes_count || 0}
+                    </span>
+                  </div>
+                  
+                  <button 
+                    onClick={toggleLike}
+                    className={`w-full flex items-center justify-center gap-2 py-2 rounded-[3px] font-mono text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
+                      liked 
+                        ? "bg-red-500 text-white border border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" 
+                        : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:text-red-500"
+                    }`}
+                  >
+                    <Heart size={14} className={`${liked ? 'fill-current' : ''}`} strokeWidth={2.5} />
+                    {liked ? 'LIKED' : 'LIKE ARTICLE'}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                    <MessageSquare size={14} className="text-orange-500" />
+                    <span className="font-mono text-[11px] font-semibold uppercase tracking-widest">Comments</span>
+                  </div>
+                  <span className="font-sans text-[13px] font-bold text-slate-900 dark:text-white">
+                    {blog.comments_count || 0}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                    <Eye size={14} className="text-blue-500" />
+                    <span className="font-mono text-[11px] font-semibold uppercase tracking-widest">Views</span>
+                  </div>
+                  <span className="font-sans text-[13px] font-bold text-slate-900 dark:text-white">
+                    {blog.views_count || 0}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3 pt-6">
-              <button 
-                onClick={toggleLike}
-                className={`flex items-center gap-2 font-mono text-[11px] font-bold tracking-[0.1em] rounded-[3px] transition-colors duration-150 border px-4 py-2 uppercase ${
-                  liked 
-                    ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-500 border-red-200 dark:border-red-800/30" 
-                    : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
-                }`}
-              >
-                <svg className={`w-3.5 h-3.5 transition-transform ${liked ? 'fill-current scale-110' : ''}`} fill={liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span>{blog.likes_count}</span>
-              </button>
-
-              <div className="flex items-center gap-2 font-sans text-[11px] font-semibold rounded-[3px] bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 select-none">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <span>{blog.comments_count} Comments</span>
+            <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-2">
+                <User size={14} className="text-orange-500" />
+                <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Author Details
+                </span>
               </div>
               
-              <div className="flex-1"></div>
+              <div className="p-5 flex flex-col gap-5">
+                <div 
+                  onClick={() => navigate(`/profile/${blog.author}`)}
+                  className="flex items-center gap-3 w-fit group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-[3px] bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center font-sans font-bold text-[15px] uppercase group-hover:border-blue-400 dark:group-hover:border-blue-500 group-hover:text-blue-500 transition-colors">
+                    {blog.author?.charAt(0)}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-sans font-bold text-[15px] text-slate-900 dark:text-white leading-none mb-1.5 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">
+                      {blog.author}
+                    </span>
+                    <span className="font-mono text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                      View Profile
+                    </span>
+                  </div>
+                </div>
 
-              {/* Extras (Share/Bookmark placeholders)
-              <button className="p-2 font-mono text-[11px] font-bold rounded-[3px] bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-              </button>
-              <button className="p-2 font-mono text-[11px] font-bold rounded-[3px] bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </button> */}
-            </div>
-          </div>
-
-          {/* Blog Content */}
-          <article className="bg-white dark:bg-slate-900 border font-sans border-slate-200 dark:border-slate-800 rounded-md p-8 shadow-sm transition-colors cf-markdown">
-            <MarkdownRenderer content={blog.content} />
-          </article>
-
-          {/* Comments Section */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-8 shadow-sm transition-colors mt-4">
-            <div className="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-800 pb-4">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              <h2 className="font-sans text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Discussion
-              </h2>
-              <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
-                [{blog.comments_count}]
-              </span>
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <Calendar size={12} />
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-widest">Published On</span>
+                  </div>
+                  <span className="font-sans text-[13px] font-semibold text-slate-700 dark:text-slate-300">
+                    {blog.created_at 
+                      ? new Date(blog.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+                      : "Unknown Date"}
+                  </span>
+                </div>
+              </div>
             </div>
             
-            <BlogComments blogId={blog.id} />
-          </div>
-
+          </aside>
         </div>
       </div>
     </>
