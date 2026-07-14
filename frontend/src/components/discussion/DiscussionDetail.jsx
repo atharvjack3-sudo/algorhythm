@@ -30,7 +30,7 @@ export default function DiscussionDetail() {
   const [votes, setVotes] = useState(0);
   const [userVote, setUserVote] = useState(0); // 1 for upvote, -1 for downvote, 0 for none
   
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     api
@@ -38,8 +38,6 @@ export default function DiscussionDetail() {
       .then((res) => {
         setDiscussion(res.data);
         setVotes(Number(res.data.votes) || 0);
-        // Note: If your backend eventually returns the current user's vote status, 
-        // you would initialize setUserVote() here.
       })
       .catch(console.error);
   }, [discussionId, user, problemId]);
@@ -50,15 +48,10 @@ export default function DiscussionDetail() {
     const isUpvote = type === "upvote";
     const targetVote = isUpvote ? 1 : -1;
 
-    // Prevent redundant requests if they already voted this way[cite: 7]
     if (userVote === targetVote) return; 
-
-    // Optimistic Update calculations
     const previousVote = userVote;
     const previousVotesCount = votes;
     
-    // Calculate the difference: 
-    // e.g., switching from downvote (-1) to upvote (1) adds 2 to the total[cite: 7]
     const diff = targetVote - previousVote;
 
     setVotes((prev) => prev + diff);
@@ -68,7 +61,6 @@ export default function DiscussionDetail() {
       await api.put(`/discussions/${discussionId}/${type}`);
     } catch (err) {
       console.error("VOTE ERROR:", err);
-      // Revert optimistic update on failure
       setVotes(previousVotesCount);
       setUserVote(previousVote);
     }
@@ -108,16 +100,13 @@ export default function DiscussionDetail() {
 
       <div className="relative min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-[#050608] text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300 overflow-hidden">
         
-        {/* Subtle IDE Grid Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col-reverse lg:flex-row gap-6 lg:gap-8">
-          
-          {/* ===== MAIN CONTENT (Markdown Body) ===== */}
+        
           <main className="flex-1 min-w-0 flex flex-col">
             <div className="bg-white dark:bg-[#0d1117] rounded-[3px] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col flex-1">
               
-              {/* Header */}
               <div className="px-6 py-5 md:px-10 md:py-8 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
                 <div className="flex items-center gap-2 mb-4">
                   <MessageSquare size={14} className="text-orange-500" />
@@ -130,7 +119,6 @@ export default function DiscussionDetail() {
                 </h1>
               </div>
 
-              {/* Body */}
               <div className="p-6 md:p-10 flex-1">
                 <div className="prose prose-slate dark:prose-invert max-w-none font-sans text-[14px] leading-relaxed prose-headings:font-sans prose-headings:tracking-tight prose-a:text-orange-600 dark:prose-a:text-orange-500 hover:prose-a:underline transition-colors [&_pre_code.hljs]:!bg-transparent [&_pre_code.hljs]:!p-0">
                   <ReactMarkdown
