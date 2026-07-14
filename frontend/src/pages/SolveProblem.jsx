@@ -1161,7 +1161,7 @@ export default function SolveProblem() {
                   <button
                     onClick={handleRun}
                     disabled={runLoading || submitting}
-                    className="text-[12px] cursor-pointer font-semibold tracking-[0.06em] rounded-[3px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="text-[12px] cursor-pointer font-semibold rounded-[3px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {runLoading ? "Running..." : "Run Code"}
                   </button>
@@ -1169,7 +1169,7 @@ export default function SolveProblem() {
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || runLoading}
-                    className="text-[12px] font-bold tracking-[0.12em] rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border-none px-6 py-2 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-[12px] font-bold rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border border-orange-600 px-6 py-2 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? "Submitting..." : "Submit"}
                   </button>
