@@ -282,7 +282,7 @@ export default function SolveProblem() {
 
   useEffect(() => {
     if (theme === "light") setEditorTheme("light");
-    else if (editorTheme !== "vs-dark") setEditorTheme("Brilliance-Dull");
+    else if (editorTheme !== "vs-dark") setEditorTheme("Algorhythm-Dark");
   }, [theme]);
 
   useEffect(() => {
@@ -324,8 +324,8 @@ export default function SolveProblem() {
     if (theme === "light") {
       setEditorTheme("light");
     } else {
-      await loadMonacoTheme(monacoRef.current, "Brilliance-Dull");
-      setEditorTheme("Brilliance-Dull");
+      await loadMonacoTheme(monacoRef.current, "Algorhythm-Dark");
+      setEditorTheme("Algorhythm-Dark");
     }
   }
 
