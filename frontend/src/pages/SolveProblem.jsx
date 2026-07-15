@@ -30,7 +30,8 @@ import {
   MessagesSquare,
   Network,
   SendHorizonal,
-  Terminal
+  Terminal,
+  ChevronDown
 } from "lucide-react";
 import "./css/scrollbar.css";
 import * as Y from "yjs";
@@ -165,6 +166,11 @@ export default function SolveProblem() {
   const handleSubmitRef = useRef(handleSubmit);
   const handleRunRef = useRef(handleRun);
 
+  const [themeOpen, setThemeOpen] = useState(false);
+  const [langOpen, setLanguageOpen] = useState(false);
+  const themeDropdownRef = useRef(null);
+  const langDropdownRef = useRef(null);
+
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
     monacoRef.current = monaco;
@@ -279,6 +285,19 @@ export default function SolveProblem() {
     handleSubmitRef.current = handleSubmit;
     handleRunRef.current = handleRun;
   }, [handleSubmit, handleRun]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(e.target)) {
+        setThemeOpen(false);
+      }
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
+        setLanguageOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (theme === "light") setEditorTheme("light");
@@ -732,7 +751,7 @@ export default function SolveProblem() {
                         {runResults.map((r, i) => {
                           const isMatch = r.verdict === "AC";
                           const isWA = r.verdict === "WA";
-                          const verdictDisplay = isMatch ? "Matched" : isWA ? "Mismatch" : r.verdict;
+                          const verdictDisplay = isMatch ? "AC" : isWA ? "WA" : r.verdict;
 
                           return (
                             <div key={i} className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm flex flex-col">
@@ -917,7 +936,7 @@ export default function SolveProblem() {
                               <td className="px-5 py-4 text-right">
                                 <span className={`inline-flex px-2.5 py-1 rounded-[3px] border font-mono text-[9px] font-bold tracking-widest uppercase ${
                                     s.verdict === "AC"
-                                      ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                                      ? "bg-green-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                                       : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                                   }`}>
                                   {s.verdict}
@@ -953,30 +972,80 @@ export default function SolveProblem() {
             
             <div className="flex items-center gap-3">
               <span className="text-xs font-sans font-semibold text-slate-600 hidden md:block">Theme: </span>
-              <div className="flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 rounded-[3px] bg-white dark:bg-[#0d1117] overflow-hidden px-1">
-      
-                <select
-                  value={editorTheme}
-                  onChange={(e) => setEditorTheme(e.target.value)}
-                  className="bg-transparent text-slate-700 dark:text-slate-300 py-1.5 px-2 text-[11px] font-sans font-semibold outline-none cursor-pointer"
+              
+              {/* Custom Theme Dropdown */}
+              <div className="relative" ref={themeDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => { setThemeOpen(!themeOpen); setLanguageOpen(false); }}
+                  className="flex items-center justify-between gap-2 px-3 py-1.5 text-[11px] font-sans font-semibold rounded-[3px] bg-white dark:bg-[#0d1117] border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 transition-colors min-w-[110px] text-left cursor-pointer select-none"
                 >
-                  {AVAILABLE_THEMES.map((theme) => <option key={theme} value={theme}>{theme}</option>)}
-                  <option key="vs-dark" value="vs-dark">VS Dark</option>
-                  <option key="light" value="light">VS Light</option>
-                </select>
+                  <span className="capitalize">{editorTheme === "vs-dark" ? "VS Dark" : editorTheme === "light" ? "VS Light" : editorTheme}</span>
+                  <ChevronDown size={12} className={`text-slate-400 transition-transform duration-200 ${themeOpen ? "rotate-180" : ""}`} />
+                </button>
+                
+                {themeOpen && (
+                  <div className="absolute left-0 mt-1 w-40 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-1 duration-150">
+                    {AVAILABLE_THEMES.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => { setEditorTheme(t); setThemeOpen(false); }}
+                        className={`w-full text-left px-3 py-1.5 text-[11px] font-sans font-semibold transition-colors cursor-pointer block capitalize ${editorTheme === t ? "text-orange-500 bg-slate-50 dark:bg-slate-900/50" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-200"}`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => { setEditorTheme("vs-dark"); setThemeOpen(false); }}
+                      className={`w-full text-left px-3 py-1.5 text-[11px] font-sans font-semibold transition-colors cursor-pointer block ${editorTheme === "vs-dark" ? "text-orange-500 bg-slate-50 dark:bg-slate-900/50" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-200"}`}
+                    >
+                      VS Dark
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEditorTheme("light"); setThemeOpen(false); }}
+                      className={`w-full text-left px-3 py-1.5 text-[11px] font-sans font-semibold transition-colors cursor-pointer block ${editorTheme === "light" ? "text-orange-500 bg-slate-50 dark:bg-slate-900/50" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-200"}`}
+                    >
+                      VS Light
+                    </button>
+                  </div>
+                )}
               </div>
+
               <span className="text-xs font-sans font-semibold text-slate-600 hidden md:block">Language: </span>
-              <div className="flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 rounded-[3px] bg-white dark:bg-[#0d1117] overflow-hidden px-1">
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="bg-transparent text-slate-700 dark:text-slate-300 py-1.5 px-2 text-[11px] font-sans font-semibold outline-none cursor-pointer tracking-wider"
+              
+              {/* Custom Language Dropdown */}
+              <div className="relative" ref={langDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => { setLanguageOpen(!langOpen); setThemeOpen(false); }}
+                  className="flex items-center justify-between gap-2 px-3 py-1.5 text-[11px] font-sans font-semibold rounded-[3px] bg-white dark:bg-[#0d1117] border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700 transition-colors min-w-[110px] text-left cursor-pointer select-none"
                 >
-                  <option value="cpp">C++20</option>
-                  <option value="java">Java</option>
-                  <option value="python">Python 3</option>
-                  <option value="javascript">JavaScript</option>
-                </select>
+                  <span>{language === "cpp" ? "C++20" : language === "java" ? "Java" : language === "python" ? "Python 3" : language === "javascript" ? "JavaScript" : language}</span>
+                  <ChevronDown size={12} className={`text-slate-400 transition-transform duration-200 ${langOpen ? "rotate-180" : ""}`} />
+                </button>
+                
+                {langOpen && (
+                  <div className="absolute left-0 mt-1 w-36 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-xl z-50 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                    {[
+                      { val: "cpp", label: "C++20" },
+                      { val: "java", label: "Java" },
+                      { val: "python", label: "Python 3" },
+                      { val: "javascript", label: "JavaScript" },
+                    ].map((langItem) => (
+                      <button
+                        key={langItem.val}
+                        type="button"
+                        onClick={() => { setLanguage(langItem.val); setLanguageOpen(false); }}
+                        className={`w-full text-left px-3 py-1.5 text-[11px] font-sans font-semibold transition-colors cursor-pointer block ${language === langItem.val ? "text-orange-500 bg-slate-50 dark:bg-slate-900/50" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-200"}`}
+                      >
+                        {langItem.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1124,7 +1193,7 @@ export default function SolveProblem() {
                   </div>
                   <span className={`font-mono text-[9px] -translate-x-2 px-2 py-0.5 rounded-[3px] border font-bold uppercase tracking-widest ${
                       openSubmission.verdict === "AC"
-                        ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                        ? "bg-green-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                         : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                     }`}>
                     {openSubmission.verdict}
@@ -1263,7 +1332,7 @@ export default function SolveProblem() {
                       <td className="px-5 py-3.5 text-right">
                         <span className={`inline-flex px-2 py-0.5 rounded-[3px] border font-mono text-[9px] font-bold tracking-widest uppercase ${
                             sub.verdict === "AC"
-                              ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                              ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                               : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                           }`}>
                           {sub.verdict}
@@ -1315,9 +1384,9 @@ export default function SolveProblem() {
         <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
           <div className="flex justify-between items-center px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#050608]">
             <h2 className="font-mono text-[12px] font-bold text-slate-900 dark:text-white uppercase tracking-[0.15em] flex items-center gap-2">
-              <CloudSync size={14} className="text-blue-500" /> Cloud Sync
+              <CloudSync size={14} className="text-orange-400" /> Cloud Sync
             </h2>
-            <button className="text-slate-400 cursor-pointer hover:text-blue-500 hover:rotate-90 transition-all duration-300 ease-out" onClick={() => { setShowCloudModal(false); setIsCreatingSave(false); setSaveTitle(""); }}>
+            <button className="text-slate-400 cursor-pointer hover:text-orange-500 transition-all duration-300 ease-out" onClick={() => { setShowCloudModal(false); setIsCreatingSave(false); setSaveTitle(""); }}>
               <XSquare size={16} />
             </button>
           </div>
@@ -1327,7 +1396,7 @@ export default function SolveProblem() {
               <p className="text-center text-slate-500 dark:text-slate-400 mb-6 font-sans text-[12px] tracking-wide font-semibold">
                 Access your cloud repository to restore previously saved code.
               </p>
-              <button onClick={handleFetchSaves} disabled={isFetching} className="flex items-center justify-center gap-2 border border-blue-600 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-white font-mono font-bold tracking-widest py-2 px-6 rounded-[3px] transition-all text-[11px] uppercase">
+              <button onClick={handleFetchSaves} disabled={isFetching} className="flex items-center justify-center gap-2 border border-orange-500 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-white font-mono font-bold tracking-widest py-2 px-6 rounded-[3px] transition-all text-[11px] uppercase">
                 {isFetching ? <RefreshCcw size={14} className="animate-spin" /> : <CloudSync size={14} />}
                 {isFetching ? "SYNCING..." : "FETCH SAVES"}
               </button>

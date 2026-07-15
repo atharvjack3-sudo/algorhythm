@@ -125,7 +125,7 @@ function CustomTC({ setRunLoading, lang, code }) {
         <div className="flex flex-col gap-5">
           {customRunRes.map((res, index) => {
             const isSuccess = res.verdict === "AC";
-            const displayVerdict = isSuccess ? "Compiled Successfully" : res.verdict;
+            const displayVerdict = isSuccess ? "Compiled" : res.verdict;
 
             return (
               <div key={index} className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm flex flex-col">
@@ -135,7 +135,7 @@ function CustomTC({ setRunLoading, lang, code }) {
                       Test Case {index + 1}
                     </span>
                     <span className={`px-2.5 py-0.5 rounded-[3px] border font-sans text-[10px] font-semibold tracking-wide ${
-                        isSuccess ? "bg-green-50 dark:bg-green-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
+                        isSuccess ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                         : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                       }`}>
                       {displayVerdict}
