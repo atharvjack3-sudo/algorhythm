@@ -585,10 +585,10 @@ export default function SolveProblem() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 font-sans text-[12px] font-semibold tracking-wide transition-colors relative whitespace-nowrap border-slate-300 dark:border-slate-800 cursor-pointer outline-none
+                  className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-sans text-[12px] font-semibold tracking-wide transition-colors relative whitespace-nowrap cursor-pointer outline-none
                     ${isActive 
-                      ? "bg-white dark:bg-[#0d1117] text-slate-900 dark:text-orange-400 border-t-2 border-t-orange-400" 
-                      : "bg-[#f8fafc] dark:bg-[#0a0c10] text-slate-500 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-[#0d1117] border-t-transparent"
+                      ? "bg-white dark:bg-[#0a0c10] text-slate-900 dark:text-orange-400 border-orange-400" 
+                      : "bg-[#f8fafc] dark:bg-[#0a0c10] border-transparent text-slate-500 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-[#0d1117] border-t-transparent"
                     }`}
                 >
                   <Icon size={14} className={isActive ? "text-orange-500" : "text-slate-400"} />
@@ -1117,10 +1117,10 @@ export default function SolveProblem() {
               <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#050608] transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="font-mono text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-[0.15em] flex items-center gap-2">
-                    <Terminal size={14} className="text-blue-500" />
+                    <Terminal size={14} className="text-orange-500" />
                     SUBMISSION RECORD
                   </div>
-                  <span className={`font-mono text-[9px] px-2 py-0.5 rounded-[3px] border font-bold uppercase tracking-widest ${
+                  <span className={`font-mono text-[9px] -translate-x-2 px-2 py-0.5 rounded-[3px] border font-bold uppercase tracking-widest ${
                       openSubmission.verdict === "AC"
                         ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
                         : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"

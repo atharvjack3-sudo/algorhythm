@@ -1,10 +1,24 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-//import darklogo from "../assets/navico/main_logo.png";
 import logo from "../assets/navico/light_mode_logo.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { History, Play, Pause, RotateCcw } from "lucide-react";
+import { 
+  History, 
+  Play, 
+  Pause, 
+  RotateCcw,
+  LayoutDashboard,
+  Bookmark,
+  FileText,
+  Terminal,
+  Sun,
+  Moon,
+  Monitor,
+  ChevronDown,
+  LogOut,
+  Activity
+} from "lucide-react";
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
@@ -44,26 +58,10 @@ export default function Navbar() {
   ];
 
   const DROPDOWN_LINKS = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
-    },
-    {
-      name: "My Lists",
-      path: "/my-lists",
-      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
-    },
-    {
-      name: "My Blogs",
-      path: "/blogs/mine",
-      icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-    },
-    {
-      name: "Playground",
-      path: "/playground",
-      icon: "M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-    },
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "My Lists", path: "/my-lists", icon: Bookmark },
+    { name: "My Blogs", path: "/blogs/mine", icon: FileText },
+    { name: "Playground", path: "/playground", icon: Terminal },
   ];
 
   return (
@@ -76,10 +74,10 @@ export default function Navbar() {
           --nb-border: #e2e8f0;
           --nb-text-muted: #64748b;
           --nb-text-hover: #0f172a;
-          --nb-accent: #f59e0b;
+          --nb-accent: #ea580c;
           --nb-btn-hover-bg: #f8fafc;
           --nb-btn-hover-border: #e2e8f0;
-          --nb-avatar-text: #070e17;
+          --nb-avatar-text: #ffffff;
           --nb-dropdown-bg: #ffffff;
           --nb-dropdown-border: #e2e8f0;
           --nb-dd-header-bg: #f8fafc;
@@ -103,29 +101,29 @@ export default function Navbar() {
         }
 
         .dark {
-          --nb-bg: #020617;
-          --nb-border: #192a3a;
-          --nb-text-muted: #3d5268;
-          --nb-text-hover: #8facc0;
-          --nb-accent: #f59e0b;
-          --nb-btn-hover-bg: #0e1e2e;
-          --nb-btn-hover-border: #233245;
-          --nb-avatar-text: #070e17;
-          --nb-dropdown-bg: #020617;
-          --nb-dropdown-border: #233245;
-          --nb-dd-header-bg: #0f172a;
-          --nb-dd-header-border: #192a3a;
+          --nb-bg: #050608;
+          --nb-border: #1e293b;
+          --nb-text-muted: #475569;
+          --nb-text-hover: #e2e8f0;
+          --nb-accent: #f97316;
+          --nb-btn-hover-bg: #0d1117;
+          --nb-btn-hover-border: #1e293b;
+          --nb-avatar-text: #ffffff;
+          --nb-dropdown-bg: #0d1117;
+          --nb-dropdown-border: #1e293b;
+          --nb-dd-header-bg: #161b22;
+          --nb-dd-header-border: #1e293b;
           --nb-dd-name: #c8d6e5;
-          --nb-theme-track: #0a1420;
-          --nb-theme-track-border: #192a3a;
-          --nb-theme-btn-text: #2d4055;
-          --nb-theme-btn-active-bg: #152030;
-          --nb-theme-btn-active-border: #233245;
-          --nb-dd-link-text: #4a6070;
-          --nb-dd-link-hover-bg: #0a1420;
-          --nb-dd-link-hover-border: #192a3a;
-          --nb-dd-link-icon: #2d4055;
-          --nb-mobile-label: #233245;
+          --nb-theme-track: #050608;
+          --nb-theme-track-border: #1e293b;
+          --nb-theme-btn-text: #475569;
+          --nb-theme-btn-active-bg: #161b22;
+          --nb-theme-btn-active-border: #334155;
+          --nb-dd-link-text: #64748b;
+          --nb-dd-link-hover-bg: #050608;
+          --nb-dd-link-hover-border: #1e293b;
+          --nb-dd-link-icon: #475569;
+          --nb-mobile-label: #1e293b;
           --nb-logo-filter: brightness(0) invert(1);
           --nb-logout-hover-bg: rgba(239,68,68,0.06);
           --nb-logout-hover-border: rgba(239,68,68,0.15);
@@ -176,7 +174,7 @@ export default function Navbar() {
         .nb-links {
           display: flex;
           align-items: center;
-          gap: 2px;
+          gap: 4px;
           height: 100%;
           position: absolute;
           left: 50%;
@@ -189,12 +187,12 @@ export default function Navbar() {
           align-items: center;
           padding: 0 14px;
           font-family: 'DM Sans', sans-serif;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
+          letter-spacing: 0.01em;
           color: var(--nb-text-muted);
           text-decoration: none;
           transition: color .15s;
-          letter-spacing: 0.01em;
         }
         .nb-link::after {
           content: '';
@@ -228,7 +226,7 @@ export default function Navbar() {
           padding: 5px 10px 5px 6px;
           background: transparent;
           border: 1px solid transparent;
-          border-radius: 5px;
+          border-radius: 3px;
           cursor: pointer;
           transition: background .15s, border-color .15s;
         }
@@ -238,9 +236,9 @@ export default function Navbar() {
           border-color: var(--nb-btn-hover-border);
         }
         .nb-avatar {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
+          width: 26px;
+          height: 26px;
+          border-radius: 3px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -249,19 +247,18 @@ export default function Navbar() {
           font-weight: 700;
           color: var(--nb-avatar-text);
           flex-shrink: 0;
+          overflow: hidden;
         }
         .nb-avatar.premium { background: var(--nb-accent); }
-        .nb-avatar.standard { background: #60a5fa; }
+        .nb-avatar.standard { background: #64748b; }
         .nb-username {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 11px;
-          font-weight: 600;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
           color: var(--nb-text-hover);
-          letter-spacing: 0.04em;
+          letter-spacing: 0.02em;
         }
         .nb-chevron {
-          width: 12px;
-          height: 12px;
           color: var(--nb-text-muted);
           transition: transform .2s, color .15s;
           flex-shrink: 0;
@@ -278,7 +275,7 @@ export default function Navbar() {
           width: 264px;
           background: var(--nb-dropdown-bg);
           border: 1px solid var(--nb-dropdown-border);
-          border-radius: 6px;
+          border-radius: 3px;
           overflow: hidden;
           transform-origin: top right;
           transition: opacity .18s, transform .18s;
@@ -304,24 +301,24 @@ export default function Navbar() {
           border-bottom: 1px solid var(--nb-dd-header-border);
         }
         .nb-dd-avatar {
-          width: 36px; height: 36px; border-radius: 50%;
+          width: 32px; height: 32px; border-radius: 3px;
           display: flex; align-items: center; justify-content: center;
-          font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
-          color: var(--nb-avatar-text); flex-shrink: 0;
+          font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+          color: var(--nb-avatar-text); flex-shrink: 0; overflow: hidden;
         }
-        /* ADDED: Background colors for dropdown avatars */
         .nb-dd-avatar.premium { background: var(--nb-accent); }
-        .nb-dd-avatar.standard { background: #60a5fa; }
+        .nb-dd-avatar.standard { background: #64748b; }
         
         .nb-dd-name {
-          font-family: 'DM Sans', sans-serif;
-          font-size: 14px; font-weight: 700; color: var(--nb-dd-name);
+          font-family: 'JetBrains Mono', monospace; /* Heading exception */
+          text-transform: letter-spacing: 0.05em;
+          font-size: 13px; font-weight: 700; color: var(--nb-dd-name);
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .nb-dd-tier {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 9px; font-weight: 600;
-          letter-spacing: 0.12em; text-transform: uppercase;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 11px; font-weight: 600;
+          letter-spacing: 0.03em;
           margin-top: 2px;
         }
         .nb-dd-tier.premium { color: var(--nb-accent); }
@@ -337,7 +334,7 @@ export default function Navbar() {
           display: flex;
           background: var(--nb-theme-track);
           border: 1px solid var(--nb-theme-track-border);
-          border-radius: 4px;
+          border-radius: 3px;
           padding: 3px;
           gap: 2px;
         }
@@ -346,16 +343,15 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 5px;
-          padding: 5px 0;
+          gap: 6px;
+          padding: 6px 0;
           border-radius: 3px;
           border: 1px solid transparent;
           background: transparent;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 9px;
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
           color: var(--nb-theme-btn-text);
           cursor: pointer;
           transition: all .15s;
@@ -366,7 +362,6 @@ export default function Navbar() {
           border-color: var(--nb-theme-btn-active-border);
           color: var(--nb-accent);
         }
-        .nb-theme-btn svg { width: 10px; height: 10px; }
 
         /* Dropdown links */
         .nb-dd-links {
@@ -381,11 +376,12 @@ export default function Navbar() {
           align-items: center;
           gap: 10px;
           padding: 8px 10px;
-          border-radius: 4px;
+          border-radius: 3px;
           text-decoration: none;
           font-family: 'DM Sans', sans-serif;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
+          letter-spacing: 0.02em;
           color: var(--nb-dd-link-text);
           transition: background .12s, color .12s, border-color .12s;
           border: 1px solid transparent;
@@ -396,7 +392,6 @@ export default function Navbar() {
           color: var(--nb-text-hover);
         }
         .nb-dd-link svg {
-          width: 15px; height: 15px;
           color: var(--nb-dd-link-icon);
           flex-shrink: 0;
           transition: color .12s;
@@ -406,14 +401,14 @@ export default function Navbar() {
         /* Performance badge */
         .nb-alpha {
           margin-left: auto;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 8px; font-weight: 700;
-          letter-spacing: 0.1em;
-          padding: 2px 5px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 10px; font-weight: 700;
+          letter-spacing: 0.05em;
+          padding: 2px 6px;
           border-radius: 2px;
-          background: rgba(239,68,68,0.08);
-          color: #ef4444;
-          border: 1px solid rgba(239,68,68,0.2);
+          background: rgba(249,115,22,0.1);
+          color: var(--nb-accent);
+          border: 1px solid rgba(249,115,22,0.2);
           text-transform: uppercase;
         }
 
@@ -426,20 +421,20 @@ export default function Navbar() {
         }
         .nb-mobile-label {
           padding: 4px 10px 6px;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 9px; font-weight: 600;
+          font-family: 'JetBrains Mono', monospace; /* Heading exception */
+          font-size: 10px; font-weight: 700;
           color: var(--nb-mobile-label);
-          letter-spacing: 0.12em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
         }
         .nb-mobile-link {
           display: block;
           padding: 7px 10px;
           text-decoration: none;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 11px; font-weight: 500;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 13px; font-weight: 700;
           color: var(--nb-text-muted);
-          letter-spacing: 0.06em;
+          letter-spacing: 0.02em;
           border-radius: 3px;
           transition: background .12s, color .12s;
         }
@@ -459,11 +454,10 @@ export default function Navbar() {
           padding: 8px 10px;
           background: transparent;
           border: 1px solid transparent;
-          border-radius: 4px;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
+          border-radius: 3px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 12px; font-weight: 700;
+          letter-spacing: 0.02em;
           color: var(--nb-text-muted);
           cursor: pointer;
           transition: all .15s;
@@ -473,19 +467,19 @@ export default function Navbar() {
           border-color: var(--nb-logout-hover-border);
           color: var(--nb-logout-hover-color);
         }
-        .nb-logout svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .nb-logout svg { flex-shrink: 0; }
 
         /* Sign in button */
         .nb-signin {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.12em;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 12px; font-weight: 700;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
-          padding: 7px 16px;
+          padding: 8px 18px;
           background: var(--nb-accent);
           color: var(--nb-avatar-text);
           border: none;
-          border-radius: 4px;
+          border-radius: 3px;
           cursor: pointer;
           text-decoration: none;
           transition: opacity .15s;
@@ -539,25 +533,13 @@ export default function Navbar() {
                     {!user?.profile ? (
                       user.username.charAt(0).toUpperCase()
                     ) : (
-                      <img className="rounded-lg" src={user?.profile}></img>
+                      <img className="w-full h-full object-cover" src={user?.profile} alt="Avatar" />
                     )}
                   </div>
-                  <span className="font-sans dark:text-white text-slate-700 font-semibold text-xs tracking-wide">
+                  <span className="nb-username">
                     {user.username}
                   </span>
-                  <svg
-                    className="nb-chevron"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  <ChevronDown size={14} className="nb-chevron" />
                 </button>
 
                 {/* Dropdown */}
@@ -570,7 +552,7 @@ export default function Navbar() {
                       {!user?.profile ? (
                         user.username.charAt(0).toUpperCase()
                       ) : (
-                        <img className="rounded-lg" src={user?.profile}></img>
+                        <img className="w-full h-full object-cover" src={user?.profile} alt="Avatar" />
                       )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -578,7 +560,7 @@ export default function Navbar() {
                       <div
                         className={`nb-dd-tier ${user?.is_premium ? "premium" : "standard"}`}
                       >
-                        {user?.is_premium ? "Premium Member" : "Standard User"}
+                        {user?.is_premium ? "Premium Access" : "Standard Key"}
                       </div>
                     </div>
                   </div>
@@ -587,55 +569,16 @@ export default function Navbar() {
                   <div className="nb-theme-row">
                     <div className="nb-theme-track">
                       {[
-                        {
-                          key: "light",
-                          label: "Light",
-                          icon: (
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                            />
-                          ),
-                        },
-                        {
-                          key: "dark",
-                          label: "Dark",
-                          icon: (
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                            />
-                          ),
-                        },
-                        {
-                          key: "system",
-                          label: "Auto",
-                          icon: (
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            />
-                          ),
-                        },
+                        { key: "light", label: "Light", icon: <Sun size={12} /> },
+                        { key: "dark", label: "Dark", icon: <Moon size={12} /> },
+                        { key: "system", label: "Auto", icon: <Monitor size={12} /> },
                       ].map((t) => (
                         <button
                           key={t.key}
                           className={`nb-theme-btn${theme === t.key ? " active" : ""}`}
                           onClick={() => setTheme(t.key)}
                         >
-                          <svg
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            {t.icon}
-                          </svg>
+                          {t.icon}
                           {t.label}
                         </button>
                       ))}
@@ -651,18 +594,7 @@ export default function Navbar() {
                         className="nb-dd-link"
                         onClick={() => setOpen(false)}
                       >
-                        <svg
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d={link.icon}
-                          />
-                        </svg>
+                        <link.icon size={15} />
                         {link.name}
                       </Link>
                     ))}
@@ -673,36 +605,15 @@ export default function Navbar() {
                       className="nb-dd-link"
                       onClick={() => setOpen(false)}
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        style={{
-                          width: 15,
-                          height: 15,
-                          color: "var(--nb-dd-link-icon)",
-                          flexShrink: 0,
-                          transition: "color .12s",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.color = "var(--nb-accent)")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.color =
-                            "var(--nb-dd-link-icon)")
-                        }
-                      >
-                        <rect x="3" y="10" width="4" height="11" rx="1" />
-                        <rect x="10" y="6" width="4" height="15" rx="1" />
-                        <rect x="17" y="3" width="4" height="18" rx="1" />
-                      </svg>
-                      My Performance
-                      <span className="nb-alpha">Alpha</span>
+                      <Activity size={15} />
+                      Performance
+                      <span className="nb-alpha">BETA</span>
                     </Link>
                   </div>
 
                   {/* Mobile nav links */}
                   <div className="nb-mobile-links">
-                    <div className="nb-mobile-label">Navigation</div>
+                    <div className="nb-mobile-label">Global Navigation</div>
                     {NAV_LINKS.map((link) => (
                       <Link
                         key={`m-${link.name}`}
@@ -724,24 +635,14 @@ export default function Navbar() {
                         setOpen(false);
                       }}
                     >
-                      <svg
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
-                      Sign out
+                      <LogOut size={14} />
+                      Terminate Session
                     </button>
-                    <div className="w-full flex h-8 mt-2 items-center justify-between rounded-md dark:bg-slate-900/50 px-3 text-xs font-medium font-sans border-slate-800/60 text-slate-400">
+                    
+                    <div className="w-full flex h-8 mt-2 items-center justify-between rounded-[3px] bg-slate-100 dark:bg-slate-900/50 px-3 border border-slate-200 dark:border-slate-800">
                       <div className="flex items-center gap-2">
-                        <History className="text-slate-500" size={14} />
-                        <span className="font-sans text-slate-500">
+                        <History className="text-slate-500" size={13} />
+                        <span className="font-sans font-bold text-[12px] tabular-nums tracking-widest text-slate-600 dark:text-slate-400">
                           {formatTime(clock)}
                         </span>
                       </div>
@@ -759,13 +660,13 @@ export default function Navbar() {
                             }, 1000);
                             setPlayStopwatch(true);
                           }}
-                          className="p-1 hover:bg-slate-300 cursor-pointer dark:hover:bg-slate-800 hover:text-slate-200 rounded transition-colors duration-150"
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors duration-150 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
                           title={playStopwatch ? "Pause" : "Start"}
                         >
                           {playStopwatch ? (
-                            <Pause size={12} className="text-slate-700"/>
+                            <Pause size={13} />
                           ) : (
-                            <Play size={12} className="text-slate-700" fill="currentColor" />
+                            <Play size={13} fill="currentColor" />
                           )}
                         </button>
 
@@ -775,10 +676,10 @@ export default function Navbar() {
                             setPlayStopwatch(false);
                             setClock(0);
                           }}
-                          className="p-1 hover:bg-slate-300 cursor-pointer dark:hover:bg-slate-800 hover:text-rose-400 rounded transition-colors duration-150"
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors duration-150 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 cursor-pointer"
                           title="Reset"
                         >
-                          <RotateCcw size={12} className="text-slate-700 " />
+                          <RotateCcw size={13} />
                         </button>
                       </div>
                     </div>
@@ -787,7 +688,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link to="/auth" className="nb-signin">
-                Sign In →
+                AUTHENTICATE
               </Link>
             )}
           </div>
