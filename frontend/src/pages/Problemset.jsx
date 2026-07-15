@@ -164,7 +164,7 @@ export default function ProblemSet() {
         </div>
         <button
           onClick={() => navigate("/premium")}
-          className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-500 rounded-[3px] transition-colors group text-left cursor-pointer"
+          className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-[#14171a] hover:border-orange-400 dark:hover:border-orange-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           <div className="absolute inset-y-0 -left-6 w-[55%] bg-orange-100 dark:bg-orange-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
 
@@ -187,7 +187,7 @@ export default function ProblemSet() {
 
         <button
           onClick={() => navigate("/leaderboard")}
-          className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 rounded-[3px] transition-colors group text-left cursor-pointer"
+          className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-[#14171a] hover:border-blue-400 dark:hover:border-blue-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           {/* Slanted Accent Background */}
           <div className="absolute inset-y-0 -left-6 w-[55%] bg-blue-100 dark:bg-blue-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
@@ -222,7 +222,7 @@ export default function ProblemSet() {
 
         <button
           onClick={() => navigate("/my-lists")}
-          className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-500 rounded-[3px] transition-colors group text-left cursor-pointer"
+          className="relative overflow-hidden flex items-center px-3 py-2 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-[#14171a] hover:border-emerald-400 dark:hover:border-emerald-500 rounded-[3px] transition-colors group text-left cursor-pointer"
         >
           {/* Slanted Accent Background */}
           <div className="absolute inset-y-0 -left-6 w-[55%] bg-emerald-100 dark:bg-emerald-500/20 -skew-x-12 group-hover:w-[85%] transition-all duration-600 ease-out z-0" />
@@ -294,7 +294,7 @@ export default function ProblemSet() {
                   className={`px-3 py-1 rounded-[3px] font-sans text-[10px] font-semibold tracking-wide border transition-colors cursor-pointer ${
                     active
                       ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-slate-50 dark:bg-gray-900 text-slate-600 dark:text-slate-400 dark:hover:text-orange-400 hover:text-orange-500 border-slate-300 dark:border-slate-700 hover:bg-orange-500/20 hover:border-orange-400 dark:hover:border-orange-500"
+                      : "bg-slate-50 dark:bg-[#121417] text-slate-600 dark:text-slate-400 dark:hover:text-orange-400 hover:text-orange-500 border-slate-300 dark:border-[#14171a] hover:bg-orange-500/20 hover:border-orange-400 dark:hover:border-orange-500"
                   }`}
                 >
                   {d.label}
@@ -326,7 +326,7 @@ export default function ProblemSet() {
                     className={`px-2 py-1 cursor-pointer rounded-[3px] font-sans text-[10px] tracking-wide border transition-colors ${
                       active
                         ? "bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
-                        : "bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-orange-400 dark:hover:border-orange-600"
+                        : "bg-slate-50 dark:bg-[#181c21] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-[#101316] hover:border-orange-400 dark:hover:border-orange-600"
                     }`}
                   >
                     {tag.name}
@@ -366,7 +366,7 @@ export default function ProblemSet() {
           </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-[3px] p-3 shadow-sm">
+        <div className="bg-slate-50 dark:bg-[#0f1114] border border-slate-200 dark:border-[#101215] rounded-[3px] p-3 shadow-sm">
           {/* Days of week */}
           <div className="grid grid-cols-7 mb-2 gap-1">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -476,7 +476,7 @@ export default function ProblemSet() {
                     setSearchQuery(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-950 border font-semibold border-slate-200 dark:border-slate-800 rounded-[3px] text-[11px] font-sans focus:outline-none focus:border-orange-500 transition-colors placeholder-slate-400 dark:placeholder-slate-600 text-slate-900 dark:text-white"
+                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-[#0d1117] border font-semibold border-slate-200 dark:border-slate-800 rounded-[3px] text-[11px] font-sans focus:outline-none focus:border-orange-500 transition-colors placeholder-slate-400 dark:placeholder-slate-600 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -510,11 +510,11 @@ export default function ProblemSet() {
           )}
 
           {/* Problem Table */}
-          <div className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md shadow-sm overflow-hidden flex flex-col flex-1">
+          <div className="w-full bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-[#14171a] rounded-md shadow-sm overflow-hidden flex flex-col flex-1">
             <div className="w-full overflow-x-auto block custom-scrollbar">
               <table className="w-full text-left border-collapse whitespace-nowrap">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                  <tr className="bg-slate-50 dark:bg-[#0d1117] border-b border-slate-200 dark:border-[#0b0e12]">
                     <th className="px-5 py-3 font-mono text-[10px] font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase w-16 text-center">
                       ID
                     </th>
@@ -532,27 +532,27 @@ export default function ProblemSet() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100 dark:divide-[#0b0e12]">
                   {loading ? (
                     Array.from({ length: limit }).map((_, idx) => (
                       <tr
                         key={idx}
-                        className="animate-pulse bg-white dark:bg-slate-950"
+                        className="animate-pulse bg-white dark:bg-[#0d1117]"
                       >
                         <td className="px-5 py-4">
-                          <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-[2px] w-6 mx-auto"></div>
+                          <div className="h-3 bg-slate-100 dark:bg-[#181c21] rounded-[2px] w-6 mx-auto"></div>
                         </td>
                         <td className="px-5 py-4">
-                          <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-[2px] w-48 mb-1.5"></div>
+                          <div className="h-4 bg-slate-100 dark:bg-[#181c21] rounded-[2px] w-48 mb-1.5"></div>
                         </td>
                         <td className="px-5 py-4">
-                          <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-[2px] w-12 mx-auto"></div>
+                          <div className="h-3 bg-slate-100 dark:bg-[#181c21] rounded-[2px] w-12 mx-auto"></div>
                         </td>
                         <td className="px-5 py-4">
-                          <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-[2px] w-14 mx-auto"></div>
+                          <div className="h-4 bg-slate-100 dark:bg-[#181c21] rounded-[2px] w-14 mx-auto"></div>
                         </td>
                         <td className="px-5 py-4">
-                          <div className="h-6 bg-slate-100 dark:bg-slate-800 rounded-[3px] w-6 mx-auto"></div>
+                          <div className="h-6 bg-slate-100 dark:bg-[#181c21] rounded-[3px] w-6 mx-auto"></div>
                         </td>
                       </tr>
                     ))
@@ -570,8 +570,8 @@ export default function ProblemSet() {
                         key={problem.id}
                         onClick={() => navigate(`/problemset/${problem.id}`)}
                         className="odd:bg-white even:bg-slate-100
-    dark:odd:bg-slate-950 dark:even:bg-slate-900/40
-    hover:!bg-orange-50 dark:hover:!bg-gray-900
+    dark:odd:bg-[#080b0f] dark:even:bg-[#0e131a]
+    hover:!bg-orange-50 dark:hover:!bg-[#1c2129]
     transition-colors duration-200
     cursor-pointer group relative "
                       >
@@ -632,7 +632,7 @@ export default function ProblemSet() {
             </div>
 
             {/* Pagination Footer */}
-            <div className="border-t border-slate-200 dark:border-slate-800 px-5 py-3 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between mt-auto">
+            <div className="border-t border-slate-200 dark:border-slate-800 px-5 py-3 bg-slate-50 dark:bg-[#0d1117] flex items-center justify-between mt-auto">
               <button
                 disabled={page === 1 || loading}
                 onClick={() => setPage((p) => p - 1)}
