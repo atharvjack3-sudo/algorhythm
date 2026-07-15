@@ -531,7 +531,7 @@ export default function SolveProblem() {
           style={isDesktop ? { width: `${leftWidth}%` } : {}}
         >
           {/* Header */}
-          <div className="px-6 pt-6 pb-4 flex-shrink-0 bg-slate-50 dark:bg-[#0a0c10] border-b-2 border-slate-200 dark:border-slate-800">
+          <div className="px-6 pt-6 pb-4 flex-shrink-0 bg-slate-50 dark:bg-[#0a0c10] border-slate-200 dark:border-slate-800">
             <h1 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight leading-tight">
               {problemId}. {problem.title}
             </h1>
@@ -585,7 +585,7 @@ export default function SolveProblem() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 font-sans text-[12px] font-semibold tracking-wide transition-colors relative whitespace-nowrap border-l border-slate-300 dark:border-slate-800 cursor-pointer outline-none
+                  className={`flex items-center gap-2 px-4 py-2.5 font-sans text-[12px] font-semibold tracking-wide transition-colors relative whitespace-nowrap border-slate-300 dark:border-slate-800 cursor-pointer outline-none
                     ${isActive 
                       ? "bg-white dark:bg-[#0d1117] text-slate-900 dark:text-orange-400 border-t-2 border-t-orange-400" 
                       : "bg-[#f8fafc] dark:bg-[#0a0c10] text-slate-500 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-[#0d1117] border-t-transparent"
