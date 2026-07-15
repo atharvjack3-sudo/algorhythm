@@ -741,8 +741,8 @@ export default function SolveProblem() {
                                   <span className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-700 dark:text-slate-300 uppercase">
                                     Test Case {r.sample || r.index || i + 1}
                                   </span>
-                                  <span className={`px-2.5 py-0.5 rounded-[3px] border font-mono text-[10px] font-bold tracking-widest uppercase ${
-                                      isMatch ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                                  <span className={`px-2.5 py-0.5 rounded-[3px] border font-sans text-[10px] font-semibold tracking-wide ${
+                                      isMatch ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-green-200 dark:border-orange-500/30"
                                       : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                                     }`}>
                                     {verdictDisplay}
@@ -758,9 +758,9 @@ export default function SolveProblem() {
                               <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
                                 <div>
                                   <div className="px-4 py-2 bg-slate-50 dark:bg-[#0a0c10] border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
-                                    Your Output
+                                    Output
                                   </div>
-                                  <pre className={`p-4 m-0 font-mono text-[13px] whitespace-pre-wrap ${isMatch ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}>
+                                  <pre className={`p-4 m-0 font-mono text-[13px] whitespace-pre-wrap ${isMatch ? "text-orange-500 dark:text-orange-400" : "text-red-600 dark:text-red-500"}`}>
                                     {r.output || <span className="italic text-slate-400 dark:text-slate-600">No output</span>}
                                   </pre>
                                 </div>
@@ -840,7 +840,7 @@ export default function SolveProblem() {
                                       Test #{s.index}
                                     </td>
                                     <td className="px-5 py-3.5 text-right">
-                                      <span className={`inline-flex px-2.5 py-1 rounded-[3px] border font-mono text-[9px] font-bold tracking-widest uppercase ${
+                                      <span className={`inline-flex px-2.5 py-1 rounded-[3px] border font-sans text-[10px] font-semibold tracking-wide ${
                                           s.verdict === "AC" || s.verdict === "Accepted"
                                             ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
                                             : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
@@ -1231,7 +1231,7 @@ export default function SolveProblem() {
           <div className="w-[92%] md:w-[65%] lg:w-[55%] h-[80%] overflow-hidden rounded-[3px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1117] shadow-2xl flex flex-col">
             <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#050608] px-5 flex-shrink-0">
               <h2 className="font-mono text-[12px] font-bold tracking-[0.15em] text-slate-800 dark:text-white uppercase flex items-center gap-2">
-                <Terminal size={14} className="text-blue-500"/> Restore History
+                <Terminal size={14} className="text-orange-400"/> Restore History
               </h2>
               <button onClick={() => setShowRestoreModal(false)} className="rounded-[3px] cursor-pointer p-1.5 text-slate-500 transition hover:bg-slate-200 dark:hover:bg-slate-800">
                 <XSquare size={16} />
@@ -1251,7 +1251,7 @@ export default function SolveProblem() {
                       }}
                       className="cursor-pointer transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80"
                     >
-                      <td className="px-5 py-3.5 font-mono text-[12px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-500 transition-colors">
+                      <td className="px-5 py-3.5 font-mono text-[12px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-orange-500 transition-colors">
                         Sub. #{submissions.length - i}
                       </td>
                       <td className="px-5 py-3.5 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
@@ -1324,8 +1324,8 @@ export default function SolveProblem() {
 
           {!cloudModalInit ? (
             <div className="flex flex-col items-center justify-center p-10">
-              <p className="text-center text-slate-500 dark:text-slate-400 mb-6 font-mono text-[10px] tracking-widest uppercase font-bold">
-                Access your cloud repository to restore saved logic vectors.
+              <p className="text-center text-slate-500 dark:text-slate-400 mb-6 font-sans text-[12px] tracking-wide font-semibold">
+                Access your cloud repository to restore previously saved code.
               </p>
               <button onClick={handleFetchSaves} disabled={isFetching} className="flex items-center justify-center gap-2 border border-blue-600 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-white font-mono font-bold tracking-widest py-2 px-6 rounded-[3px] transition-all text-[11px] uppercase">
                 {isFetching ? <RefreshCcw size={14} className="animate-spin" /> : <CloudSync size={14} />}
@@ -1335,17 +1335,17 @@ export default function SolveProblem() {
           ) : (
             <div className="p-5 flex flex-col gap-5">
               {!isCreatingSave ? (
-                <button onClick={() => setIsCreatingSave(true)} className="w-full bg-slate-50 dark:bg-[#050608] hover:bg-blue-50 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-blue-400 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-500 py-2.5 rounded-[3px] transition-colors font-mono text-[10px] font-bold tracking-[0.15em] uppercase cursor-pointer flex items-center justify-center gap-2">
-                  <PlaySquare size={12} /> INITIALIZE NEW SAVE
+                <button onClick={() => setIsCreatingSave(true)} className="w-full bg-slate-50 dark:bg-[#050608] hover:bg-blue-50 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-orange-400 text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-500 py-2.5 rounded-[3px] transition-colors font-sans text-[11px] font-semibold cursor-pointer flex items-center justify-center gap-2">
+                  <PlaySquare size={12} /> Make New Save
                 </button>
               ) : (
                 <div className="flex gap-2">
-                  <input type="text" placeholder="Enter save signature..." value={saveTitle} onChange={(e) => setSaveTitle(e.target.value)} className="flex-1 bg-white dark:bg-[#050608] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-2 rounded-[3px] outline-none focus:border-blue-500 transition-colors font-mono text-[11px]" autoFocus />
-                  <button onClick={handleCreateSave} disabled={isSaving || !saveTitle.trim()} className="flex items-center justify-center font-mono font-bold tracking-widest bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-[3px] text-[10px] uppercase transition-colors cursor-pointer border border-blue-600">
-                    {isSaving ? <RefreshCcw size={12} className="animate-spin mr-1" /> : "COMMIT"}
+                  <input type="text" placeholder="Enter save signature..." value={saveTitle} onChange={(e) => setSaveTitle(e.target.value)} className="flex-1 bg-white dark:bg-[#050608] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-2 rounded-[3px] outline-none focus:border-orange-500 transition-colors font-mono text-[11px]" autoFocus />
+                  <button onClick={handleCreateSave} disabled={isSaving || !saveTitle.trim()} className="flex items-center justify-center font-sans font-semibold tracking-wide bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-[3px] text-[10px] uppercase transition-colors cursor-pointer border border-orange-600">
+                    {isSaving ? <RefreshCcw size={12} className="animate-spin mr-1" /> : "Create"}
                   </button>
-                  <button onClick={() => setIsCreatingSave(false)} disabled={isSaving} className="font-mono font-bold tracking-widest bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-3 py-2 rounded-[3px] text-[10px] uppercase transition-colors cursor-pointer">
-                    ABORT
+                  <button onClick={() => setIsCreatingSave(false)} disabled={isSaving} className="font-sans font-semibold tracking-wide bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-3 py-2 rounded-[3px] text-[10px] transition-colors cursor-pointer">
+                    Cancel
                   </button>
                 </div>
               )}
@@ -1353,7 +1353,7 @@ export default function SolveProblem() {
               <div className="flex flex-col border border-slate-200 dark:border-slate-800 rounded-[3px] max-h-64 overflow-y-auto custom-scrollbar relative">
                 {isFetching && (
                   <div className="absolute inset-0 bg-white/80 dark:bg-[#0d1117]/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <RefreshCcw className="animate-spin text-blue-500" size={24} />
+                    <RefreshCcw className="animate-spin text-orange-400" size={24} />
                   </div>
                 )}
                 {cloudSaves.length > 0 ? (

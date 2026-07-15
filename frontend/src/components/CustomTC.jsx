@@ -134,8 +134,8 @@ function CustomTC({ setRunLoading, lang, code }) {
                     <span className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-700 dark:text-slate-300 uppercase">
                       Test Case {index + 1}
                     </span>
-                    <span className={`px-2.5 py-0.5 rounded-[3px] border font-mono text-[10px] font-bold tracking-widest uppercase ${
-                        isSuccess ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                    <span className={`px-2.5 py-0.5 rounded-[3px] border font-sans text-[10px] font-semibold tracking-wide ${
+                        isSuccess ? "bg-green-50 dark:bg-green-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                         : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                       }`}>
                       {displayVerdict}
@@ -151,7 +151,7 @@ function CustomTC({ setRunLoading, lang, code }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
                   <div className="flex flex-col">
                     <div className="px-4 py-2 bg-slate-50 dark:bg-[#0a0c10] border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
-                      Input Payload
+                      Input
                     </div>
                     <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap flex-1 bg-white dark:bg-[#0d1117]">
                       {testCases[index] || ""}
@@ -159,7 +159,7 @@ function CustomTC({ setRunLoading, lang, code }) {
                   </div>
                   <div className="flex flex-col">
                     <div className="px-4 py-2 bg-slate-50 dark:bg-[#0a0c10] border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
-                      Output Result
+                      Output
                     </div>
                     <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap flex-1 bg-white dark:bg-[#0d1117]">
                       {res.output || <span className="italic text-slate-400 dark:text-slate-600">No output</span>}
