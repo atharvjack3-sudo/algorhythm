@@ -636,7 +636,7 @@ export default function ProblemSet() {
               <button
                 disabled={page === 1 || loading}
                 onClick={() => setPage((p) => p - 1)}
-                className="font-sans text-[10px] font-semibold tracking-wide rounded-[3px] bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-sans text-[10px] font-semibold tracking-wide rounded-[3px] bg-white dark:bg-[#0a0c10] cursor-pointer text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 &larr; Prev
               </button>
@@ -700,7 +700,7 @@ export default function ProblemSet() {
               <button
                 disabled={page * limit >= total || loading}
                 onClick={() => setPage((p) => p + 1)}
-                className="font-sans text-[10px] font-semibold tracking-wide rounded-[3px] bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-sans text-[10px] cursor-pointer font-semibold tracking-wide rounded-[3px] bg-white dark:bg-[#0a0c10] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next &rarr;
               </button>

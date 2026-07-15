@@ -550,7 +550,7 @@ export default function SolveProblem() {
               </span>
 
               {solved && (
-                <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2.5 py-1 rounded-[3px] border border-green-200 dark:border-green-800/30 tracking-widest">
+                <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-[3px] border border-orange-200 dark:border-orange-800/30 tracking-widest">
                   <CheckCheck size={12} strokeWidth={3} /> SOLVED
                 </span>
               )}
@@ -591,7 +591,7 @@ export default function SolveProblem() {
                       : "bg-[#f8fafc] dark:bg-[#0a0c10] border-transparent text-slate-500 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-[#0d1117] border-t-transparent"
                     }`}
                 >
-                  <Icon size={14} className={isActive ? "text-orange-500" : "text-slate-400"} />
+                  <Icon size={14} className={isActive ? "text-orange-400" : "text-slate-400"} />
                   {tab.id}
                 </button>
               );
@@ -952,7 +952,9 @@ export default function SolveProblem() {
           <div className="min-h-[48px] py-3 bg-[#f3f4f6] dark:bg-[#0a0c10] border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
             
             <div className="flex items-center gap-3">
+              <span className="text-xs font-sans font-semibold text-slate-600 hidden md:block">Theme: </span>
               <div className="flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 rounded-[3px] bg-white dark:bg-[#0d1117] overflow-hidden px-1">
+      
                 <select
                   value={editorTheme}
                   onChange={(e) => setEditorTheme(e.target.value)}
@@ -963,7 +965,7 @@ export default function SolveProblem() {
                   <option key="light" value="light">VS Light</option>
                 </select>
               </div>
-
+              <span className="text-xs font-sans font-semibold text-slate-600 hidden md:block">Language: </span>
               <div className="flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 rounded-[3px] bg-white dark:bg-[#0d1117] overflow-hidden px-1">
                 <select
                   value={language}

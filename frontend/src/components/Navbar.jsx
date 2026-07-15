@@ -102,7 +102,7 @@ export default function Navbar() {
 
         .dark {
           --nb-bg: #050608;
-          --nb-border: #1e293b;
+          --nb-border: #1F1F1F;
           --nb-text-muted: #475569;
           --nb-text-hover: #e2e8f0;
           --nb-accent: #f97316;
@@ -636,7 +636,7 @@ export default function Navbar() {
                       }}
                     >
                       <LogOut size={14} />
-                      Terminate Session
+                      Log out
                     </button>
                     
                     <div className="w-full flex h-8 mt-2 items-center justify-between rounded-[3px] bg-slate-100 dark:bg-slate-900/50 px-3 border border-slate-200 dark:border-slate-800">

@@ -167,7 +167,7 @@ const SectionLabel = ({ color, icon: Icon, children }) => (
 
 const EmptyRow = ({ cols, text }) => (
   <tr>
-    <td colSpan={cols} className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-sans text-[11px] font-semibold tracking-wide bg-white dark:bg-gray-950">
+    <td colSpan={cols} className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-sans text-[11px] font-semibold tracking-wide bg-white dark:bg-[#0a0c10]">
       {text}
     </td>
   </tr>
@@ -178,7 +178,7 @@ const TableShell = ({ head, children }) => (
     <div className="overflow-x-auto w-full custom-scrollbar">
       <table className="w-full border-collapse whitespace-nowrap">
         <thead>
-          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a0c10]/50">
             {head.map((h, i) => (
               <th key={i} className={`px-5 py-3 font-mono text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase ${h.center ? "text-center" : "text-left"}`}>
                 {h.label}
@@ -195,7 +195,7 @@ const TableShell = ({ head, children }) => (
 );
 
 const Chip = ({ children, className }) => (
-  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-widest border ${className || "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800"}`}>
+  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-widest border ${className || "bg-slate-100 dark:bg-[#0a0c10] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800"}`}>
     {children}
   </span>
 );
@@ -322,7 +322,7 @@ export default function Contests() {
 
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col gap-8">
           
-          <div className="bg-white dark:bg-gray-950 border border-slate-200 dark:border-slate-800 rounded-[3px] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-white dark:bg-[#0a0c10] border border-slate-200 dark:border-slate-800 rounded-[3px] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="flex flex-col">
                 <h1 className="text-2xl md:text-3xl font-bold font-sans tracking-tight text-slate-900 dark:text-white">
@@ -376,7 +376,7 @@ export default function Contests() {
                   {running.length === 0
                     ? <EmptyRow cols={5} text="No Ongoing Contests" />
                     : running.map(c => (
-                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-gray-950 dark:even:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer">
+                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0a0c10] dark:even:bg-[#0a0c10]/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer">
                         <td className="px-5 py-4 relative" onClick={() => navigate(`/contests/${c.id}/problems`)}>
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-red-500" />
                           <div className="font-sans text-[14px] font-bold text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
@@ -418,7 +418,7 @@ export default function Contests() {
                   {upcoming.length === 0
                     ? <EmptyRow cols={5} text="No Scheduled Contests" />
                     : upcoming.map(c => (
-                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-gray-950 dark:even:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0a0c10] dark:even:bg-[#0a0c10]/50 hover:bg-slate-100 dark:hover:bg-slate-800/80">
                         <td className="px-5 py-4 relative">
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                           <div className="font-sans text-[14px] font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">
@@ -461,7 +461,7 @@ export default function Contests() {
                   {past.length === 0
                     ? <EmptyRow cols={4} text="NO HISTORY" />
                     : past.map(c => (
-                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-gray-950 dark:even:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer" onClick={() => navigate(`/contests/${c.id}`)}>
+                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0a0c10] dark:even:bg-[#0a0c10]/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer" onClick={() => navigate(`/contests/${c.id}`)}>
                         <td className="px-5 py-4 relative">
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-slate-400 dark:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                           <span className="font-sans text-[13px] font-semibold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors">
@@ -490,7 +490,7 @@ export default function Contests() {
 
               {/* RATING CARD */}
               <div className="bg-white dark:bg-[#050608] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm overflow-hidden flex flex-col">
-                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-2">
+                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a0c10]/50 flex items-center gap-2">
                   <TerminalSquare size={14} className="text-orange-500" />
                   <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.15em] uppercase">
                     User Profile
@@ -529,8 +529,8 @@ export default function Contests() {
               </div>
 
               {/* RULES */}
-              <div className="bg-white dark:bg-gray-950 border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-2">
+              <div className="bg-white dark:bg-[#0a0c10] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a0c10]/50 flex items-center gap-2">
                   <ShieldAlert size={14} className="text-red-500" />
                   <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.15em] uppercase">
                     General Rules
