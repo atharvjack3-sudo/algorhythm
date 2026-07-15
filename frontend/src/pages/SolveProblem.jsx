@@ -12,18 +12,25 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
 import CustomTC from "../components/CustomTC";
-//import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
 import SubmissionAnim from "../components/submissionAnim";
 import CollabTab from "../components/CollabTab";
 import {
-  Copy,
-  RotateCcw,
-  CloudUpload,
-  History,
-  Check,
-  X,
-  Info,
+  ClipboardCopy,
+  RefreshCcw,
+  CloudSync,
+  GitCommit,
+  CheckCheck,
+  XSquare,
+  HelpCircle,
+  CodeXml,
+  BookMarked,
+  PlaySquare,
+  ListChecks,
+  MessagesSquare,
+  Network,
+  SendHorizonal,
+  Terminal
 } from "lucide-react";
 import "./css/scrollbar.css";
 import * as Y from "yjs";
@@ -35,8 +42,6 @@ const themeModules = import.meta.glob("../themes/*.json");
 export const AVAILABLE_THEMES = Object.keys(themeModules)
   .map((path) => path.split("/").pop().replace(".json", ""))
   .sort();
-const loadedThemes = new Set();
-
 
 export async function loadMonacoTheme(monaco, themeName) {
   const path = `../themes/${themeName}.json`;
@@ -50,13 +55,13 @@ export async function loadMonacoTheme(monaco, themeName) {
 }
 
 const TABS = [
-  "Problem",
-  "Editorial",
-  "Submissions",
-  "Run",
-  "Result",
-  "Discussion",
-  "Collab",
+  { id: "Problem", icon: CodeXml },
+  { id: "Editorial", icon: BookMarked },
+  { id: "Submissions", icon: GitCommit },
+  { id: "Run", icon: PlaySquare },
+  { id: "Result", icon: ListChecks },
+  { id: "Discussion", icon: MessagesSquare },
+  { id: "Collab", icon: Network },
 ];
 
 /* =========================
@@ -72,13 +77,13 @@ function MarkdownRenderer({ content, className = "" }) {
         prose dark:prose-invert max-w-none
         prose-headings:font-sans prose-headings:font-bold prose-headings:tracking-tight
         prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
-        prose-a:text-blue-600 dark:prose-a:text-blue-400
+        prose-a:text-blue-600 dark:prose-a:text-blue-500
         
-        [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[13px] [&_:not(pre)>code]:bg-slate-100 dark:[&_:not(pre)>code]:bg-slate-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px]
+        [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[12px] [&_:not(pre)>code]:bg-slate-200/50 dark:[&_:not(pre)>code]:bg-[#1e1e1e] [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px] [&_:not(pre)>code]:border [&_:not(pre)>code]:border-slate-300/50 dark:[&_:not(pre)>code]:border-slate-700/50
         
         [&_:not(pre)>code::before]:content-none [&_:not(pre)>code::after]:content-none
         
-        prose-pre:p-0 prose-pre:bg-slate-50 dark:prose-pre:bg-[#0d1117] prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[5px]
+        prose-pre:p-0 prose-pre:bg-slate-50 dark:prose-pre:bg-[#050608] prose-pre:border prose-pre:border-slate-200 dark:prose-pre:border-slate-800 prose-pre:rounded-[3px]
         
         [&_pre_code.hljs]:!bg-transparent [&_pre_code.hljs]:p-4 [&_pre_code.hljs]:!font-mono [&_pre_code.hljs]:!text-[13px] [&_pre_code.hljs]:!leading-[1.6]
         
@@ -106,7 +111,6 @@ export default function SolveProblem() {
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
   const [openSubmission, setOpenSubmission] = useState(null);
-  const [ideInit, setIdeInit] = useState(false);
 
   const [runLoading, setRunLoading] = useState(false);
   const [runResults, setRunResults] = useState([]);
@@ -126,7 +130,7 @@ export default function SolveProblem() {
   const editorRef = useRef(null);
   const [showProblemTopics, setShowProblemTopics] = useState(true);
   const [differentiate, setDifferentiate] = useState(false);
-  const [cmpCode, setCmpCode] = useState([]); // old, fin
+  const [cmpCode, setCmpCode] = useState([]);
 
   /* ==============
   Collab States
@@ -140,13 +144,14 @@ export default function SolveProblem() {
   const bindingRef = useRef(null);
   const listenerRef = useRef(null);
   const yTextRef = useRef(null);
+  
   /* =========================
      RESIZER LOGIC
   ========================= */
-  const [leftWidth, setLeftWidth] = useState(45); // Start at 45%
+  const [leftWidth, setLeftWidth] = useState(48);
   const [isDragging, setIsDragging] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
-  ////////////////
+  
   const [copySuccess, setCopySuccess] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showCloudModal, setShowCloudModal] = useState(false);
@@ -174,27 +179,21 @@ export default function SolveProblem() {
     );
     applyTheme(monaco);
   }
+  
   function handleBeforeMount(monaco) {
     monacoRef.current = monaco;
   }
+  
   const handleFetchSaves = async () => {
     setIsFetching(true);
     try {
       const response = await api.get(`/cloud-saves/${problemId}`);
       const data = response.data;
-
-      if (data.errorPresent) {
-        console.error("Failed to fetch cloud saves:", data.errorMsg);
-        return;
-      }
-
+      if (data.errorPresent) return;
       setCloudSaves(data.saves);
       setCloudModalInit(true);
     } catch (error) {
-      console.error(
-        "Network error:",
-        error.response?.data?.errorMsg || error.message,
-      );
+      console.error(error);
     } finally {
       setIsFetching(false);
     }
@@ -203,46 +202,29 @@ export default function SolveProblem() {
   const handleCreateSave = async () => {
     if (!saveTitle.trim()) return;
     setIsSaving(true);
-
     try {
-      const response = await api.post("/cloud-saves", {
-        problemId,
-        title: saveTitle,
-        code,
-        language,
-      });
-
-      if (response.data.errorPresent) {
-        console.error("Failed to create save:", response.data.errorMsg);
-        return;
-      }
-
+      const response = await api.post("/cloud-saves", { problemId, title: saveTitle, code, language });
+      if (response.data.errorPresent) return;
       setSaveTitle("");
       setIsCreatingSave(false);
       await handleFetchSaves();
     } catch (error) {
-      console.error(
-        "Network error:",
-        error.response?.data?.errorMsg || error.message,
-      );
+      console.error(error);
     } finally {
       setIsSaving(false);
     }
   };
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy code:", err);
-    }
+    } catch (err) {}
   };
+
   function handleCollabEditorMount(editor, monaco) {
-    if (!collabData || !collabData.wsRoomId) {
-      console.error("Collab data is missing, cannot connect to WebSocket!");
-      return;
-    }
+    if (!collabData || !collabData.wsRoomId) return;
     editorRef.current = editor;
     monacoRef.current = monaco;
 
@@ -283,30 +265,24 @@ export default function SolveProblem() {
     const listener = editor.onDidChangeModelContent(() => {
       setCode(editor.getValue());
     });
+    
     yTextRef.current = yText;
     ydocRef.current = ydoc;
     providerRef.current = provider;
     bindingRef.current = binding;
     listenerRef.current = listener;
   }
-  const colors = [
-    "#ef4444",
-    "#3b82f6",
-    "#22c55e",
-    "#f59e0b",
-    "#8b5cf6",
-    "#ec4899",
-    "#06b6d4",
-    "#84cc16",
-  ];
+  
+  const colors = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+  
   useEffect(() => {
     handleSubmitRef.current = handleSubmit;
     handleRunRef.current = handleRun;
   }, [handleSubmit, handleRun]);
+
   useEffect(() => {
     if (theme === "light") setEditorTheme("light");
-    else if (editorTheme !== "vs-dark") setEditorTheme("Dark-Algo");
-    // setEditorTheme(theme === "light" ? "light" : theme);
+    else if (editorTheme !== "vs-dark") setEditorTheme("Brilliance-Dull");
   }, [theme]);
 
   useEffect(() => {
@@ -318,45 +294,27 @@ export default function SolveProblem() {
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [collabActive]);
+
   useEffect(() => {
-    if (authLoading || !user) return;
-    if (!collabActive) return;
+    if (authLoading || !user || !collabActive) return;
 
     return () => {
       listenerRef.current?.dispose();
-
       if (isOwner && collabData) {
-        api
-          .post("/collab/terminate-room", {
-            roomCode: collabData.roomCode,
-          })
-          .catch(console.error);
+        api.post("/collab/terminate-room", { roomCode: collabData.roomCode }).catch(console.error);
       }
-
       bindingRef.current?.destroy();
       providerRef.current?.destroy();
       ydocRef.current?.destroy();
-
-      listenerRef.current = null;
-      bindingRef.current = null;
-      providerRef.current = null;
-      ydocRef.current = null;
-      yTextRef.current = null;
-
       setIsOwner(false);
       setCollabData(null);
     };
   }, [collabActive]);
 
   useEffect(() => {
-    if (!monacoRef.current) return;
-    if (editorTheme === "vs-dark") return;
-    if (editorTheme === "light") return;
-
+    if (!monacoRef.current || editorTheme === "vs-dark" || editorTheme === "light") return;
     loadMonacoTheme(monacoRef.current, editorTheme).then(() => {
       monacoRef.current.editor.setTheme(editorTheme);
     });
@@ -366,8 +324,8 @@ export default function SolveProblem() {
     if (theme === "light") {
       setEditorTheme("light");
     } else {
-      await loadMonacoTheme(monacoRef.current, "Dark-Algo");
-      setEditorTheme("Dark-Algo");
+      await loadMonacoTheme(monacoRef.current, "Brilliance-Dull");
+      setEditorTheme("Brilliance-Dull");
     }
   }
 
@@ -381,14 +339,12 @@ export default function SolveProblem() {
     const handleMouseMove = (e) => {
       if (!isDragging) return;
       const newWidth = (e.clientX / window.innerWidth) * 100;
-      if (newWidth > 20 && newWidth < 56) {
+      if (newWidth > 20 && newWidth < 57) {
         setLeftWidth(newWidth);
       }
     };
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
+    const handleMouseUp = () => setIsDragging(false);
 
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -416,13 +372,7 @@ export default function SolveProblem() {
         const res = await api.get(`/problems/${problemId}`);
         setData(res.data);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.error || "Problem not found");
-          //setTimeout(() => setError(null), 2000);
-        } else {
-          setError("Unexpected error");
-          //setTimeout(() => setError(null), 2000);
-        }
+        setError(err.response?.data?.error || "Problem not found");
       } finally {
         setLoading(false);
       }
@@ -436,9 +386,7 @@ export default function SolveProblem() {
       try {
         const res = await api.get(`/submissions/${problemId}`);
         setSubmissions(res.data);
-      } catch (err) {
-        console.error("Failed to load submissions");
-      }
+      } catch (err) {}
     }
     fetchSubmissions();
   }, [problemId, user]);
@@ -479,18 +427,13 @@ export default function SolveProblem() {
   }
 
   async function handleRun() {
-    if (!user) return;
-    if (!code.trim()) return;
+    if (!user || !code.trim()) return;
     try {
       setActiveTab("Run");
       setRunLoading(true);
       setRunError(null);
       setRunResults([]);
-      const res = await api.post("/run", {
-        problemId,
-        language,
-        code,
-      });
+      const res = await api.post("/run", { problemId, language, code });
       setRunResults(res.data.samples);
     } catch (err) {
       setRunError(err.response?.data?.error || "Run failed");
@@ -507,16 +450,15 @@ export default function SolveProblem() {
         space: res.data.space_complexity,
         id: id,
       });
-    } catch (err) {
-      console.error("Couldn't evaluate complexity", err);
-    }
+    } catch (err) {}
   }
 
   if (loading) {
     return (
-      <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse uppercase">
-          LOADING WORKSPACE...
+      <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-[#050608] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
+        <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.2em] animate-pulse uppercase relative z-10">
+          INITIALIZING WORKSPACE...
         </span>
       </div>
     );
@@ -524,12 +466,14 @@ export default function SolveProblem() {
 
   if (error) {
     return (
-      <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="bg-white dark:bg-slate-900 px-6 py-4 border border-slate-200 dark:border-slate-800 rounded-md text-center shadow-sm">
-          <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.1em] uppercase mb-1">
-            Error
+      <div className="w-full h-[calc(100vh-56px)] flex items-center justify-center bg-slate-50 dark:bg-[#050608] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
+        <div className="bg-white dark:bg-[#0d1117] px-8 py-6 border border-red-200 dark:border-red-900/50 rounded-[3px] text-center shadow-2xl relative z-10 max-w-md">
+          <Terminal size={32} className="text-red-500 mx-auto mb-4" />
+          <div className="font-mono text-[12px] font-bold text-red-600 dark:text-red-500 tracking-[0.15em] uppercase mb-2">
+            System Error
           </div>
-          <p className="font-sans text-[14px] text-slate-800 dark:text-slate-200">
+          <p className="font-sans text-[14px] font-semibold text-slate-800 dark:text-slate-200">
             {error}
           </p>
         </div>
@@ -539,12 +483,6 @@ export default function SolveProblem() {
 
   const { problem, content, stats, topics, samples } = data;
 
-  const handleEditorWillMount = async (monaco) => {
-    monacoRef.current = monaco;
-
-    await loadMonacoTheme(monaco, editorTheme);
-  };
-
   return (
     <>
       <style>{`
@@ -552,30 +490,14 @@ export default function SolveProblem() {
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .font-sans { font-family: 'DM Sans', sans-serif; }
         
-        .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
 
+        .yRemoteSelectionHead { position: absolute; border-left-width: 2px !important; border-left-style: solid !important; height: 100%; box-sizing: border-box; z-index: 99; }
+        .yRemoteSelectionHead::after { position: absolute; content: ' '; border-width: 3px !important; border-style: solid !important; border-radius: 4px; left: -4px; top: -5px; }
         
-        .yRemoteSelectionHead {
-          position: absolute;
-          border-left-width: 2px !important;
-          border-left-style: solid !important;
-          height: 100%;
-          box-sizing: border-box;
-          z-index: 99;
-        }
-
-        .yRemoteSelectionHead::after {
-          position: absolute;
-          content: ' ';
-          border-width: 3px !important;
-          border-style: solid !important;
-          border-radius: 4px;
-          left: -4px;
-          top: -5px;
-        }
         .hljs { color: #24292e; }
         .hljs-keyword, .hljs-built_in { color: #d73a49; font-weight: 600; }
         .hljs-string, .hljs-meta { color: #032f62; }
@@ -584,7 +506,6 @@ export default function SolveProblem() {
         .hljs-comment { color: #6a737d; font-style: italic; }
         .hljs-type { color: #005cc5; font-weight: 600; }
         .hljs-operator, .hljs-punctuation { color: #24292e; }
-
         .dark .hljs { color: #c9d1d9; }
         .dark .hljs-keyword, .dark .hljs-built_in { color: #ff7b72; font-weight: 600; }
         .dark .hljs-string, .dark .hljs-meta { color: #a5d6ff; }
@@ -595,62 +516,59 @@ export default function SolveProblem() {
         .dark .hljs-operator, .dark .hljs-punctuation { color: #c9d1d9; }
       `}</style>
 
-      <div className="w-full h-[calc(100dvh-56px)] overflow-y-auto md:overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row font-sans transition-colors duration-200 relative">
-        {isDragging && (
-          <div className="fixed inset-0 z-[200] cursor-col-resize" />
-        )}
+      <div className="w-full h-[calc(100dvh-56px)] overflow-y-auto md:overflow-hidden bg-slate-50 dark:bg-[#050608] flex flex-col md:flex-row font-sans transition-colors duration-200 relative">
+        
+        {/* Workspace Background Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
+
+        {isDragging && <div className="fixed inset-0 z-[200] cursor-col-resize" />}
 
         {/* =========================
-            LEFT PANEL
+            LEFT PANEL (Problem & Data)
         ========================= */}
         <section
-          className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full bg-white dark:bg-slate-950 flex flex-col relative z-10 transition-colors overflow-hidden border-r border-slate-200 dark:border-slate-800"
+          className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full bg-white dark:bg-[#0d1117] flex flex-col relative z-10 transition-colors overflow-hidden border-r border-slate-200 dark:border-slate-800"
           style={isDesktop ? { width: `${leftWidth}%` } : {}}
         >
           {/* Header */}
-          <div className="px-5 pt-6 pb-2 flex-shrink-0">
-            <h1 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+          <div className="px-6 pt-6 pb-4 flex-shrink-0 bg-slate-50 dark:bg-[#0a0c10] border-b-2 border-slate-200 dark:border-slate-800">
+            <h1 className="font-sans text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight leading-tight">
               {problemId}. {problem.title}
             </h1>
 
             <div className="flex flex-wrap items-center gap-3">
-              <span
-                className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-wider ${
-                  problem?.difficulty === "easy"
-                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                    : problem?.difficulty === "medium"
-                      ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
-                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                }`}
-              >
+              <span className={`px-2.5 py-1 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-widest border ${
+                  problem?.difficulty === "easy" ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                  : problem?.difficulty === "medium" ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-500/30"
+                  : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
+                }`}>
                 {problem?.difficulty}
               </span>
 
-              <span className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+              <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest px-2.5 py-1 rounded-[3px] ">
                 Acceptance: {stats.acceptance_rate ?? "N/A"}%
               </span>
 
               {solved && (
-                <span className="flex items-center gap-1 font-sans text-[10px] font-light text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-[3px] border border-green-200 dark:border-green-800/30 tracking-widest">
-                  Solved
+                <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2.5 py-1 rounded-[3px] border border-green-200 dark:border-green-800/30 tracking-widest">
+                  <CheckCheck size={12} strokeWidth={3} /> SOLVED
                 </span>
               )}
             </div>
+            
             {!showProblemTopics && (
-              <span
-                className="px-2 py-0.5 mt-3 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800"
-                onClick={() => setShowProblemTopics((prev) => !prev)}
+              <button
+                className="mt-3 font-mono text-[9px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 uppercase tracking-widest transition-colors cursor-pointer"
+                onClick={() => setShowProblemTopics(true)}
               >
-                Show Topics{" "}
-              </span>
+                [ SHOW TOPICS ]
+              </button>
             )}
+            
             {topics?.length > 0 && showProblemTopics && (
-              <div className="mt-3 flex gap-2 flex-wrap">
+              <div className="mt-4 flex gap-2 flex-wrap">
                 {topics.map((t) => (
-                  <span
-                    key={t}
-                    className="px-2 py-0.5 rounded-[3px] bg-slate-100 dark:bg-slate-900 font-sans text-[10px] text-slate-600 dark:text-slate-300 tracking-widest border border-slate-200 dark:border-slate-800"
-                  >
+                  <span key={t} className="px-2 py-0.5 rounded-[3px] bg-slate-200/50 dark:bg-slate-800/50 font-sans font-semibold tracking-wide text-[10px] text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
                     {t}
                   </span>
                 ))}
@@ -658,125 +576,96 @@ export default function SolveProblem() {
             )}
           </div>
 
-          {/* Tabs */}
-          <div className="flex overflow-x-auto overflow-y-hidden border-b border-slate-200 dark:border-slate-800 mt-2 custom-scrollbar px-2 flex-shrink-0 bg-slate-50 dark:bg-slate-950/50">
-            {TABS.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2.5 font-sans text-[11px] cursor-pointer font-semibold uppercase tracking-[0.08em] transition-all relative whitespace-nowrap border-b-[3px] top-[1px]
-                  ${
-                    activeTab === tab
-                      ? "text-orange-600 dark:text-orange-500 border-orange-600 dark:border-orange-500"
-                      : "text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200"
-                  }`}
-              >
-                {tab}
-              </button>
-            ))}
+          {/* IDE-Style Tabs */}
+          <div className="flex overflow-x-auto overflow-y-hidden bg-[#f3f4f6] dark:bg-[#0a0c10] custom-scrollbar flex-shrink-0">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2.5 font-sans text-[12px] font-semibold tracking-wide transition-colors relative whitespace-nowrap border-l border-slate-300 dark:border-slate-800 cursor-pointer outline-none
+                    ${isActive 
+                      ? "bg-white dark:bg-[#0d1117] text-slate-900 dark:text-orange-400 border-t-2 border-t-orange-400" 
+                      : "bg-[#f8fafc] dark:bg-[#0a0c10] text-slate-500 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-[#0d1117] border-t-transparent"
+                    }`}
+                >
+                  <Icon size={14} className={isActive ? "text-orange-500" : "text-slate-400"} />
+                  {tab.id}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto px-5 py-6 text-[14px] text-slate-800 dark:text-slate-200 custom-scrollbar bg-white dark:bg-slate-950">
-            {/* ===== DISCUSSION ===== */}
-            <div
-              className={`${activeTab === "Discussion" ? "block" : "hidden"}`}
-            >
-              <Suspense
-                fallback={
-                  <div className="py-10 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
-                    Loading discussions...
-                  </div>
-                }
-              >
-                <DiscussionTab />
-              </Suspense>
-            </div>
-            {/* {activeTab === "Discussion" && (
-              <Suspense
-                fallback={
-                  <div className="py-10 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
-                    Loading discussions...
-                  </div>
-                }
-              >
-                <DiscussionTab />
-              </Suspense>
-            )} */}
-
+          {/* Tab Content Area */}
+          <div className="flex-1 overflow-y-auto p-6 text-[14px] text-slate-800 dark:text-slate-200 custom-scrollbar bg-white dark:bg-[#0d1117]">
+            
             {/* ===== PROBLEM ===== */}
             {activeTab === "Problem" && (
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-8 pb-10">
                 <MarkdownRenderer content={content.statement} />
 
                 {content.constraints && (
-                  <div>
-                    <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-2">
-                      Constraints
-                    </h3>
-                    <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
-                      <MarkdownRenderer
-                        content={content.constraints}
-                        className="font-mono text-[12px] whitespace-pre-line"
-                      />
+                  <div className="flex flex-col gap-2">
+                    <div className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 uppercase flex items-center gap-2">
+                      <Terminal size={14} className="text-orange-500" /> Constraints
+                    </div>
+                    <div className="bg-slate-50 dark:bg-[#050608] border border-slate-200 dark:border-slate-800 p-4 rounded-[3px] shadow-sm">
+                      <MarkdownRenderer content={content.constraints} className="font-mono text-[12px] whitespace-pre-line" />
                     </div>
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div className="flex flex-col h-full">
-                    <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-2">
-                      Input Format
-                    </h3>
-                    <div className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
-                      <MarkdownRenderer
-                        content={content.input_format}
-                        className="text-[13px] whitespace-pre-line"
-                      />
+                  {content.input_format && (
+                    <div className="flex flex-col gap-2 h-full">
+                      <div className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 uppercase flex items-center gap-2">
+                         Input Format
+                      </div>
+                      <div className="flex-1 bg-slate-50 dark:bg-[#050608] border border-slate-200 dark:border-slate-800 p-4 rounded-[3px] shadow-sm">
+                        <MarkdownRenderer content={content.input_format} className="text-[13px] whitespace-pre-line" />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex flex-col h-full">
-                    <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-2">
-                      Output Format
-                    </h3>
-                    <div className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-md">
-                      <MarkdownRenderer
-                        content={content.output_format}
-                        className="text-[13px] whitespace-pre-line"
-                      />
+                  {content.output_format && (
+                    <div className="flex flex-col gap-2 h-full">
+                      <div className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 uppercase flex items-center gap-2">
+                         Output Format
+                      </div>
+                      <div className="flex-1 bg-slate-50 dark:bg-[#050608] border border-slate-200 dark:border-slate-800 p-4 rounded-[3px] shadow-sm">
+                        <MarkdownRenderer content={content.output_format} className="text-[13px] whitespace-pre-line" />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                <div className="flex flex-col gap-5 pt-2">
-                  <h3 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white mb-0">
-                    Examples
-                  </h3>
+                <div className="flex flex-col gap-5 pt-4">
+                  <div className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-500 uppercase flex items-center gap-2">
+                    <CodeXml size={14} className="text-orange-500" /> Pretests
+                  </div>
                   {samples.map((s, i) => (
-                    <div
-                      key={i}
-                      className="border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm"
-                    >
-                      <div className="bg-slate-100 dark:bg-slate-900 px-4 py-2 border-b border-slate-200 dark:border-slate-800">
-                        <span className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                    <div key={i} className="border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm flex flex-col">
+                      <div className="bg-slate-100 dark:bg-[#161b22] px-4 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center">
+                        <span className="font-mono text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">
                           Example {i + 1}
                         </span>
                       </div>
                       <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
-                        <div className="flex-1 bg-slate-50 dark:bg-slate-950/50">
-                          <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                        <div className="flex-1 bg-white dark:bg-[#0d1117] flex flex-col">
+                          <div className="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] bg-slate-50 dark:bg-[#0a0c10]">
                             Input
                           </div>
-                          <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                          <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap flex-1">
                             {s.input}
                           </pre>
                         </div>
-                        <div className="flex-1 bg-white dark:bg-slate-950">
-                          <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                        <div className="flex-1 bg-white dark:bg-[#0d1117] flex flex-col">
+                          <div className="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] bg-slate-50 dark:bg-[#0a0c10]">
                             Output
                           </div>
-                          <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                          <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap flex-1">
                             {s.output}
                           </pre>
                         </div>
@@ -792,225 +681,18 @@ export default function SolveProblem() {
               <MarkdownRenderer content={content.editorial} />
             </div>
 
-            {/* ===== RUN ===== */}
-            <div className={`${activeTab === "Run" ? "block" : "hidden"}`}>
-              <div className="flex flex-col gap-5">
-                {runLoading ? (
-                  <SubmissionAnim />
-                ) : (
-                  <>
-                    {runError && (
-                      <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[3px] shadow-sm">
-                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
-                          Runtime / Compilation Error
-                        </div>
-                        <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
-                          {runError}
-                        </pre>
-                      </div>
-                    )}
-
-                    {runResults.length === 0 ? (
-                      <div className="px-4 py-16 text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans font-semibold text-[12px] text-slate-500 dark:text-slate-400">
-                        Run your code to evaluate sample test cases.
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-5">
-                        {runResults.map((r, i) => {
-                          const isMatch = r.verdict === "AC";
-                          const isWA = r.verdict === "WA";
-
-                          const verdictDisplay = isMatch
-                            ? "Matched"
-                            : isWA
-                              ? "Mismatch"
-                              : r.verdict;
-
-                          return (
-                            <div
-                              key={i}
-                              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm flex flex-col"
-                            >
-                              <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
-                                <div className="flex items-center gap-3">
-                                  <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-600 dark:text-slate-300 uppercase">
-                                    Test Case {r.sample || r.index || i + 1}
-                                  </span>
-                                  <span
-                                    className={`px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
-                                      isMatch
-                                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                        : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                    }`}
-                                  >
-                                    {verdictDisplay}
-                                  </span>
-                                </div>
-
-                                <div className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wider">
-                                  {r.time !== undefined
-                                    ? `${r.time} ms`
-                                    : "- ms"}
-                                  <span className="mx-2 text-slate-300 dark:text-slate-700 font-normal">
-                                    |
-                                  </span>
-                                  {r.memory !== undefined
-                                    ? `${r.memory} KB`
-                                    : "- KB"}
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
-                                <div>
-                                  <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
-                                    Your Output
-                                  </div>
-                                  <pre
-                                    className={`p-4 m-0 font-mono text-[12px] whitespace-pre-wrap ${isMatch ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
-                                  >
-                                    {r.output || (
-                                      <span className="italic text-slate-400 dark:text-slate-600">
-                                        No output
-                                      </span>
-                                    )}
-                                  </pre>
-                                </div>
-                                <div>
-                                  <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-slate-500 uppercase tracking-[0.1em]">
-                                    Expected Output
-                                  </div>
-                                  <pre className="p-4 m-0 font-mono text-[12px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap">
-                                    {r.expected}
-                                  </pre>
-                                </div>
-                              </div>
-
-                              {r.error && (
-                                <div className="border-t border-slate-200 dark:border-slate-800">
-                                  <div className="px-4 py-2 bg-red-50/50 dark:bg-red-950/20 border-b border-slate-200 dark:border-slate-800 font-mono text-[9px] font-semibold text-red-500 uppercase tracking-[0.1em]">
-                                    Error / Stderr
-                                  </div>
-                                  <pre className="p-4 m-0 font-mono text-[12px] text-red-600 dark:text-red-400 whitespace-pre-wrap bg-red-50/30 dark:bg-red-950/10 max-h-48 overflow-y-auto">
-                                    {r.error}
-                                  </pre>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                )}
-                <div className={`${runLoading ? "hidden" : "block"}`}>
-                  <CustomTC
-                    setRunLoading={setRunLoading}
-                    lang={language}
-                    code={code}
-                  />
+            {/* ===== DISCUSSION ===== */}
+            <div className={`${activeTab === "Discussion" ? "block" : "hidden"}`}>
+              <Suspense fallback={
+                <div className="py-10 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">
+                  Loading discussions...
                 </div>
-              </div>
+              }>
+                <DiscussionTab />
+              </Suspense>
             </div>
 
-            {/* ===== RESULT ===== */}
-            {activeTab === "Result" && (
-              <div className="flex flex-col gap-5">
-                {submitting ? (
-                  <SubmissionAnim />
-                ) : (
-                  <>
-                    {!lastResult ? (
-                      <div className="px-4 py-16 text-center border font-semibold border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans text-[12px] text-slate-500 dark:text-slate-400 ">
-                        Submit code to view final verdict.
-                      </div>
-                    ) : (
-                      <>
-                        <div
-                          className={`p-5 rounded-md border shadow-sm ${
-                            lastResult.verdict === "AC" ||
-                            lastResult.verdict === "Accepted"
-                              ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50"
-                              : "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50"
-                          }`}
-                        >
-                          <h3
-                            className={`font-mono text-[18px] font-bold tracking-wide uppercase ${lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}
-                          >
-                            {lastResult.verdict === "AC"
-                              ? "Accepted"
-                              : lastResult.verdict}
-                          </h3>
-                          <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
-                            Tested against all system cases
-                          </p>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
-                          <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
-                            <span className="font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
-                              Test Cases Breakdown
-                            </span>
-                          </div>
-                          <div className="w-full overflow-x-auto custom-scrollbar">
-                            <table className="w-full border-collapse whitespace-nowrap text-left">
-                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                                {lastResult.samples &&
-                                  lastResult.samples.map((s) => (
-                                    <tr
-                                      key={s.index}
-                                      className="border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                    >
-                                      <td className="px-4 py-3 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                                        Test #{s.index}
-                                      </td>
-                                      <td className="px-4 py-3 text-right">
-                                        <span
-                                          className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold tracking-wide uppercase ${
-                                            s.verdict === "AC" ||
-                                            s.verdict === "Accepted"
-                                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                          }`}
-                                        >
-                                          {s.verdict === "AC"
-                                            ? "Accepted"
-                                            : s.verdict}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-
-                        {lastResult.hidden_failed && (
-                          <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
-                            <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-1">
-                              Hidden Test Failure
-                            </div>
-                            <p className="font-sans text-[13px] text-slate-800 dark:text-slate-200">
-                              {lastResult.hidden_failed}
-                            </p>
-                          </div>
-                        )}
-
-                        {lastResult.verdict !== "AC" && lastResult.error && (
-                          <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-md shadow-sm">
-                            <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 tracking-[0.08em] uppercase mb-2">
-                              Error Details
-                            </div>
-                            <pre className="font-mono text-[11px] text-red-500 whitespace-pre-wrap">
-                              {lastResult.error}
-                            </pre>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+            {/* ===== COLLAB ===== */}
             <div className={activeTab === "Collab" ? "block" : "hidden"}>
               <CollabTab
                 collabActive={collabActive}
@@ -1023,65 +705,221 @@ export default function SolveProblem() {
               />
             </div>
 
-            {/* ===== SUBMISSIONS ===== */}
+            {/* ===== RUN RESULTS ===== */}
+            <div className={`${activeTab === "Run" ? "block" : "hidden"}`}>
+              <div className="flex flex-col gap-6">
+                {runLoading ? (
+                  <SubmissionAnim />
+                ) : (
+                  <>
+                    {runError && (
+                      <div className="p-5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-[3px] shadow-sm">
+                        <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-500 tracking-[0.15em] uppercase mb-2 flex items-center gap-2">
+                          <Terminal size={14} /> Compilation / Runtime Error
+                        </div>
+                        <pre className="font-mono text-[12px] text-red-600 dark:text-red-400 whitespace-pre-wrap mt-3 bg-red-100/50 dark:bg-red-950/30 p-4 rounded-[3px]">
+                          {runError}
+                        </pre>
+                      </div>
+                    )}
+
+                    {runResults.length === 0 ? (
+                      <div className="px-4 py-20 text-center border border-slate-200 dark:border-slate-800 rounded-[3px] bg-slate-50 dark:bg-[#050608] shadow-sm font-sans text-[12px] font-semibold tracking-wide text-slate-500 dark:text-slate-400">
+                        Run code to evaluate test cases
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-5">
+                        {runResults.map((r, i) => {
+                          const isMatch = r.verdict === "AC";
+                          const isWA = r.verdict === "WA";
+                          const verdictDisplay = isMatch ? "Matched" : isWA ? "Mismatch" : r.verdict;
+
+                          return (
+                            <div key={i} className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm flex flex-col">
+                              <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-[#161b22]">
+                                <div className="flex items-center gap-3">
+                                  <span className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-700 dark:text-slate-300 uppercase">
+                                    Test Case {r.sample || r.index || i + 1}
+                                  </span>
+                                  <span className={`px-2.5 py-0.5 rounded-[3px] border font-mono text-[10px] font-bold tracking-widest uppercase ${
+                                      isMatch ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                                      : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
+                                    }`}>
+                                    {verdictDisplay}
+                                  </span>
+                                </div>
+                                <div className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-widest uppercase">
+                                  {r.time !== undefined ? `${r.time} ms` : "- ms"}
+                                  <span className="mx-2 text-slate-300 dark:text-slate-700">|</span>
+                                  {r.memory !== undefined ? `${r.memory} KB` : "- KB"}
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
+                                <div>
+                                  <div className="px-4 py-2 bg-slate-50 dark:bg-[#0a0c10] border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                                    Your Output
+                                  </div>
+                                  <pre className={`p-4 m-0 font-mono text-[13px] whitespace-pre-wrap ${isMatch ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}>
+                                    {r.output || <span className="italic text-slate-400 dark:text-slate-600">No output</span>}
+                                  </pre>
+                                </div>
+                                <div>
+                                  <div className="px-4 py-2 bg-slate-50 dark:bg-[#0a0c10] border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-[0.1em]">
+                                    Expected Output
+                                  </div>
+                                  <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap">
+                                    {r.expected}
+                                  </pre>
+                                </div>
+                              </div>
+
+                              {r.error && (
+                                <div className="border-t border-slate-200 dark:border-slate-800">
+                                  <div className="px-4 py-2 bg-red-50 dark:bg-red-500/10 border-b border-red-200 dark:border-red-500/20 font-mono text-[9px] font-bold text-red-600 dark:text-red-500 uppercase tracking-[0.1em]">
+                                    Stderr
+                                  </div>
+                                  <pre className="p-4 m-0 font-mono text-[12px] text-red-600 dark:text-red-400 whitespace-pre-wrap bg-white dark:bg-[#050608] max-h-48 overflow-y-auto">
+                                    {r.error}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+                <div className={`${runLoading ? "hidden" : "block"}`}>
+                  <CustomTC setRunLoading={setRunLoading} lang={language} code={code} />
+                </div>
+              </div>
+            </div>
+
+            {/* ===== RESULT (Final Verdict) ===== */}
+            {activeTab === "Result" && (
+              <div className="flex flex-col gap-6">
+                {submitting ? (
+                  <SubmissionAnim />
+                ) : (
+                  <>
+                    {!lastResult ? (
+                      <div className="px-4 py-20 text-center border border-slate-200 dark:border-slate-800 rounded-[3px] bg-slate-50 dark:bg-[#050608] shadow-sm font-sans text-[12px] font-semibold tracking-wide text-slate-500 dark:text-slate-400">
+                       Submit code to view final verdict 
+                      </div>
+                    ) : (
+                      <>
+                        <div className={`p-6 rounded-[3px] border shadow-sm flex flex-col items-center justify-center text-center ${
+                            lastResult.verdict === "AC" || lastResult.verdict === "Accepted"
+                              ? "bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30"
+                              : "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30"
+                          }`}>
+                          <h3 className={`font-mono text-3xl font-bold tracking-tight uppercase ${
+                              lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
+                            }`}>
+                            {lastResult.verdict === "AC" ? "Accepted" : lastResult.verdict}
+                          </h3>
+                          <p className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-2">
+                            System Execution Complete
+                          </p>
+                        </div>
+
+                        <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm">
+                          <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22]">
+                            <span className="font-mono text-[10px] font-bold tracking-[0.15em] text-slate-600 dark:text-slate-300 uppercase">
+                              Test Cases Breakdown
+                            </span>
+                          </div>
+                          <div className="w-full overflow-x-auto custom-scrollbar">
+                            <table className="w-full border-collapse whitespace-nowrap text-left">
+                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                                {lastResult.samples && lastResult.samples.map((s) => (
+                                  <tr key={s.index} className="transition-colors odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                                    <td className="px-5 py-3.5 font-mono text-[12px] font-bold text-slate-700 dark:text-slate-300">
+                                      Test #{s.index}
+                                    </td>
+                                    <td className="px-5 py-3.5 text-right">
+                                      <span className={`inline-flex px-2.5 py-1 rounded-[3px] border font-mono text-[9px] font-bold tracking-widest uppercase ${
+                                          s.verdict === "AC" || s.verdict === "Accepted"
+                                            ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                                            : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
+                                        }`}>
+                                        {s.verdict === "AC" ? "Accepted" : s.verdict}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {lastResult.hidden_failed && (
+                          <div className="p-5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-[3px] shadow-sm">
+                            <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-500 tracking-[0.15em] uppercase mb-2 flex items-center gap-2">
+                              <Terminal size={14} /> Hidden Test Failure
+                            </div>
+                            <p className="font-sans text-[13px] font-semibold text-red-800 dark:text-red-200 mt-2">
+                              {lastResult.hidden_failed}
+                            </p>
+                          </div>
+                        )}
+
+                        {lastResult.verdict !== "AC" && lastResult.error && (
+                          <div className="p-5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-[3px] shadow-sm">
+                            <div className="font-mono text-[11px] font-bold text-red-600 dark:text-red-500 tracking-[0.15em] uppercase mb-2 flex items-center gap-2">
+                              <Terminal size={14} /> System Error Details
+                            </div>
+                            <pre className="font-mono text-[12px] text-red-600 dark:text-red-400 whitespace-pre-wrap mt-3 bg-red-100/50 dark:bg-red-950/30 p-4 rounded-[3px]">
+                              {lastResult.error}
+                            </pre>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ===== SUBMISSIONS (History) ===== */}
             {activeTab === "Submissions" && (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-6">
                 {submissions.length === 0 ? (
-                  <div className="px-4 py-16 font-semibold text-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900 shadow-sm font-sans text-[12px] text-slate-500 dark:text-slate-400">
-                    No past submissions.
+                  <div className="px-4 py-20 text-center border border-slate-200 dark:border-slate-800 rounded-[3px] bg-slate-50 dark:bg-[#050608] shadow-sm font-sans text-[12px] font-semibold tracking-wide text-slate-500 dark:text-slate-400">
+                    No Past Submissions
                   </div>
                 ) : (
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+                  <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm flex flex-col">
                     <div className="w-full overflow-x-auto custom-scrollbar">
                       <table className="w-full text-left border-collapse whitespace-nowrap">
-                        <thead className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
+                        <thead className="bg-slate-50 dark:bg-[#161b22] border-b border-slate-200 dark:border-slate-800">
                           <tr>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase w-20">
-                              ID
-                            </th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase">
-                              Time Submitted
-                            </th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
-                              Language
-                            </th>
-                            <th className="px-5 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-right">
-                              Status
-                            </th>
+                            <th className="px-5 py-3.5 font-mono text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase w-20">ID</th>
+                            <th className="px-5 py-3.5 font-mono text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase">Timestamp</th>
+                            <th className="px-5 py-3.5 font-mono text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase text-center">Lang</th>
+                            <th className="px-5 py-3.5 font-mono text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase text-right">Status</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                           {submissions.map((s, i) => (
-                            <tr
-                              key={i}
-                              onClick={() => setOpenSubmission(s)}
-                              className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
-                            >
-                              <td className="px-5 py-3 font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400 group-hover:text-blue-500 transition-colors">
+                            <tr key={i} onClick={() => setOpenSubmission(s)} className="transition-colors cursor-pointer group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                              <td className="px-5 py-4 font-mono text-[12px] font-bold text-slate-500 dark:text-slate-500 group-hover:text-blue-500 transition-colors">
                                 #{submissions.length - i}
                               </td>
-                              <td className="px-5 py-3 font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                                {new Date(s.submitted_at).toLocaleString(
-                                  undefined,
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )}
+                              <td className="px-5 py-4 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                {new Date(s.submitted_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                               </td>
-                              <td className="text-center text-xs font-mono font-extralight text-gray-600 dark:text-slate-400">
+                              <td className="px-5 py-4 text-center font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                 {s.language}
                               </td>
-                              <td className="px-5 py-3 text-right">
-                                <span
-                                  className={`inline-flex px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold tracking-wide uppercase ${
+                              <td className="px-5 py-4 text-right">
+                                <span className={`inline-flex px-2.5 py-1 rounded-[3px] border font-mono text-[9px] font-bold tracking-widest uppercase ${
                                     s.verdict === "AC"
-                                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                  }`}
-                                >
+                                      ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                                      : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
+                                  }`}>
                                   {s.verdict}
                                 </span>
                               </td>
@@ -1099,59 +937,48 @@ export default function SolveProblem() {
 
         {/* ===== DESKTOP DRAG RESIZER ===== */}
         <div
-          className="hidden md:flex w-[1px] bg-slate-200 dark:bg-slate-800 cursor-col-resize hover:bg-orange-500 dark:hover:bg-gray-300 transition-colors z-50 items-center justify-center flex-shrink-0 relative group"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-          }}
+          className="hidden md:flex w-[1px] bg-slate-300 dark:bg-slate-800 cursor-col-resize hover:bg-orange-500 dark:hover:bg-orange-500 transition-colors z-50 items-center justify-center flex-shrink-0 relative group"
+          onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); }}
         >
-          <div className="absolute inset-y-0 -left-1 -right-1 z-10" />
+          <div className="absolute inset-y-0 -left-2 -right-2 z-10" />
         </div>
 
-        {/* ===== RIGHT PANEL EDITOR ===== */}
-        <section className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800">
-          {/* Editor Toolbar */}
-          <div className="min-h-12 py-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
-            <div className="flex items-center gap-2">
-              <label className="font-sans text-[12px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
-                Theme
-              </label>
+        {/* =========================
+            RIGHT PANEL (Editor)
+        ========================= */}
+        <section className="w-full min-h-[calc(100dvh-56px)] shrink-0 md:shrink md:min-h-0 md:h-full md:flex-1 flex flex-col bg-white dark:bg-[#1e1e1e] overflow-hidden transition-colors border-t md:border-t-0 border-slate-200 dark:border-slate-800 relative z-10">
+          
+          {/* Editor Action Toolbar */}
+          <div className="min-h-[48px] py-3 bg-[#f3f4f6] dark:bg-[#0a0c10] border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between px-4 z-10 gap-4 flex-shrink-0 transition-colors">
+            
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 rounded-[3px] bg-white dark:bg-[#0d1117] overflow-hidden px-1">
+                <select
+                  value={editorTheme}
+                  onChange={(e) => setEditorTheme(e.target.value)}
+                  className="bg-transparent text-slate-700 dark:text-slate-300 py-1.5 px-2 text-[11px] font-sans font-semibold outline-none cursor-pointer"
+                >
+                  {AVAILABLE_THEMES.map((theme) => <option key={theme} value={theme}>{theme}</option>)}
+                  <option key="vs-dark" value="vs-dark">VS Dark</option>
+                  <option key="light" value="light">VS Light</option>
+                </select>
+              </div>
 
-              <select
-                value={editorTheme}
-                onChange={async (e) => {
-                  setEditorTheme(e.target.value);
-                }}
-                className="bg-slate-50 custom-scrollbar dark:bg-slate-950 border border-slate-900 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] pl-2 py-1 text-[11px] font-sans outline-none focus:border-orange-500 transition-colors cursor-pointer"
-              >
-                {AVAILABLE_THEMES.map((theme) => (
-                  <option key={theme} value={theme}>
-                    {theme}
-                  </option>
-                ))}
-                <option key={"vs-dark"} value={"vs-dark"}>
-                  VS Dark
-                </option>
-                <option key={"light"} value={"light"}>
-                  VS Light
-                </option>
-              </select>
-              <label className="font-sans text-[12px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide hidden sm:block">
-                Language
-              </label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-[3px] px-2 py-1 text-[11px] font-sans outline-none focus:border-orange-500 transition-colors cursor-pointer tracking-widest"
-              >
-                <option value="cpp">C++20</option>
-                <option value="java">Java</option>
-                <option value="python">Python 3</option>
-                <option value="javascript">JavaScript</option>
-              </select>
+              <div className="flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 rounded-[3px] bg-white dark:bg-[#0d1117] overflow-hidden px-1">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-transparent text-slate-700 dark:text-slate-300 py-1.5 px-2 text-[11px] font-sans font-semibold outline-none cursor-pointer tracking-wider"
+                >
+                  <option value="cpp">C++20</option>
+                  <option value="java">Java</option>
+                  <option value="python">Python 3</option>
+                  <option value="javascript">JavaScript</option>
+                </select>
+              </div>
             </div>
 
-            <div className="flex gap-2.5 items-center">
+            <div className="flex gap-2 items-center">
               {authLoading ? (
                 <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">
                   AUTH...
@@ -1161,89 +988,30 @@ export default function SolveProblem() {
                   <button
                     onClick={handleRun}
                     disabled={runLoading || submitting}
-                    className="text-[12px] cursor-pointer font-semibold rounded-[3px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center gap-1.5 text-[12px] font-sans font-semibold cursor-pointer rounded-[3px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-4 py-1.5 hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {runLoading ? "Running..." : "Run Code"}
+                    <PlaySquare size={12} fill="currentColor" /> {runLoading ? "Running" : "Run"}
                   </button>
 
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || runLoading}
-                    className="text-[12px] font-bold rounded-[3px] transition-opacity duration-150 cursor-pointer bg-orange-500 text-white border border-orange-600 px-6 py-2 hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 text-[12px] font-sans font-semibold cursor-pointer rounded-[3px] bg-orange-500 text-white border border-orange-500 px-5 py-1.5 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
                   >
-                    {submitting ? "Submitting..." : "Submit"}
+                    <SendHorizonal size={12} /> {submitting ? "Submitting" : "Submit"}
                   </button>
                 </>
               ) : (
-                <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                  <a
-                    href="/auth"
-                    className="text-orange-600 dark:text-orange-400 hover:underline font-bold"
-                  >
-                    SIGN IN
-                  </a>{" "}
-                  TO SUBMIT
+                <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-200 dark:bg-slate-800 px-3 py-1.5 rounded-[3px]">
+                  <a href="/auth" className="text-orange-600 dark:text-orange-500 hover:underline">SIGN IN</a> TO SUBMIT
                 </span>
               )}
             </div>
           </div>
-          <div className="h-8 w-full px-5 pb-1 dark:bg-slate-900 border-b dark:border-slate-800 border-slate-200 flex items-center gap-5 justify-around">
-            <button
-              onClick={handleCopy}
-              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
-            >
-              {copySuccess ? (
-                <Check size={15} className="text-green-500" />
-              ) : (
-                <Copy size={15} />
-              )}
-              <span className="text-xs font-semibold tracking-wide hidden md:block">
-                {copySuccess ? "Copied" : "Copy"}
-              </span>
-            </button>
-
-            <button
-              onClick={() => {
-                const r = window.confirm(
-                  "Are you sure you want to reset the IDE?",
-                );
-                if (!r) return;
-                if (collabActive) {
-                  yTextRef.current?.delete(0, yTextRef.current.length);
-                } else editorRef.current?.setValue("");
-              }}
-              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
-            >
-              <RotateCcw size={15} />
-              <span className="text-xs font-semibold tracking-wide hidden md:block">
-                Reset
-              </span>
-            </button>
-
-            <button
-              onClick={() => setShowCloudModal(true)}
-              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
-            >
-              <CloudUpload size={15} />
-              <span className="text-xs font-semibold tracking-wide hidden md:block">
-                Cloud Save
-              </span>
-            </button>
-
-            <button
-              onClick={() => setShowRestoreModal(true)}
-              className="flex cursor-pointer items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:brightness-120 transition-colors"
-            >
-              <History size={15} />
-              <span className="text-xs font-semibold tracking-wide hidden md:block">
-                History
-              </span>
-            </button>
-          </div>
 
           {submitError && (
-            <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-widest border-b border-red-200 dark:border-red-900/50 flex-shrink-0">
-              [ERROR] {submitError}
+            <div className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-widest border-b border-red-200 dark:border-red-500/30 flex-shrink-0 flex items-center gap-2">
+              <Terminal size={12} /> [ERROR] {submitError}
             </div>
           )}
 
@@ -1309,39 +1077,54 @@ export default function SolveProblem() {
               />
             )}
           </div>
-          <div className="dark:bg-slate-950 w-full py-1 px-2 bg-white text-xs dark:text-slate-400 text-slate-700 font-sans flex justify-between">
-            <div className="flex">
-              <Info size={15} />
-              <span className="mr-5 ml-2">
-                Run Code: ⌘
-                <span className="font-semibold ml-0.5"> + Shift + Enter</span>
+          
+          {/* VS-Code Style Bottom Status Bar */}
+          <div className="h-7 w-full bg-[#f3f4f6] dark:bg-[#0D0D0D] border-t border-slate-300 dark:border-[#0D0D0D] flex items-center justify-between px-3 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest select-none flex-shrink-0">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-slate-400">
+                <HelpCircle size={10} /> 
+                <span className="hidden md:inline">CMD+SHIFT+ENTER TO RUN</span>
               </span>
-              <span>
-                Submit Code: ⌘
-                <span className="font-semibold ml-0.5"> + Enter</span>
+              <span className="hidden md:inline text-slate-400 border-l border-slate-300 dark:border-slate-700 pl-4">
+                CMD+ENTER TO SUBMIT
               </span>
             </div>
-            <div className="md:block hidden">Local Autosave: off</div>
+            
+            <div className="flex items-center gap-4 h-full">
+              <button onClick={handleCopy} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+                {copySuccess ? <CheckCheck size={10} className="text-green-500" /> : <ClipboardCopy size={10} />}
+                <span className="hidden md:block">{copySuccess ? "COPIED" : "COPY"}</span>
+              </button>
+              <button onClick={() => { if(window.confirm("Reset IDE?")) { if (collabActive) yTextRef.current?.delete(0, yTextRef.current.length); else editorRef.current?.setValue(""); } }} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-red-500 transition-colors cursor-pointer">
+                <RefreshCcw size={10} /> <span className="hidden md:block">RESET</span>
+              </button>
+              <button onClick={() => setShowCloudModal(true)} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-500 transition-colors cursor-pointer">
+                <CloudSync size={10} /> <span className="hidden md:block">CLOUD</span>
+              </button>
+              <button onClick={() => setShowRestoreModal(true)} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-purple-500 transition-colors cursor-pointer">
+                <GitCommit size={10} /> <span className="hidden md:block">HISTORY</span>
+              </button>
+            </div>
           </div>
+
         </section>
+
         {/* ===== SUBMISSION MODAL ===== */}
         {openSubmission && (
           <div className="fixed inset-0 bg-slate-900/80 z-[150] backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-950 w-full max-w-4xl h-[85vh] rounded-md shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 transition-colors">
+            <div className="bg-white dark:bg-[#0d1117] w-full max-w-4xl h-[85vh] rounded-[3px] shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 transition-colors">
               {/* Modal Header */}
-              <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 transition-colors">
+              <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#050608] transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className="font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                    SUBMISSION DETAILS
+                  <div className="font-mono text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-[0.15em] flex items-center gap-2">
+                    <Terminal size={14} className="text-blue-500" />
+                    SUBMISSION RECORD
                   </div>
-                  <span
-                    className={`font-mono text-[10px] px-2 py-0.5 -translate-x-2 rounded-[3px] font-bold uppercase tracking-widest border ${
+                  <span className={`font-mono text-[9px] px-2 py-0.5 rounded-[3px] border font-bold uppercase tracking-widest ${
                       openSubmission.verdict === "AC"
-                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/30"
-                        : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/30"
-                    }`}
-                  >
+                        ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                        : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
+                    }`}>
                     {openSubmission.verdict}
                   </span>
                 </div>
@@ -1350,82 +1133,59 @@ export default function SolveProblem() {
                     <button
                       onClick={() => evaluate_complexity(openSubmission.id)}
                       disabled={true || complexity?.id === openSubmission.id}
-                      className="font-mono text-[10px] font-bold tracking-[0.06em] rounded-[3px] bg-transparent text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700 px-3 py-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
+                      className="font-mono text-[9px] font-bold tracking-widest rounded-[3px] bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-500 border border-purple-200 dark:border-purple-500/30 px-3 py-1.5 hover:bg-purple-100 dark:hover:bg-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase transition-colors"
                     >
-                      {complexity?.id === openSubmission.id
-                        ? "ANALYZED"
-                        : "AI ANALYSIS"}
+                      {complexity?.id === openSubmission.id ? "ANALYZED" : "AI ANALYSIS"}
                     </button>
                   )}
-
-                  <button
-                    onClick={() => setOpenSubmission(null)}
-                    className="font-mono text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none p-1"
-                  >
-                    CLOSE [X]
+                  <button onClick={() => setOpenSubmission(null)} className="font-mono text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none p-1">
+                    <XSquare size={16} />
                   </button>
                 </div>
               </div>
-              <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-5 py-2 dark:border-slate-800 dark:bg-slate-900">
+              
+              <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1117] px-5 py-3">
                 <button
-                  onClick={() => {
-                    setCmpCode([openSubmission.code, code]);
-                    setDifferentiate(true);
-                    setOpenSubmission(null);
-                  }}
-                  className="rounded-md border border-orange-500 bg-orange-500 px-4 py-2 text-xs font-semibold tracking-wide text-white transition-all hover:bg-orange-600 active:scale-95"
+                  onClick={() => { setCmpCode([openSubmission.code, code]); setDifferentiate(true); setOpenSubmission(null); }}
+                  className="rounded-[3px] border border-orange-500 bg-orange-500 px-4 py-1.5 font-mono text-[10px] font-bold tracking-widest text-white uppercase transition-all hover:bg-orange-600 cursor-pointer"
                 >
-                  Diff with Current
+                  DIFF WITH CURRENT
                 </button>
-
                 <button
                   onClick={() => window.confirm("coming soon...")}
-                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold tracking-wide text-slate-700 transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  className="rounded-[3px] border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-1.5 font-mono text-[10px] font-bold tracking-widest text-slate-600 dark:text-slate-400 uppercase transition-all hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
-                  Diff with Other
+                  DIFF WITH OTHER
                 </button>
-
                 <button
                   onClick={() => {
-                    if (collabActive) {
-                      yTextRef.current?.delete(0, yTextRef.current.length);
-                      yTextRef.current?.insert(0, openSubmission.code);
-                    } else editorRef?.current?.setValue(openSubmission.code);
+                    if (collabActive) { yTextRef.current?.delete(0, yTextRef.current.length); yTextRef.current?.insert(0, openSubmission.code); } 
+                    else editorRef?.current?.setValue(openSubmission.code);
                     setLanguage(openSubmission.language);
                     setOpenSubmission(null);
                   }}
-                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold tracking-wide text-slate-700 transition-all hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  className="rounded-[3px] border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-1.5 font-mono text-[10px] font-bold tracking-widest text-slate-600 dark:text-slate-400 uppercase transition-all hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ml-auto"
                 >
-                  Restore Code
+                  RESTORE CODE
                 </button>
               </div>
 
               {/* AI Complexity Dropdown */}
-              <div
-                className={`flex-shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                  complexity && complexity.id === openSubmission.id
-                    ? "max-h-40 opacity-100 border-b border-blue-200 dark:border-blue-900/30"
-                    : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="px-5 py-4 bg-blue-50 dark:bg-slate-900/50 flex flex-col gap-2 transition-colors">
-                  <div className="font-mono text-[10px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase">
-                    AI Analysis Insight
+              <div className={`flex-shrink-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${complexity && complexity.id === openSubmission.id ? "max-h-40 opacity-100 border-b border-slate-200 dark:border-slate-800" : "max-h-0 opacity-0"}`}>
+                <div className="px-5 py-4 bg-slate-50 dark:bg-[#050608] flex flex-col gap-2 transition-colors">
+                  <div className="font-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                    AI Complexity Analysis
                   </div>
                   <div className="flex flex-wrap gap-x-6 gap-y-3 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold uppercase tracking-wider">
-                        Time:
-                      </span>
-                      <span className="bg-white dark:bg-slate-950 px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
+                      <span className="font-bold uppercase tracking-wider text-slate-400">Time:</span>
+                      <span className="bg-white dark:bg-[#0d1117] px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800 text-purple-500">
                         <InlineMath math={complexity?.time || "O(1)"} />
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold uppercase tracking-wider">
-                        Space:
-                      </span>
-                      <span className="bg-white dark:bg-slate-950 px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
+                      <span className="font-bold uppercase tracking-wider text-slate-400">Space:</span>
+                      <span className="bg-white dark:bg-[#0d1117] px-2 py-0.5 rounded-[3px] border border-slate-200 dark:border-slate-800 text-emerald-500">
                         <InlineMath math={complexity?.space || "O(1)"} />
                       </span>
                     </div>
@@ -1434,7 +1194,7 @@ export default function SolveProblem() {
               </div>
 
               {/* Readonly Editor */}
-              <div className="flex-1 relative bg-slate-50 dark:bg-[#0d1117]">
+              <div className="flex-1 relative bg-slate-50 dark:bg-[#1e1e1e]">
                 <Editor
                   height="100%"
                   language={openSubmission.language || "cpp"}
@@ -1461,279 +1221,175 @@ export default function SolveProblem() {
             </div>
           </div>
         )}
-      </div>
-      {showRestoreModal && (
-        <div className="fixed inset-0 custom-scrollbar z-50 flex items-center justify-center bg-black/30 backdrop-blur-md">
-          <div className="w-[92%] md:w-[65%] lg:w-[55%] h-[80%] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl">
-            <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5">
-              <h2 className="text-lg font-bold tracking-wide text-slate-800 dark:text-white">
-                Restore Submission
-              </h2>
 
-              <button
-                onClick={() => setShowRestoreModal(false)}
-                className="rounded-md cursor-pointer p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-              >
-                <X size={18} />
+      </div>
+      
+      {showRestoreModal && (
+        <div className="fixed inset-0 custom-scrollbar z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+          <div className="w-[92%] md:w-[65%] lg:w-[55%] h-[80%] overflow-hidden rounded-[3px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1117] shadow-2xl flex flex-col">
+            <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#050608] px-5 flex-shrink-0">
+              <h2 className="font-mono text-[12px] font-bold tracking-[0.15em] text-slate-800 dark:text-white uppercase flex items-center gap-2">
+                <Terminal size={14} className="text-blue-500"/> Restore History
+              </h2>
+              <button onClick={() => setShowRestoreModal(false)} className="rounded-[3px] cursor-pointer p-1.5 text-slate-500 transition hover:bg-slate-200 dark:hover:bg-slate-800">
+                <XSquare size={16} />
               </button>
             </div>
-
-            <div className="h-[calc(100%-56px)] overflow-y-auto">
-              {submissions.map((sub, i) => (
-                <div
-                  onClick={() => {
-                    if (collabActive) {
-                      yTextRef.current?.delete(0, yTextRef.current.length);
-                      yTextRef.current?.insert(0, sub.code);
-                    } else editorRef?.current?.setValue(sub.code);
-                    setLanguage(sub.language);
-                    setShowRestoreModal(false);
-                  }}
-                  key={sub._id ?? i}
-                  className="flex h-12 cursor-pointer items-center justify-between border-b border-slate-200 px-5 transition hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-900"
-                >
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Sub. #{i + 1}
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {sub.language}
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {new Date(sub.submitted_at).toLocaleString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                      sub.verdict === "AC"
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                    }`}
-                  >
-                    {sub.verdict}
-                  </span>
-                </div>
-              ))}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  {submissions.map((sub, i) => (
+                    <tr
+                      key={sub._id ?? i}
+                      onClick={() => {
+                        if (collabActive) { yTextRef.current?.delete(0, yTextRef.current.length); yTextRef.current?.insert(0, sub.code); } 
+                        else editorRef?.current?.setValue(sub.code);
+                        setLanguage(sub.language);
+                        setShowRestoreModal(false);
+                      }}
+                      className="cursor-pointer transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80"
+                    >
+                      <td className="px-5 py-3.5 font-mono text-[12px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-500 transition-colors">
+                        Sub. #{submissions.length - i}
+                      </td>
+                      <td className="px-5 py-3.5 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
+                        {sub.language}
+                      </td>
+                      <td className="px-5 py-3.5 font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                        {new Date(sub.submitted_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <span className={`inline-flex px-2 py-0.5 rounded-[3px] border font-mono text-[9px] font-bold tracking-widest uppercase ${
+                            sub.verdict === "AC"
+                              ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                              : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
+                          }`}>
+                          {sub.verdict}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       )}
+
       {differentiate && (
-        <div className="absolute top-0 left-0 flex flex-col justify-center items-center w-full h-full z-100 bg-slate-950/20 backdrop-blur-3xl">
-          <button
-            className="mb-2 py-2 px-2 flex text-xs cursor-pointer hover:bg-orange-500 bg-orange-400 font-semibold font-sans gap-1 tracking-wide text-white rounded-sm"
-            onClick={() => setDifferentiate(false)}
-          >
-            {" "}
-            <X size={15} /> <span>Close</span>
-          </button>
-          <DiffEditor
-            className="border-2 dark:border-slate-700 border-slate-500"
-            height="80vh"
-            width="80vw"
-            language="cpp"
-            theme={editorTheme}
-            original={cmpCode[0]}
-            modified={cmpCode[1]}
-            options={{
-              readOnly: true,
-              renderSideBySide: false,
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-            }}
-          />
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+          <div className="w-[90vw] h-[90vh] bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] flex flex-col overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#050608]">
+              <div className="font-mono text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                <Terminal size={14} className="text-blue-500"/> DIFF VIEWER
+              </div>
+              <button className="flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] font-bold text-white uppercase tracking-widest bg-blue-600 hover:bg-blue-700 rounded-[3px] cursor-pointer" onClick={() => setDifferentiate(false)}>
+                <XSquare size={14} /> CLOSE
+              </button>
+            </div>
+            <div className="flex-1 relative">
+              <DiffEditor
+                height="100%"
+                width="100%"
+                language="cpp"
+                theme={editorTheme}
+                original={cmpCode[0]}
+                modified={cmpCode[1]}
+                options={{
+                  readOnly: true,
+                  renderSideBySide: true,
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 13,
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
-      <div
-        className={`${
-          showCloudModal ? "block" : "hidden"
-        } fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300`}
-      >
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 rounded-md shadow-2xl shadow-black w-full max-w-lg animate-in fade-in zoom-in-95 duration-300">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-5">
-            <h2 className="text-xl font-semibold font-sans text-slate-900 dark:text-slate-300">
-              Cloud Saves
+
+      <div className={`${showCloudModal ? "flex" : "hidden"} fixed inset-0 z-[150] items-center justify-center bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300`}>
+        <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
+          <div className="flex justify-between items-center px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#050608]">
+            <h2 className="font-mono text-[12px] font-bold text-slate-900 dark:text-white uppercase tracking-[0.15em] flex items-center gap-2">
+              <CloudSync size={14} className="text-blue-500" /> Cloud Sync
             </h2>
-            <button
-              className="text-slate-400 cursor-pointer hover:text-orange-500 hover:rotate-90 transition-all duration-300 ease-out"
-              onClick={() => {
-                setShowCloudModal(false);
-                setIsCreatingSave(false);
-                setSaveTitle("");
-              }}
-            >
-              <X size={16} />
+            <button className="text-slate-400 cursor-pointer hover:text-blue-500 hover:rotate-90 transition-all duration-300 ease-out" onClick={() => { setShowCloudModal(false); setIsCreatingSave(false); setSaveTitle(""); }}>
+              <XSquare size={16} />
             </button>
           </div>
 
           {!cloudModalInit ? (
-            <div className="flex justify-center flex-col items-center py-10">
-              <p className="text-center dark:text-slate-400 text-slate-700 mb-5 font-sans text-sm">
-                Please fetch your pre-existing cloud saves to restore them, or
-                create new cloud saves.
+            <div className="flex flex-col items-center justify-center p-10">
+              <p className="text-center text-slate-500 dark:text-slate-400 mb-6 font-mono text-[10px] tracking-widest uppercase font-bold">
+                Access your cloud repository to restore saved logic vectors.
               </p>
-              <button
-                onClick={handleFetchSaves}
-                disabled={isFetching}
-                className="flex items-center justify-center bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:hover:bg-orange-500 disabled:cursor-not-allowed cursor-pointer text-white font-medium py-2.5 px-6 rounded-sm transition-all duration-200 ease-out font-sans text-xs hover:shadow-orange-500/30 active:scale-95"
-              >
-                {isFetching && (
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                )}
-                {isFetching ? "Fetching..." : "Fetch Cloud Saves"}
+              <button onClick={handleFetchSaves} disabled={isFetching} className="flex items-center justify-center gap-2 border border-blue-600 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-white font-mono font-bold tracking-widest py-2 px-6 rounded-[3px] transition-all text-[11px] uppercase">
+                {isFetching ? <RefreshCcw size={14} className="animate-spin" /> : <CloudSync size={14} />}
+                {isFetching ? "SYNCING..." : "FETCH SAVES"}
               </button>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                {!isCreatingSave ? (
-                  <button
-                    onClick={() => setIsCreatingSave(true)}
-                    className="w-full bg-slate-50 dark:bg-slate-900 hover:bg-orange-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 py-2 rounded-md transition-all duration-200 ease-out hover:scale-[1.01] text-sm font-semibold font-sans active:scale-[0.99]"
-                  >
-                    + Create New Cloud Save
+            <div className="p-5 flex flex-col gap-5">
+              {!isCreatingSave ? (
+                <button onClick={() => setIsCreatingSave(true)} className="w-full bg-slate-50 dark:bg-[#050608] hover:bg-blue-50 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-blue-400 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-500 py-2.5 rounded-[3px] transition-colors font-mono text-[10px] font-bold tracking-[0.15em] uppercase cursor-pointer flex items-center justify-center gap-2">
+                  <PlaySquare size={12} /> INITIALIZE NEW SAVE
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <input type="text" placeholder="Enter save signature..." value={saveTitle} onChange={(e) => setSaveTitle(e.target.value)} className="flex-1 bg-white dark:bg-[#050608] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-2 rounded-[3px] outline-none focus:border-blue-500 transition-colors font-mono text-[11px]" autoFocus />
+                  <button onClick={handleCreateSave} disabled={isSaving || !saveTitle.trim()} className="flex items-center justify-center font-mono font-bold tracking-widest bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-[3px] text-[10px] uppercase transition-colors cursor-pointer border border-blue-600">
+                    {isSaving ? <RefreshCcw size={12} className="animate-spin mr-1" /> : "COMMIT"}
                   </button>
-                ) : (
-                  <div className="flex gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                    <input
-                      type="text"
-                      placeholder="Enter save title..."
-                      value={saveTitle}
-                      onChange={(e) => setSaveTitle(e.target.value)}
-                      className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-2 rounded-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 text-xs font-sans"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleCreateSave}
-                      disabled={isSaving || !saveTitle.trim()}
-                      className="flex items-center justify-center font-sans bg-orange-500 hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-white px-4 py-2 rounded-sm text-xs transition-all duration-200 ease-out hover:scale-105 active:scale-95"
-                    >
-                      {isSaving && (
-                        <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                      )}
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setIsCreatingSave(false)}
-                      disabled={isSaving}
-                      className="bg-slate-100 text-xs font-sans dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 px-3 py-2 rounded-sm transition-all duration-200 ease-out active:scale-95"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-              </div>
+                  <button onClick={() => setIsCreatingSave(false)} disabled={isSaving} className="font-mono font-bold tracking-widest bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-3 py-2 rounded-[3px] text-[10px] uppercase transition-colors cursor-pointer">
+                    ABORT
+                  </button>
+                </div>
+              )}
 
-              <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar relative">
+              <div className="flex flex-col border border-slate-200 dark:border-slate-800 rounded-[3px] max-h-64 overflow-y-auto custom-scrollbar relative">
                 {isFetching && (
-                  <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg transition-opacity duration-200">
-                    <svg
-                      className="animate-spin h-8 w-8 text-orange-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
+                  <div className="absolute inset-0 bg-white/80 dark:bg-[#0d1117]/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <RefreshCcw className="animate-spin text-blue-500" size={24} />
                   </div>
                 )}
-                <p className="text-center dark:text-slate-400 text-slate-700 mb-5 font-sans text-xs">
-                  Click on a save to restore it to your IDE
-                </p>
-
                 {cloudSaves.length > 0 ? (
-                  cloudSaves.map((cs, i) => (
+                  cloudSaves.map((cs) => (
                     <div
                       key={cs.id}
-                      style={{ animationDelay: `${i * 40}ms` }}
                       onClick={() => {
-                        if (collabActive) {
-                          yTextRef.current?.delete(0, yTextRef.current.length);
-                          yTextRef.current?.insert(0, cs.code);
-                        } else editorRef?.current?.setValue(cs.code);
+                        if (collabActive) { yTextRef.current?.delete(0, yTextRef.current.length); yTextRef.current?.insert(0, cs.code); } 
+                        else editorRef?.current?.setValue(cs.code);
                         setLanguage(cs.language);
                         setShowCloudModal(false);
                       }}
-                      className="animate-in fade-in slide-in-from-left-1 fill-mode-both flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm cursor-pointer transition-all duration-200 ease-out hover:border-orange-400 dark:hover:border-orange-500/60 hover:bg-orange-50 dark:hover:bg-slate-800 hover:translate-x-1 hover:shadow-md hover:shadow-orange-500/10 active:scale-[0.98]"
+                      className="flex justify-between items-center px-4 py-3 border-b last:border-b-0 border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1117] cursor-pointer transition-colors hover:border-l-2 hover:border-l-blue-500 hover:bg-slate-50 dark:hover:bg-slate-900/50 group"
                     >
                       <div className="flex flex-col">
-                        <span className="text-slate-900 font-sans text-sm dark:text-white font-medium">
+                        <span className="font-sans text-[14px] font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">
                           {cs.title}
                         </span>
-                        <span className="text-xs text-slate-400 dark:text-slate-500 font-sans mt-1">
+                        <span className="font-mono text-[9px] text-slate-400 dark:text-slate-500 tracking-widest uppercase mt-1">
                           {new Date(cs.created_at).toLocaleString()}
                         </span>
                       </div>
-                      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 text-xs px-2 py-1 rounded-sm">
+                      <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-mono font-bold tracking-widest text-[9px] px-2 py-0.5 rounded-[3px] uppercase">
                         {cs.language}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-slate-400 dark:text-slate-500 text-center py-6">
-                    No cloud saves found.
-                  </p>
+                  <div className="p-8 text-center font-mono text-[10px] font-bold tracking-[0.15em] text-slate-400 uppercase bg-slate-50 dark:bg-[#050608]">
+                    NO CLOUD SAVES
+                  </div>
                 )}
               </div>
             </div>
           )}
         </div>
       </div>
+
     </>
   );
 }
