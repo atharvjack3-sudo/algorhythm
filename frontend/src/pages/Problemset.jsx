@@ -416,9 +416,9 @@ export default function ProblemSet() {
               const potd = potdMap.get(day);
 
               const isToday =
-                new Date().getDate() === day &&
-                new Date().getMonth() === currentMonth.getMonth() &&
-                new Date().getFullYear() === currentMonth.getFullYear();
+                new Date().getUTCDate() === day &&
+                new Date().getUTCMonth() === currentMonth.getUTCMonth() &&
+                new Date().getUTCFullYear() === currentMonth.getUTCFullYear();
 
               let buttonClasses =
                 "w-full aspect-square flex items-center justify-center font-sans text-[11px] rounded-[3px] transition-all border relative ";
