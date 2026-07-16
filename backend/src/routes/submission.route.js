@@ -603,7 +603,7 @@ router.post("/submissions", authMiddleware, async (req, res) => {
           );
         }
 
-        if (problemId == potdData.get().problem_id) await writeConn("INSERT INTO user_potd_stats (user_id, potd_id) VALUES($1, $2) ON CONFLICT (user_id, potd_id) DO NOTHING", [userId, potdData.get().id]);
+        if (problemId == potdData.get().problem_id) await writeConn.query("INSERT INTO user_potd_stats (user_id, potd_id) VALUES($1, $2) ON CONFLICT (user_id, potd_id) DO NOTHING", [userId, potdData.get().id]);
       }
 
       // Topic Updates
