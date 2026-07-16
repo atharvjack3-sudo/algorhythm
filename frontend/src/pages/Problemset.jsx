@@ -559,7 +559,7 @@ export default function ProblemSet() {
 
           {/* Mobile Sidebar Overlay */}
           {showMobileFilters && (
-            <div className="md:hidden mb-6 p-5 bg-white dark:bg-[#050608] border border-slate-200 dark:border-slate-800 rounded-[3px]">
+            <div className="md:hidden mb-6 p-5 bg-slate-100 dark:bg-[#050608] border border-slate-200 dark:border-slate-800 rounded-[3px]">
               <SidebarContent />
             </div>
           )}
