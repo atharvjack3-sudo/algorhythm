@@ -761,7 +761,7 @@ export default function SolveProblem() {
                                     Test Case {r.sample || r.index || i + 1}
                                   </span>
                                   <span className={`px-2.5 py-0.5 rounded-[3px] border font-sans text-[10px] font-semibold tracking-wide ${
-                                      isMatch ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-green-200 dark:border-orange-500/30"
+                                      isMatch ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                                       : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                                     }`}>
                                     {verdictDisplay}
@@ -831,11 +831,11 @@ export default function SolveProblem() {
                       <>
                         <div className={`p-6 rounded-[3px] border shadow-sm flex flex-col items-center justify-center text-center ${
                             lastResult.verdict === "AC" || lastResult.verdict === "Accepted"
-                              ? "bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30"
+                              ? "bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30"
                               : "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30"
                           }`}>
                           <h3 className={`font-mono text-3xl font-bold tracking-tight uppercase ${
-                              lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
+                              lastResult.verdict === "AC" || lastResult.verdict === "Accepted" ? "text-orange-500 dark:text-orange-400" : "text-red-600 dark:text-red-500"
                             }`}>
                             {lastResult.verdict === "AC" ? "Accepted" : lastResult.verdict}
                           </h3>
@@ -861,7 +861,7 @@ export default function SolveProblem() {
                                     <td className="px-5 py-3.5 text-right">
                                       <span className={`inline-flex px-2.5 py-1 rounded-[3px] border font-sans text-[10px] font-semibold tracking-wide ${
                                           s.verdict === "AC" || s.verdict === "Accepted"
-                                            ? "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/30"
+                                            ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                                             : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                                         }`}>
                                         {s.verdict === "AC" ? "Accepted" : s.verdict}
@@ -936,7 +936,7 @@ export default function SolveProblem() {
                               <td className="px-5 py-4 text-right">
                                 <span className={`inline-flex px-2.5 py-1 rounded-[3px] border font-mono text-[9px] font-bold tracking-widest uppercase ${
                                     s.verdict === "AC"
-                                      ? "bg-green-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
+                                      ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                                       : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                                   }`}>
                                   {s.verdict}
@@ -1193,7 +1193,7 @@ export default function SolveProblem() {
                   </div>
                   <span className={`font-mono text-[9px] -translate-x-2 px-2 py-0.5 rounded-[3px] border font-bold uppercase tracking-widest ${
                       openSubmission.verdict === "AC"
-                        ? "bg-green-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
+                        ? "bg-orange-50 dark:bg-orange-500/10 text-orange-500 dark:text-orange-400 border-orange-200 dark:border-orange-500/30"
                         : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30"
                     }`}>
                     {openSubmission.verdict}
