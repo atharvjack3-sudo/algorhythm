@@ -12,7 +12,7 @@ export default function ProblemSet() {
   const { theme, setTheme } = useTheme();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const {user, loading : authLoading} = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [allTags, setAllTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
@@ -371,7 +371,7 @@ export default function ProblemSet() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="font-mono text-[10px] mb-1 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
-            POTD Calendar (coming soon)
+            POTD Calendar
           </span>
           <div className="flex items-center gap-1 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
             <button
@@ -414,7 +414,6 @@ export default function ProblemSet() {
             {/* Calendar Days */}
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const day = i + 1;
-
               const potd = potdMap.get(day);
 
               const isSelected =
@@ -427,6 +426,23 @@ export default function ProblemSet() {
                 new Date().getMonth() === currentMonth.getMonth() &&
                 new Date().getFullYear() === currentMonth.getFullYear();
 
+              let buttonClasses =
+                "w-full aspect-square flex items-center justify-center font-sans text-[11px] rounded-[3px] transition-all border relative ";
+
+              if (isSelected) {
+                buttonClasses +=
+                  "bg-orange-500 text-white border-orange-500 font-bold shadow-[0_0_10px_rgba(249,115,22,0.25)] cursor-pointer";
+              } else if (isToday) {
+                buttonClasses +=
+                  "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/40 font-bold cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-500/20";
+              } else if (potd) {
+                buttonClasses +=
+                  "bg-transparent text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800/80 hover:border-orange-500 hover:text-orange-600 dark:hover:text-orange-500 cursor-pointer";
+              } else {
+                buttonClasses +=
+                  "bg-transparent text-slate-300 dark:text-slate-700 border-transparent opacity-25 cursor-not-allowed select-none";
+              }
+
               return (
                 <button
                   key={day}
@@ -436,19 +452,27 @@ export default function ProblemSet() {
                     }
                   }}
                   disabled={!potd}
-                  className={`w-full aspect-square flex items-center justify-center font-semibold font-sans text-[10px] rounded-[3px] transition-colors cursor-pointer border ${
-                    potd?.solved
-                      ? "bg-green-500 text-white border-green-500"
-                      : isSelected
-                        ? "bg-orange-500 text-white border-orange-500"
-                        : isToday
-                          ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
-                          : potd
-                            ? "hover:bg-slate-100 dark:hover:bg-slate-800"
-                            : "opacity-40 cursor-not-allowed"
-                  }`}
+                  className={buttonClasses}
                 >
-                  {day}
+                  {/* Day Number */}
+                  <span className="relative z-10">{day}</span>
+
+                  {potd?.solved && (
+                    <div className="absolute top-0.5 right-0.5 text-orange-500 dark:text-orange-500 z-20">
+                      <svg
+                        className="w-2.5 h-2.5 stroke-[3.5]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </button>
               );
             })}
@@ -535,7 +559,7 @@ export default function ProblemSet() {
 
           {/* Mobile Sidebar Overlay */}
           {showMobileFilters && (
-            <div className="md:hidden mb-6 p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3px]">
+            <div className="md:hidden mb-6 p-5 bg-white dark:bg-[#050608] border border-slate-200 dark:border-slate-800 rounded-[3px]">
               <SidebarContent />
             </div>
           )}
