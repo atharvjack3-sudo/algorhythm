@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProblemSet() {
   const [problems, setProblems] = useState([]);
@@ -10,6 +11,8 @@ export default function ProblemSet() {
   const [searchQuery, setSearchQuery] = useState("");
   const { theme, setTheme } = useTheme();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const {user, loading : authLoading} = useAuth();
 
   const [allTags, setAllTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
