@@ -27,7 +27,6 @@ export default function ProblemSet() {
   const [listsLoading, setListsLoading] = useState(false);
   // Calendar State
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [potdList, setPotdList] = useState([]);
 
@@ -416,11 +415,6 @@ export default function ProblemSet() {
               const day = i + 1;
               const potd = potdMap.get(day);
 
-              const isSelected =
-                selectedDate?.getDate() === day &&
-                selectedDate?.getMonth() === currentMonth.getMonth() &&
-                selectedDate?.getFullYear() === currentMonth.getFullYear();
-
               const isToday =
                 new Date().getDate() === day &&
                 new Date().getMonth() === currentMonth.getMonth() &&
@@ -429,10 +423,7 @@ export default function ProblemSet() {
               let buttonClasses =
                 "w-full aspect-square flex items-center justify-center font-sans text-[11px] rounded-[3px] transition-all border relative ";
 
-              if (isSelected) {
-                buttonClasses +=
-                  "bg-orange-500 text-white border-orange-500 font-bold shadow-[0_0_10px_rgba(249,115,22,0.25)] cursor-pointer";
-              } else if (isToday) {
+               if (isToday) {
                 buttonClasses +=
                   "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/40 font-bold cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-500/20";
               } else if (potd) {
