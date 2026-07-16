@@ -18,7 +18,7 @@ wss.on("connection", (conn, req) => {
 
 async function startServer() {
   const potd = await db.query("SELECT id, problem_id FROM potd WHERE date = CURRENT_DATE");
-  potdData.set(potd);
+  potdData.set(potd.rows[0]);
   console.log(potdData.get());
   server.listen(PORT, () => {
     console.log(`Backend running on port ${PORT}`);
