@@ -375,6 +375,7 @@ export default function ProblemSet() {
           <div className="flex items-center gap-1 font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
             <button
               onClick={handlePrevMonth}
+              disabled={true}
               className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
             >
               &lt;
@@ -384,6 +385,7 @@ export default function ProblemSet() {
             </span>
             <button
               onClick={handleNextMonth}
+              disabled={true}
               className="p-1 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-[3px] transition-colors cursor-pointer"
             >
               &gt;
