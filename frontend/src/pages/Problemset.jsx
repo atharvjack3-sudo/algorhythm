@@ -430,7 +430,7 @@ export default function ProblemSet() {
                   "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/40 font-bold cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-500/20";
               } else if (potd) {
                 buttonClasses +=
-                  "bg-transparent text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800/80 hover:border-orange-500 hover:text-orange-600 dark:hover:text-orange-500 cursor-pointer";
+                  "bg-transparent text-slate-700 dark:text-slate-300 border-transparent hover:border-orange-500 hover:text-orange-600 dark:hover:text-orange-500 cursor-pointer";
               } else {
                 buttonClasses +=
                   "bg-transparent text-slate-300 dark:text-slate-700 border-transparent opacity-25 cursor-not-allowed select-none";
