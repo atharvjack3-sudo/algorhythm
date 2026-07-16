@@ -65,16 +65,12 @@ export default function ProblemSet() {
     );
   };
 
-  const potdMap = useMemo(() => {
-    const map = new Map();
+  const potdMap = new Map();
 
-    for (const potd of potdList) {
-      const d = new Date(potd.date);
-      map.set(d.getDate(), potd);
-    }
-
-    return map;
-  }, [potdList]);
+  for (const potd of potdList) {
+    const d = new Date(potd.date);
+    potdMap.set(d.getDate(), potd);
+  }
 
   const difficultyOptions = [
     { id: "easy", label: "Easy" },
