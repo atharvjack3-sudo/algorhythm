@@ -3,6 +3,8 @@ dotenv.config();
 import app from "./app.js";
 import http from "http";
 import { WebSocketServer } from "ws";
+import potdData from "./cache/potdCache.js";
+import { db } from "../config/db.js";
 
 import { setupWSConnection } from "y-websocket/bin/utils"; 
 
@@ -14,6 +16,11 @@ wss.on("connection", (conn, req) => {
   setupWSConnection(conn, req);
 });
 
-server.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
-});
+async function startServer() {
+  const potd = await db.query("SELECT id, problem_id FROM potd WHERE date = CURRENT_DATE");
+  potdData.set(potd);
+  server.listen(PORT, () => {
+    console.log(`Backend running on port ${PORT}`);
+  });
+}
+startServer();

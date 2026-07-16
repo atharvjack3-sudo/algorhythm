@@ -26,6 +26,8 @@ export default function ProblemSet() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  const [potdList, setPotdList] = useState([]);
+
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
@@ -63,6 +65,17 @@ export default function ProblemSet() {
     );
   };
 
+  const potdMap = useMemo(() => {
+    const map = new Map();
+
+    for (const potd of potdList) {
+      const d = new Date(potd.date);
+      map.set(d.getDate(), potd);
+    }
+
+    return map;
+  }, [potdList]);
+
   const difficultyOptions = [
     { id: "easy", label: "Easy" },
     { id: "medium", label: "Medium" },
@@ -77,6 +90,20 @@ export default function ProblemSet() {
       setAllTags(res.data);
     });
   }, []);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+    const fetchPOTDList = async () => {
+      try {
+        const res = await api.get("/potd-list");
+        setPotdList(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchPOTDList();
+  }, [authLoading, user]);
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -388,10 +415,14 @@ export default function ProblemSet() {
             {/* Calendar Days */}
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const day = i + 1;
+
+              const potd = potdMap.get(day);
+
               const isSelected =
                 selectedDate?.getDate() === day &&
                 selectedDate?.getMonth() === currentMonth.getMonth() &&
                 selectedDate?.getFullYear() === currentMonth.getFullYear();
+
               const isToday =
                 new Date().getDate() === day &&
                 new Date().getMonth() === currentMonth.getMonth() &&
@@ -400,21 +431,22 @@ export default function ProblemSet() {
               return (
                 <button
                   key={day}
-                  onClick={() =>
-                    setSelectedDate(
-                      new Date(
-                        currentMonth.getFullYear(),
-                        currentMonth.getMonth(),
-                        day,
-                      ),
-                    )
-                  }
+                  onClick={() => {
+                    if (potd) {
+                      navigate(`/problemset/${potd.problem_id}`);
+                    }
+                  }}
+                  disabled={!potd}
                   className={`w-full aspect-square flex items-center justify-center font-semibold font-sans text-[10px] rounded-[3px] transition-colors cursor-pointer border ${
-                    isSelected
-                      ? "bg-orange-500 text-white font-bold border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.2)]"
-                      : isToday
-                        ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50 font-bold hover:bg-orange-100 dark:hover:bg-orange-500/20"
-                        : "bg-transparent text-slate-600 dark:text-slate-400 border-transparent hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    potd?.solved
+                      ? "bg-green-500 text-white border-green-500"
+                      : isSelected
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : isToday
+                          ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/50"
+                          : potd
+                            ? "hover:bg-slate-100 dark:hover:bg-slate-800"
+                            : "opacity-40 cursor-not-allowed"
                   }`}
                 >
                   {day}

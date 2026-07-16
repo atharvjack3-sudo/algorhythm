@@ -2,6 +2,7 @@ import express from "express";
 import fs from "fs/promises";
 import path from "path";
 import { db } from "../config/db.js"; // your pg pool
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -406,6 +407,33 @@ router.get("/topics", async (req, res) => {
     console.error("TOPICS FETCH ERROR:", err);
     res.status(500).json({ error: err.message });
   }
+});
+
+router.get("/potd-list", authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const { rows } = await db.query(
+            `
+            SELECT
+                p.*,
+                (ups.user_id IS NOT NULL) AS solved
+            FROM potd p
+            LEFT JOIN user_potd_stats ups
+                ON ups.potd_id = p.id
+               AND ups.user_id = $1
+            WHERE EXTRACT(YEAR FROM p.date) = EXTRACT(YEAR FROM CURRENT_DATE)
+              AND EXTRACT(MONTH FROM p.date) = EXTRACT(MONTH FROM CURRENT_DATE)
+            ORDER BY p.date;
+            `,
+            [userId]
+        );
+
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 });
 
 export default router;

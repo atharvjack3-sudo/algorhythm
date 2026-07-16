@@ -6,6 +6,8 @@ import { db } from "../config/db.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { analyzeWithAI } from "../utils/google.js";
 import { updateRating } from "../utils/helper.js";
+import potdData from "../cache/potdCache.js";
+
 
 const router = express.Router();
 const JUDGE0_URL = process.env.JUDGE0_URL;
@@ -600,6 +602,8 @@ router.post("/submissions", authMiddleware, async (req, res) => {
             [userId, problemId]
           );
         }
+
+        if (problemId == potdData.get().problem_id) await writeConn("INSERT INTO user_potd_stats (user_id, potd_id) VALUES($1, $2) ON CONFLICT (user_id, potd_id) DO NOTHING", [userId, potdData.get().id]);
       }
 
       // Topic Updates

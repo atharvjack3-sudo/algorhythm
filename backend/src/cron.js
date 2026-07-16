@@ -2,7 +2,7 @@
 import cron from "node-cron";
 import { db } from "./config/db.js";
 import { finalizeContest } from "./jobs/contestFinalize.job.js";
-
+import potdData from "./cache/potdCache.js";
 // Separate execution locks
 let isContestRunning = false;
 let isRankRunning = false;
@@ -86,5 +86,44 @@ cron.schedule("0 1 * * *", async () => {
     console.error("Rank cron job failed", err);
   } finally {
     isRankRunning = false;
+  }
+});
+
+let isPotdRunning = false;
+
+cron.schedule("0 0 * * *", async () => {
+  if (isPotdRunning) {
+    console.log("Skipping POTD cron: previous execution still in progress");
+    return;
+  }
+
+  isPotdRunning = true;
+
+  try {
+    console.log(`[${new Date().toISOString()}] CRON: Selecting POTD...`);
+
+    const problemId = Math.floor(Math.random() * 15) + 1;
+
+    const { rows } = await db.query(
+      `
+      INSERT INTO potd (date, problem_id)
+      VALUES (CURRENT_DATE, $1)
+      ON CONFLICT (date)
+      DO UPDATE
+      SET problem_id = EXCLUDED.problem_id
+      RETURNING id, problem_id;
+      `,
+      [problemId]
+    );
+
+    potdData.set(rows[0]);
+
+    console.log(
+      `[${new Date().toISOString()}] CRON: Today's POTD is problem ${rows[0].problem_id}`
+    );
+  } catch (err) {
+    console.error("POTD cron failed", err);
+  } finally {
+    isPotdRunning = false;
   }
 });
