@@ -4,7 +4,7 @@ import app from "./app.js";
 import http from "http";
 import { WebSocketServer } from "ws";
 import potdData from "./cache/potdCache.js";
-import { db } from "../config/db.js";
+import { db } from "./config/db.js";
 
 import { setupWSConnection } from "y-websocket/bin/utils"; 
 
