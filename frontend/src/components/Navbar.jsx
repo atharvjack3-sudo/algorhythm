@@ -472,12 +472,11 @@ export default function Navbar() {
         /* Sign in button */
         .nb-signin {
           font-family: 'DM Sans', sans-serif;
-          font-size: 12px; font-weight: 700;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-          padding: 8px 18px;
+          font-size: 11px; font-weight: 500;
+          letter-spacing: 0.02em;
+          padding: 6px 15px;
           background: var(--nb-accent);
-          color: var(--nb-avatar-text);
+          color: black;
           border: none;
           border-radius: 3px;
           cursor: pointer;
@@ -688,7 +687,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link to="/auth" className="nb-signin">
-                AUTHENTICATE
+                Sign in
               </Link>
             )}
           </div>

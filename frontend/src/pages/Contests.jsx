@@ -73,6 +73,7 @@ const CountdownTimer = ({ targetDateStr, format = "full", onComplete }) => {
     return () => clearInterval(interval);
   }, [targetDateStr, format, onComplete]);
 
+  // Kept mono specifically for the ticking timer to prevent jumping text widths
   return <span className="font-mono tracking-widest">{timeLeft}</span>;
 };
 
@@ -81,7 +82,7 @@ const CountdownTimer = ({ targetDateStr, format = "full", onComplete }) => {
 const RatingGraph = ({ history }) => {
   if (!history || history.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col gap-2 items-center justify-center text-slate-500 dark:text-slate-400 text-[10px] font-sans tracking-wide ">
+      <div className="w-full h-full flex flex-col gap-2 items-center justify-center text-slate-500 dark:text-slate-400 text-[12px] font-sans font-semibold tracking-wide">
         <TerminalSquare size={16} className="opacity-50" />
         No Rated Contests
       </div>
@@ -115,7 +116,7 @@ const RatingGraph = ({ history }) => {
         return (
           <g key={val}>
             <line x1="0" y1={y} x2={svgWidth} y2={y} className="stroke-slate-200 dark:stroke-slate-800/80" strokeWidth="1" strokeDasharray="4 4" />
-            <text x="4" y={y - 4} className="text-[8px] fill-slate-400 dark:fill-slate-500 font-mono tracking-widest">{val}</text>
+            <text x="4" y={y - 4} className="text-[10px] fill-slate-400 dark:fill-slate-500 font-sans font-semibold tracking-wide">{val}</text>
           </g>
         );
       })}
@@ -159,6 +160,7 @@ const SectionLabel = ({ color, icon: Icon, children }) => (
     <div className="p-1.5 rounded-[3px] shadow-sm" style={{ backgroundColor: `${color}15`, color: color, border: `1px solid ${color}30` }}>
       <Icon size={14} strokeWidth={2.5} />
     </div>
+    {/* Heading: Mono */}
     <span className="font-mono text-[11px] font-bold tracking-[0.15em] uppercase text-slate-800 dark:text-slate-200">
       {children}
     </span>
@@ -167,7 +169,7 @@ const SectionLabel = ({ color, icon: Icon, children }) => (
 
 const EmptyRow = ({ cols, text }) => (
   <tr>
-    <td colSpan={cols} className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-sans text-[11px] font-semibold tracking-wide bg-white dark:bg-[#0a0c10]">
+    <td colSpan={cols} className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-sans text-[13px] font-semibold tracking-wide bg-white dark:bg-[#0d1117]">
       {text}
     </td>
   </tr>
@@ -178,7 +180,7 @@ const TableShell = ({ head, children }) => (
     <div className="overflow-x-auto w-full custom-scrollbar">
       <table className="w-full border-collapse whitespace-nowrap">
         <thead>
-          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a0c10]/50">
+          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22]/50">
             {head.map((h, i) => (
               <th key={i} className={`px-5 py-3 font-mono text-[10px] font-bold tracking-[0.15em] text-slate-500 dark:text-slate-400 uppercase ${h.center ? "text-center" : "text-left"}`}>
                 {h.label}
@@ -195,18 +197,19 @@ const TableShell = ({ head, children }) => (
 );
 
 const Chip = ({ children, className }) => (
-  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-widest border ${className || "bg-slate-100 dark:bg-[#0a0c10] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800"}`}>
+  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] font-sans text-[11px] font-bold uppercase tracking-wide border ${className || "bg-slate-100 dark:bg-[#050608] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800"}`}>
     {children}
   </span>
 );
 
 const Btn = ({ onClick, variant = "ghost", children }) => {
-  const baseStyle = "font-mono text-[10px] font-bold tracking-[0.15em] rounded-[3px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 uppercase select-none";
+  // Base style uses sans
+  const baseStyle = "font-sans text-[12px] font-bold tracking-wider rounded-[3px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 uppercase select-none";
   
   const variants = {
-    primary: "bg-orange-500 text-white px-5 py-2.5 hover:bg-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.2)] border border-orange-500",
-    ghost: "bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-5 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white",
-    live: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 border border-red-200 dark:border-red-500/30 px-5 py-2.5 hover:bg-red-100 dark:hover:bg-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]",
+    primary: "bg-orange-500 text-white px-5 py-2 hover:bg-orange-600 shadow-sm border border-orange-500",
+    ghost: "bg-transparent text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 px-5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-orange-500 dark:hover:text-orange-500 hover:border-orange-500 dark:hover:border-orange-500",
+    live: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 border border-red-200 dark:border-red-500/30 px-5 py-2 hover:bg-red-100 dark:hover:bg-red-500/20",
     danger: "bg-transparent text-red-500 hover:text-red-600 dark:hover:text-red-400 py-1.5 px-3 border border-transparent hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20",
   };
 
@@ -219,12 +222,14 @@ const Btn = ({ onClick, variant = "ghost", children }) => {
 
 const InputField = ({ label, ...props }) => (
   <div className="flex flex-col gap-1.5">
+    {/* Label: Heading Mono */}
     <label className="font-mono text-[9px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.15em] uppercase">
       {label}
     </label>
+    {/* Input: Sans */}
     <input 
       {...props} 
-      className="w-full bg-white dark:bg-[#050608] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-[3px] px-3 py-2 text-[13px] font-mono outline-none focus:border-orange-500 dark:focus:border-orange-500 transition-colors shadow-sm"
+      className="w-full bg-white dark:bg-[#050608] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-[3px] px-3 py-2 text-[13px] font-sans font-medium outline-none focus:border-orange-500 dark:focus:border-orange-500 transition-colors shadow-sm placeholder:text-slate-400 dark:placeholder:text-slate-600"
     />
   </div>
 );
@@ -296,13 +301,14 @@ export default function Contests() {
 
   const rColor = getRatingColor(stats?.contest_rating);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   function getRankCol(s) {
     if (s == null || s > 3) return "dark:text-white text-slate-700";
     if (s == 1) return "text-yellow-600";
-    if (s == 2) return "text-silver-500";
-    return "text-brown-600";
+    if (s == 2) return "text-slate-400"; // Silver
+    return "text-amber-700"; // Bronze
   }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -316,47 +322,52 @@ export default function Contests() {
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
       `}</style>
 
-      <div className="relative min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-[#050608] text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300 overflow-hidden">
+      <div className="relative min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-[#050608] text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 transition-colors duration-300 overflow-hidden">
         
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
+        {/* Widescreen IDE Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col gap-8">
           
-          <div className="bg-white dark:bg-[#0a0c10] border border-slate-200 dark:border-slate-800 rounded-[3px] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+          {/* Main Hero Header */}
+          <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
+              <div className="p-3 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-[3px] border border-orange-200 dark:border-orange-500/30 shadow-sm">
+                <Trophy size={28} strokeWidth={2} />
+              </div>
               <div className="flex flex-col">
                 <h1 className="text-2xl md:text-3xl font-bold font-sans tracking-tight text-slate-900 dark:text-white">
                   Algorhythm Contests
                 </h1>
-                <p className="font-sans text-[11px] font-semibold text-slate-500 tracking-wide mt-2">
+                <p className="font-sans text-[13px] font-medium text-slate-500 tracking-wide mt-1">
                   Compete, Rank Up, and Test Your Skills
                 </p>
               </div>
             </div>
             
-            <div className="flex gap-6 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 pt-6 md:pt-0 md:pl-8">
+            <div className="flex flex-wrap gap-6 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 pt-6 md:pt-0 md:pl-8">
               <div className="flex flex-col">
-                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Rating</span>
-                <span className="font-mono text-2xl font-bold" style={{ color: rColor }}>
+                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Global Rating</span>
+                <span className="font-sans text-2xl font-bold" style={{ color: rColor }}>
                   {stats?.contest_rating || 0}
                 </span>
               </div>
               <div className="flex flex-col">
                 <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contests</span>
-                <span className="font-mono text-2xl font-bold text-slate-900 dark:text-white">
+                <span className="font-sans text-2xl font-bold text-slate-900 dark:text-white">
                   {stats?.contests_participated || 0}
                 </span>
               </div>
               <div className="flex flex-col">
                 <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">AC Rate</span>
-                <span className="font-mono text-2xl font-bold text-slate-900 dark:text-white">
-                  {stats?.contest_acceptance_rate || 0}
+                <span className="font-sans text-2xl font-bold text-slate-900 dark:text-white">
+                  {stats?.contest_acceptance_rate || 0}%
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Rank</span>
-                <span className={`font-mono text-2xl font-bold ${getRankCol(stats?.contest_global_rank)}`}>
-                  {stats?.contest_global_rank || 0}
+                <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Global Rank</span>
+                <span className={`font-sans text-2xl font-bold ${getRankCol(stats?.contest_global_rank)}`}>
+                  {stats?.contest_global_rank || "N/A"}
                 </span>
               </div>
             </div>
@@ -376,24 +387,24 @@ export default function Contests() {
                   {running.length === 0
                     ? <EmptyRow cols={5} text="No Ongoing Contests" />
                     : running.map(c => (
-                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0a0c10] dark:even:bg-[#0a0c10]/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer">
-                        <td className="px-5 py-4 relative" onClick={() => navigate(`/contests/${c.id}/problems`)}>
+                      <tr key={c.id} onClick={() => navigate(`/contests/${c.id}/problems`)} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-[#0d1117]/60 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer">
+                        <td className="px-5 py-4 relative">
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-red-500" />
-                          <div className="font-sans text-[14px] font-bold text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
+                          <div className="font-sans text-[14px] font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors">
                             {c.name}
                           </div>
-                          <div className="flex items-center gap-1.5 font-mono text-[10px] text-slate-500 dark:text-slate-400 mt-1.5">
+                          <div className="flex items-center gap-1.5 font-sans text-[12px] font-medium text-slate-500 dark:text-slate-400 mt-1">
                             <Users size={12} /> {c.participants || 0} Registered
                           </div>
                         </td>
-                        <td className="px-5 py-4 font-mono text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                        <td className="px-5 py-4 font-sans text-[13px] font-semibold text-slate-600 dark:text-slate-300">
                           {formatIST(c.start_time)}
                         </td>
-                        <td className="px-5 py-4 text-center font-mono text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                        <td className="px-5 py-4 text-center font-sans text-[13px] font-semibold text-slate-600 dark:text-slate-300">
                           {formatDuration(c.duration_minutes)}
                         </td>
                         <td className="px-5 py-4 text-center">
-                          <span className="inline-flex px-2.5 py-1 rounded-[3px] bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 font-mono text-[11px] text-red-600 dark:text-red-500 font-bold shadow-[0_0_10px_rgba(239,68,68,0.1)]">
+                          <span className="inline-flex px-3 py-1 rounded-[3px] bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-500 font-bold shadow-[0_0_10px_rgba(239,68,68,0.15)]">
                             <CountdownTimer targetDateStr={c.end_time} format="full" onComplete={loadArenaData} />
                           </span>
                         </td>
@@ -418,32 +429,32 @@ export default function Contests() {
                   {upcoming.length === 0
                     ? <EmptyRow cols={5} text="No Scheduled Contests" />
                     : upcoming.map(c => (
-                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0a0c10] dark:even:bg-[#0a0c10]/50 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-[#0d1117]/60 hover:bg-slate-100 dark:hover:bg-slate-800/80">
                         <td className="px-5 py-4 relative">
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="font-sans text-[14px] font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">
+                          <div className="font-sans text-[14px] font-bold text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors">
                             {c.name}
                           </div>
-                          <div className="flex items-center gap-1.5 font-mono text-[10px] text-slate-500 dark:text-slate-400 mt-1.5">
+                          <div className="flex items-center gap-1.5 font-sans text-[12px] font-medium text-slate-500 dark:text-slate-400 mt-1">
                             <Users size={12} /> {c.participants || 0} Registered
                           </div>
                         </td>
-                        <td className="px-5 py-4 font-mono text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                        <td className="px-5 py-4 font-sans text-[13px] font-semibold text-slate-600 dark:text-slate-300">
                           {formatIST(c.start_time)}
                         </td>
-                        <td className="px-5 py-4 text-center font-mono text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                        <td className="px-5 py-4 text-center font-sans text-[13px] font-semibold text-slate-600 dark:text-slate-300">
                           {formatDuration(c.duration_minutes)}
                         </td>
-                        <td className="px-5 py-4 text-center font-mono text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                        <td className="px-5 py-4 text-center font-bold text-slate-600 dark:text-slate-400">
                           <CountdownTimer targetDateStr={c.start_time} format="days" onComplete={loadArenaData} />
                         </td>
                         <td className="px-5 py-4 text-center">
                           {c.is_registered
                             ? <div className="flex flex-col items-center gap-2">
                                 <Chip className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-500/30">
-                                  <CheckCircle2 size={12} /> REGISTERED
+                                  <CheckCircle2 size={14} /> REGISTERED
                                 </Chip>
-                                <Btn onClick={() => unregister(c.id)} variant="danger"><XCircle size={10} /> REVOKE</Btn>
+                                <Btn onClick={() => unregister(c.id)} variant="danger"><XCircle size={12} /> REVOKE</Btn>
                               </div>
                             : <Btn onClick={() => register(c.id)} variant="ghost">REGISTER</Btn>}
                         </td>
@@ -459,24 +470,24 @@ export default function Contests() {
                 </SectionLabel>
                 <TableShell head={[{label:"Contest"},{label:"Start"},{label:"Duration",center:true},{label:"Participants",center:true}]}>
                   {past.length === 0
-                    ? <EmptyRow cols={4} text="NO HISTORY" />
+                    ? <EmptyRow cols={4} text="No Archive History" />
                     : past.map(c => (
-                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0a0c10] dark:even:bg-[#0a0c10]/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer" onClick={() => navigate(`/contests/${c.id}`)}>
+                      <tr key={c.id} className="transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-[#0d1117]/60 hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer" onClick={() => navigate(`/contests/${c.id}`)}>
                         <td className="px-5 py-4 relative">
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-slate-400 dark:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <span className="font-sans text-[13px] font-semibold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors">
+                          <span className="font-sans text-[14px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors">
                             {c.name}
                           </span>
                         </td>
-                        <td className="px-5 py-4 font-mono text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        <td className="px-5 py-4 font-sans text-[13px] font-semibold text-slate-500 dark:text-slate-400">
                           {formatIST(c.start_time)}
                         </td>
-                        <td className="px-5 py-4 text-center font-mono text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        <td className="px-5 py-4 text-center font-sans text-[13px] font-semibold text-slate-500 dark:text-slate-400">
                           {formatDuration(c.duration_minutes)}
                         </td>
                         <td className="px-5 py-4 text-center">
-                          <Chip className="bg-slate-100 dark:bg-[#050608] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
-                            <Users size={12} /> {c.participants || 0}
+                          <Chip>
+                            <Users size={14} className="opacity-70" /> {c.participants || 0}
                           </Chip>
                         </td>
                       </tr>
@@ -489,33 +500,33 @@ export default function Contests() {
             <aside className="w-full lg:w-[340px] shrink-0 flex flex-col gap-6">
 
               {/* RATING CARD */}
-              <div className="bg-white dark:bg-[#050608] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm overflow-hidden flex flex-col">
-                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a0c10]/50 flex items-center gap-2">
+              <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm overflow-hidden flex flex-col">
+                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] flex items-center gap-2">
                   <TerminalSquare size={14} className="text-orange-500" />
-                  <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.15em] uppercase">
+                  <span className="font-mono text-[10px] font-bold text-slate-600 dark:text-slate-300 tracking-[0.15em] uppercase">
                     User Profile
                   </span>
                 </div>
                 
                 <div className="p-5 flex flex-col gap-6">
                   <div className="flex flex-col gap-3">
-                    <div className="flex justify-between items-center bg-slate-50 dark:bg-[#050608] px-3 py-2 rounded-[3px] border border-slate-200 dark:border-slate-800">
-                      <span className="font-mono text-[9px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest">Handle</span>
-                      <span className="font-sans text-[14px] font-bold" style={{ color: rColor }}>
+                    <div className="flex justify-between items-center bg-slate-50 dark:bg-[#050608] px-4 py-2.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
+                      <span className="font-mono text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Handle</span>
+                      <span className="font-sans text-[15px] font-bold" style={{ color: rColor }}>
                         {user.username}
                       </span>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-[#050608] px-3 py-2 rounded-[3px] border border-slate-200 dark:border-slate-800">
-                        <span className="font-mono text-[9px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest">Title</span>
-                        <span className="font-mono text-[12px] font-bold" style={{ color: rColor }}>
+                      <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-[#050608] px-4 py-2.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
+                        <span className="font-mono text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Title</span>
+                        <span className="font-sans text-[13px] font-bold" style={{ color: rColor }}>
                           {stats?.is_banned ? "BANNED" : getMilitaryRank(stats?.contest_rating)}
                         </span>
                       </div>
-                      <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-[#050608] px-3 py-2 rounded-[3px] border border-slate-200 dark:border-slate-800">
-                        <span className="font-mono text-[9px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest">Rating</span>
-                        <span className="font-mono text-[12px] font-bold" style={{ color: rColor }}>
+                      <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-[#050608] px-4 py-2.5 rounded-[3px] border border-slate-200 dark:border-slate-800">
+                        <span className="font-mono text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Rating</span>
+                        <span className="font-sans text-[14px] font-bold" style={{ color: rColor }}>
                           {stats?.contest_rating || 0}
                         </span>
                       </div>
@@ -529,10 +540,10 @@ export default function Contests() {
               </div>
 
               {/* RULES */}
-              <div className="bg-white dark:bg-[#0a0c10] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a0c10]/50 flex items-center gap-2">
-                  <ShieldAlert size={14} className="text-red-500" />
-                  <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.15em] uppercase">
+              <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] flex items-center gap-2">
+                  <ShieldAlert size={14} className="text-orange-500" />
+                  <span className="font-mono text-[10px] font-bold text-slate-600 dark:text-slate-300 tracking-[0.15em] uppercase">
                     General Rules
                   </span>
                 </div>
@@ -542,11 +553,11 @@ export default function Contests() {
                     ["Zero Tolerance", "Plagiarism, multiple accounts, or AI assistance results in a permanent platform ban."],
                     ["Information Lockdown", "No discussion of problem logic, hints, or code until the arena timer reaches zero."],
                   ].map(([title, body], i) => (
-                    <div key={title} className="border-l-2 border-slate-300 dark:border-slate-700 pl-3">
-                      <div className="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <div key={title} className="border-l-2 border-slate-300 dark:border-slate-700 pl-3.5">
+                      <div className="font-sans text-[12px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide mb-1 flex items-center gap-1.5">
                         <span className="text-orange-500">[{i+1}]</span> {title}
                       </div>
-                      <div className="font-sans text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{body}</div>
+                      <div className="font-sans text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{body}</div>
                     </div>
                   ))}
                 </div>
@@ -554,28 +565,28 @@ export default function Contests() {
 
               {/* ADMIN PANEL */}
               {user && (user.role === "owner" || user.role === "moderator") && (
-                <div className="bg-white dark:bg-[#0d1117] border border-orange-500/30 rounded-[3px] flex flex-col overflow-hidden">
+                <div className="bg-white dark:bg-[#0d1117] border border-orange-500/30 rounded-[3px] flex flex-col overflow-hidden shadow-[0_0_15px_rgba(249,115,22,0.1)]">
                   <div className="px-5 py-3.5 border-b border-orange-500/20 bg-orange-50 dark:bg-orange-500/10 flex items-center gap-2">
-                    <TerminalSquare size={14} className="text-orange-500" />
-                    <span className="font-mono text-[10px] font-bold text-orange-600 dark:text-orange-500 tracking-[0.15em] uppercase">
+                    <TerminalSquare size={14} className="text-orange-600 dark:text-orange-500" />
+                    <span className="font-mono text-[10px] font-bold text-orange-700 dark:text-orange-500 tracking-[0.15em] uppercase">
                       Schedule Contest
                     </span>
                   </div>
                   <div className="p-5">
-                    <form onSubmit={createContest} className="flex flex-col gap-4">
+                    <form onSubmit={createContest} className="flex flex-col gap-5">
                       <InputField label="Contest Name" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Div. 2 Round 1" />
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <InputField label="Start Time" required type="datetime-local" value={form.start_time} onChange={e => setForm({...form, start_time: e.target.value})} />
                         <InputField label="End Time"   required type="datetime-local" value={form.end_time}   onChange={e => setForm({...form, end_time: e.target.value})} />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <InputField label="Writers (CSV)" required value={form.writers} onChange={e => setForm({...form, writers: e.target.value})} placeholder="u1, u2" />
                         <InputField label="Problems (CSV)" required value={form.problems} onChange={e => setForm({...form, problems: e.target.value})} placeholder="1, 4, 7" />
                       </div>
                       {user.role === "moderator" && (
                         <InputField label="Creation Token" required value={form.token} onChange={e => setForm({...form, token: e.target.value})} placeholder="TOKEN_76" />
                       )}
-                      <button type="submit" className="w-full bg-orange-500 text-white border border-orange-500 rounded-[3px] p-3 font-mono text-[11px] font-bold tracking-[0.15em] uppercase cursor-pointer mt-2 hover:bg-orange-600 transition-all">
+                      <button type="submit" className="w-full bg-orange-500 text-white border border-orange-500 rounded-[3px] p-3 font-sans text-[13px] font-bold tracking-wide uppercase cursor-pointer mt-2 hover:bg-orange-600 transition-all shadow-sm">
                         Schedule Contest
                       </button>
                     </form>
