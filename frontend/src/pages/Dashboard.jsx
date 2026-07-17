@@ -347,13 +347,13 @@ export default function Dashboard() {
                     className="font-mono text-[10px] font-bold tracking-widest uppercase text-center"
                     style={{ color: getContestColor(contestStats?.contest_rating) }}
                   >
-                    [{getContestRank(contestStats?.contest_rating)}]
+                    {getContestRank(contestStats?.contest_rating)}
                   </p>
-                  {contestStats?.is_banned && (
+                  {contestStats?.is_banned == 1 ? (
                     <span className="flex items-center gap-1 font-mono text-[9px] font-bold text-red-600 dark:text-red-500 uppercase tracking-widest bg-red-50 dark:bg-red-500/10 px-2 py-0.5 rounded-[3px] border border-red-200 dark:border-red-500/30">
                       <ShieldAlert size={10} /> BANNED
-                    </span>
-                  )}
+                    </span>) : <></>
+                  }
                   {status === "Premium" && (
                     <span className="font-mono text-[9px] font-bold text-orange-600 dark:text-orange-500 uppercase tracking-widest bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-[3px] border border-orange-200 dark:border-orange-500/30 mt-1">
                       PRO ACCESS
@@ -374,12 +374,12 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Platform Operations Grid */}
+            {/* Platform stats Grid */}
             <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm flex flex-col">
               <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] flex items-center gap-2">
                 <TerminalSquare size={14} className="text-blue-500" />
                 <span className="font-mono text-[10px] font-bold tracking-[0.15em] text-slate-600 dark:text-slate-300 uppercase">
-                  Platform Operations
+                  Platform Stats
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-px bg-slate-200 dark:bg-slate-800">
@@ -402,29 +402,29 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Arena Operations Grid */}
+            {/* Contest stats Grid */}
             <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm flex flex-col">
               <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] flex items-center gap-2">
                 <Swords size={14} className="text-red-500" />
                 <span className="font-mono text-[10px] font-bold tracking-[0.15em] text-slate-600 dark:text-slate-300 uppercase">
-                  Arena Operations
+                  Contest Stats
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-px bg-slate-200 dark:bg-slate-800">
+                <div className="bg-white dark:bg-[#0d1117] p-5 flex flex-col gap-1.5 hover:bg-slate-50 dark:hover:bg-[#161b22] transition-colors">
+                  <p className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">Global Rank</p>
+                  <p className="font-sans text-xl font-bold text-slate-900 dark:text-white">{contestStats?.contest_global_rank || "-"}</p>
+                </div>
+                <div className="bg-white dark:bg-[#0d1117] p-5 flex flex-col gap-1.5 hover:bg-slate-50 dark:hover:bg-[#161b22] transition-colors">
+                  <p className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">Contest AC %</p>
+                  <p className="font-sans text-xl font-bold text-slate-900 dark:text-white">{contestStats?.contest_acceptance_rate || 0}%</p>
+                </div>
                 <div className="bg-white dark:bg-[#0d1117] p-5 flex flex-col gap-1.5 hover:bg-slate-50 dark:hover:bg-[#161b22] transition-colors">
                   <p className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">Contests</p>
                   <p className="font-sans text-xl font-bold text-slate-900 dark:text-white">{contestStats?.contests_participated || 0}</p>
                 </div>
                 <div className="bg-white dark:bg-[#0d1117] p-5 flex flex-col gap-1.5 hover:bg-slate-50 dark:hover:bg-[#161b22] transition-colors">
-                  <p className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">Arena AC %</p>
-                  <p className="font-sans text-xl font-bold text-slate-900 dark:text-white">{contestStats?.contest_acceptance_rate || 0}%</p>
-                </div>
-                <div className="bg-white dark:bg-[#0d1117] p-5 flex flex-col gap-1.5 hover:bg-slate-50 dark:hover:bg-[#161b22] transition-colors">
-                  <p className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">Arena Solved</p>
-                  <p className="font-sans text-xl font-bold text-slate-900 dark:text-white">{contestStats?.contests_solved || 0}</p>
-                </div>
-                <div className="bg-white dark:bg-[#0d1117] p-5 flex flex-col gap-1.5 hover:bg-slate-50 dark:hover:bg-[#161b22] transition-colors">
-                  <p className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">Last Entry</p>
+                  <p className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">Last Contest</p>
                   <p className="font-sans text-[13px] font-bold text-slate-900 dark:text-white mt-1">
                     {contestStats?.last_contest_date ? new Date(contestStats.last_contest_date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) : "—"}
                   </p>
@@ -437,7 +437,7 @@ export default function Dashboard() {
               <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 bg-slate-50 dark:bg-[#161b22]">
                 <Activity size={14} className="text-emerald-500" />
                 <span className="font-mono text-[10px] font-bold tracking-[0.15em] text-slate-600 dark:text-slate-300 uppercase">
-                  Difficulty Matrix
+                  Problem Stats
                 </span>
               </div>
               <div className="p-6 flex justify-center items-center">
@@ -464,7 +464,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <Trophy size={14} className="text-orange-500" />
                   <span className="font-mono text-[11px] font-bold tracking-[0.15em] text-slate-700 dark:text-slate-300 uppercase">
-                    Rating Trajectory
+                    Rating Graph
                   </span>
                 </div>
               </div>
@@ -489,7 +489,7 @@ export default function Dashboard() {
                 <div className="h-[240px] w-full bg-slate-50 dark:bg-[#050608] border border-slate-200 dark:border-slate-800 rounded-[3px] p-2 shadow-inner">
                   {ratingLoading ? (
                     <div className="w-full h-full flex flex-col items-center justify-center font-mono text-[10px] text-slate-400 uppercase tracking-widest font-bold gap-2">
-                       <Activity size={16} className="animate-pulse" /> [ RENDERING GRAPH ]
+                       <Activity size={16} className="animate-pulse" /> [ DRAWING GRAPH ]
                     </div>
                   ) : (
                     <RatingGraph history={ratingHistory} />
@@ -600,7 +600,7 @@ export default function Dashboard() {
                             {s.language}
                           </td>
                           <td className="px-5 py-3.5 text-center">
-                            <span className="inline-flex px-2 py-0.5 rounded-[3px] border bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 font-mono text-[9px] font-bold tracking-widest uppercase text-emerald-600 dark:text-emerald-500">
+                            <span className="inline-flex px-2 py-0.5 rounded-[3px] border bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30 font-mono text-[9px] font-bold tracking-widest uppercase text-orange-500 dark:text-orange-400">
                               AC
                             </span>
                           </td>
