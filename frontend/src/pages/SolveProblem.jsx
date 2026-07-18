@@ -228,7 +228,12 @@ export default function SolveProblem() {
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {}
   };
-
+  const handleTestCopy = async (content) => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch (err) {
+      console.log(err);}
+  }
   function handleCollabEditorMount(editor, monaco) {
     if (!collabData || !collabData.wsRoomId) return;
     editorRef.current = editor;
@@ -673,16 +678,16 @@ export default function SolveProblem() {
                       </div>
                       <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
                         <div className="flex-1 bg-white dark:bg-[#0d1117] flex flex-col">
-                          <div className="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] bg-slate-50 dark:bg-[#0a0c10]">
-                            Input
+                          <div className="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] bg-slate-50 flex justify-between dark:bg-[#0a0c10]">
+                            <span>Input</span> <span><ClipboardCopy onClick={() => handleTestCopy(s.input)} className="text-slate-400 cursor-pointer dark:text-slate-600" size={13}/></span> 
                           </div>
                           <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap flex-1">
                             {s.input}
                           </pre>
                         </div>
                         <div className="flex-1 bg-white dark:bg-[#0d1117] flex flex-col">
-                          <div className="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] bg-slate-50 dark:bg-[#0a0c10]">
-                            Output
+                          <div className="px-4 py-1.5 border-b border-slate-100 flex justify-between dark:border-slate-800/50 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] bg-slate-50 dark:bg-[#0a0c10]">
+                            <span>Output</span> <span><ClipboardCopy onClick={() => handleTestCopy(s.output)} className="text-slate-400 cursor-pointer dark:text-slate-600" size={13}/></span> 
                           </div>
                           <pre className="p-4 m-0 font-mono text-[13px] text-slate-800 dark:text-slate-300 whitespace-pre-wrap flex-1">
                             {s.output}

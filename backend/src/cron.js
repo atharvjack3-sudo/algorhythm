@@ -102,7 +102,7 @@ cron.schedule("0 0 * * *", async () => {
   try {
     console.log(`[${new Date().toISOString()}] CRON: Selecting POTD...`);
 
-    const problemId = Math.floor(Math.random() * 16) + 1;
+    const problemId = Math.floor(Math.random() * 17) + 1;
 
     const { rows } = await db.query(
       `
