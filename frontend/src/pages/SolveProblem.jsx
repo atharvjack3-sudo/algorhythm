@@ -442,6 +442,8 @@ export default function SolveProblem() {
         },
         ...prev,
       ]);
+
+      if (!solved && result.verdict == "AC") setSolved(true);
     } catch (err) {
       setSubmitError(err.response?.data?.error || "Submission failed");
       setTimeout(() => setSubmitError(null), 2000);
