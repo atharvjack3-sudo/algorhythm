@@ -129,7 +129,7 @@ export default function SolveProblem() {
   const [submissions, setSubmissions] = useState([]);
   const monacoRef = useRef(null);
   const editorRef = useRef(null);
-  const [showProblemTopics, setShowProblemTopics] = useState(true);
+  const [showProblemTopics, setShowProblemTopics] = useState(false);
   const [differentiate, setDifferentiate] = useState(false);
   const [cmpCode, setCmpCode] = useState([]);
 
@@ -582,10 +582,10 @@ export default function SolveProblem() {
             
             {!showProblemTopics && (
               <button
-                className="mt-3 font-mono text-[9px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 uppercase tracking-widest transition-colors cursor-pointer"
+                className="px-2 py-0.5 rounded-[3px] bg-slate-200/50 dark:bg-slate-800/50 font-sans font-semibold tracking-wide text-[10px] text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 cursor-pointer"
                 onClick={() => setShowProblemTopics(true)}
               >
-                [ SHOW TOPICS ]
+                Click to Show Topics
               </button>
             )}
             
