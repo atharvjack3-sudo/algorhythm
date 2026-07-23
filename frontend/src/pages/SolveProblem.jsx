@@ -432,10 +432,9 @@ export default function SolveProblem() {
     };
   }, []);
 
-  async function handleSubmit() {
+ async function handleSubmit() {
     if (!user) return;
     
-    // Close existing connection if user spam clicks
     if (submissionWsRef.current) {
         submissionWsRef.current.close();
     }
@@ -446,7 +445,6 @@ export default function SolveProblem() {
       setSubmitError(null);
       setSubmissionProgress("Initializing...");
 
-      // Hit the async endpoint
       const res = await api.post("/async-submission", {
         problemId: Number(problemId),
         language,
@@ -456,7 +454,6 @@ export default function SolveProblem() {
       const { submissionId } = res.data;
       setSubmissionProgress("Queued...");
 
-      // Establish WebSocket Connection
       const wsUrl = `wss://algorhythm-6zhv.onrender.com/submission?submissionId=${submissionId}`;
       const ws = new WebSocket(wsUrl);
       submissionWsRef.current = ws;
@@ -464,20 +461,16 @@ export default function SolveProblem() {
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
-        if (data.status === 'PROCESSING') {
-          if (data.totalCases) {
-            setSubmissionProgress(`Evaluating Test Cases... (${data.completedCases}/${data.totalCases})`);
-          } else {
-            setSubmissionProgress("Processing...");
-          }
+        if (data.type === 'SUBMISSION_UPDATE') {
+          setSubmissionProgress(data.message || "Processing...");
         } 
-        else if (data.status === 'COMPLETED' || data.status === 'ERROR') {
-          setLastResult(data.result);
+        else if (data.type === 'SUBMISSION_RESULT') {
+          setLastResult(data);
           
           setSubmissions((prev) => [
             {
               id: submissionId,
-              verdict: data.result.verdict,
+              verdict: data.verdict,
               submitted_at: new Date().toISOString(),
               language,
               code: code,
@@ -485,7 +478,7 @@ export default function SolveProblem() {
             ...prev,
           ]);
 
-          if (!solved && data.result.verdict === "AC") setSolved(true);
+          if (!solved && data.verdict === "AC") setSolved(true);
           
           setSubmitting(false);
           setSubmissionProgress("");
@@ -499,7 +492,6 @@ export default function SolveProblem() {
       };
 
       ws.onclose = () => {
-        // Only set error if it closed unexpectedly without completing
         setSubmitting((prev) => {
           if (prev) {
             setSubmitError("Connection to evaluation server lost.");
