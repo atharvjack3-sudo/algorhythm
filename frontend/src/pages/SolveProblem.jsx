@@ -434,7 +434,8 @@ export default function SolveProblem() {
 
  async function handleSubmit() {
     if (!user) return;
-    
+    const curr_code = code;
+    const curr_lang = language;
     if (submissionWsRef.current) {
         submissionWsRef.current.close();
     }
@@ -462,7 +463,7 @@ export default function SolveProblem() {
         const data = JSON.parse(event.data);
         
         if (data.type === 'SUBMISSION_UPDATE') {
-          setSubmissionProgress(data.message || "Processing...");
+          setSubmissionProgress("Processing...");
         } 
         else if (data.type === 'SUBMISSION_RESULT') {
           setLastResult(data);
@@ -472,8 +473,8 @@ export default function SolveProblem() {
               id: submissionId,
               verdict: data.verdict,
               submitted_at: new Date().toISOString(),
-              language,
-              code: code,
+              language: curr_lang,
+              code: curr_code,
             },
             ...prev,
           ]);
@@ -640,7 +641,7 @@ export default function SolveProblem() {
             
             {!showProblemTopics && (
               <button
-                className="px-2 py-0.5 rounded-[3px] bg-slate-200/50 dark:bg-slate-800/50 font-sans font-semibold tracking-wide text-[10px] text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 cursor-pointer"
+                className="px-2 py-0.5 rounded-[3px] bg-slate-200/50 dark:bg-slate-800/50 font-sans font-semibold tracking-wide text-[10px] text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 cursor-pointer mt-1"
                 onClick={() => setShowProblemTopics(true)}
               >
                 Click to Show Topics
