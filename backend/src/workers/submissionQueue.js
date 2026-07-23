@@ -20,7 +20,8 @@ const LIMIT_MULTIPLIERS = {
   javascript: { time: 2.0, memory: 2.0 }, 
 };
 
-const queue = [];
+let queue = [];
+let queue_idx = 0; // points at the next unprocessed job.
 let isWorkerRunning = false;
 
 // 20 requests/sec = 1 request every 50ms
@@ -115,9 +116,14 @@ export async function startWorker() {
   console.log("Submission worker loop started...");
 
   while (true) {
-    if (queue.length > 0) {
-      const job = queue.shift();
+    if (queue.length > 0 && queue_idx < queue.length) {
+      const job = queue[queue_idx];
+      queue[queue_idx++] = null;
       processSubmissionJob(job).catch((err) => console.error(`Job execution failed for submission ${job.submissionId}:`, err));
+      if ((queue.length == queue_idx) || (queue.length >= 10000 && queue_idx >= 5000)) {
+        queue = queue.slice(queue_idx);
+        queue_idx = 0;
+      }
       await delay(RATE_LIMIT_MS); // 20 req/sec limit
     } else {
       await delay(500); // Sleep briefly when idle to prevent CPU thrashing
