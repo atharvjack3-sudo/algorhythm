@@ -40,14 +40,6 @@ async function processSubmissionJob(job) {
       `UPDATE submissions SET status = 'PROCESSING' WHERE id = $1`, 
       [submissionId]
     );
-
-    // 2. Notify the frontend via WebSocket
-    sendToClient(submissionId, { 
-      type: "SUBMISSION_UPDATE", 
-      status: "PROCESSING", 
-      message: "Running your code on testcases..." 
-    });
-
     // 3. Fetch test cases
     const { rows: tcRows } = await readConn.query(
       `SELECT * FROM problem_testcases WHERE problem_id = $1 ORDER BY id`,
@@ -64,7 +56,12 @@ async function processSubmissionJob(job) {
       
       // Append state to the callback URL.
       const callbackUrl = `${process.env.BACKEND_URL}/api/finalize-submission?subId=${submissionId}&index=${index + 1}&isSample=${tc.is_sample}&secret=${process.env.JUDGE0_WEBHOOK_SECRET}`;
-
+      // 2. Notify the frontend via WebSocket
+      sendToClient(submissionId, { 
+        type: "SUBMISSION_UPDATE", 
+        status: "PROCESSING", 
+        message: "Running your code on testcases..." 
+      });
       return {
         source_code: codeBase64,
         language_id: LANGUAGE_MAP[language],
@@ -120,10 +117,10 @@ export async function startWorker() {
   while (true) {
     if (queue.length > 0) {
       const job = queue.shift();
-      await processSubmissionJob(job);
-      await delay(RATE_LIMIT_MS); // Strict 20 req/sec limit
+      processSubmissionJob(job).catch((err) => console.error(`Job execution failed for submission ${job.submissionId}:`, err));
+      await delay(RATE_LIMIT_MS); // 20 req/sec limit
     } else {
-      await delay(200); // Sleep briefly when idle to prevent CPU thrashing
+      await delay(500); // Sleep briefly when idle to prevent CPU thrashing
     }
   }
 }
