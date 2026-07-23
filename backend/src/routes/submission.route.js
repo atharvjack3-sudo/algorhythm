@@ -12,7 +12,12 @@ import { addToQueue } from "../workers/submissionQueue.js";
 const router = express.Router();
 const JUDGE0_URL = process.env.JUDGE0_URL;
 
-
+const LANGUAGE_MAP = {
+  cpp: 54,
+  java: 62,
+  python: 71,
+  javascript: 63,
+};
 
 function difficultyToRating(difficulty) {
   switch (difficulty) {
