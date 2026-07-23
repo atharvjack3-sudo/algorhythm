@@ -55,6 +55,7 @@ export default function Navbar() {
     { name: "Contests", path: "/contests" },
     { name: "Premium", path: "/premium" },
     { name: "Blogs", path: "/blogs" },
+    { name: "Learn", path: "/learn" }
   ];
 
   const DROPDOWN_LINKS = [

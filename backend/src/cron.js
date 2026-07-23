@@ -127,3 +127,44 @@ cron.schedule("0 0 * * *", async () => {
     isPotdRunning = false;
   }
 });
+
+// ==========================================
+// 4. Stale Submissions Cleanup (Runs every 6 hours)
+// ==========================================
+cron.schedule("0 */6 * * *", async () => {
+  if (isCleanupRunning) {
+    console.log("Skipping cleanup cron: previous execution still in progress");
+    return;
+  }
+
+  isCleanupRunning = true;
+
+  try {
+    console.log(`[${new Date().toISOString()}] CRON: Starting stale submissions cleanup...`);
+    
+    await db.query('BEGIN');
+    const result = await db.query(`
+      WITH stale_subs AS (
+        SELECT id 
+        FROM submissions
+        WHERE submitted_at < NOW() - INTERVAL '1 hour'
+          AND status IN ('PENDING', 'PROCESSING')
+      ),
+      deleted_state AS (
+        DELETE FROM submission_execution_state
+        WHERE submission_id IN (SELECT id FROM stale_subs)
+      )
+      DELETE FROM submissions
+      WHERE id IN (SELECT id FROM stale_subs)
+    `);
+
+    await db.query('COMMIT');
+    console.log(`[${new Date().toISOString()}] CRON: Successfully deleted ${result.rowCount} stale submissions.`);
+    
+  } catch (err) {
+    await db.query('ROLLBACK');
+    console.error("Cleanup cron job failed", err);
+  } finally {
+    isCleanupRunning = false;
+  }
+});

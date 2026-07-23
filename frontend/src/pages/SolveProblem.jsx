@@ -122,7 +122,10 @@ export default function SolveProblem() {
   const [error, setError] = useState(null);
 
   const [submitting, setSubmitting] = useState(false);
+  const [submissionProgress, setSubmissionProgress] = useState("");
   const [submitError, setSubmitError] = useState(null);
+  const submissionWsRef = useRef(null);
+
   const [solved, setSolved] = useState(false);
   const [lastResult, setLastResult] = useState(null);
   const [complexity, setComplexity] = useState(null);
@@ -420,34 +423,95 @@ export default function SolveProblem() {
     setSolved(submissions.some((s) => s.verdict === "AC"));
   }, [submissions]);
 
+  // Clean up WebSockets on component unmount
+  useEffect(() => {
+    return () => {
+      if (submissionWsRef.current) {
+        submissionWsRef.current.close();
+      }
+    };
+  }, []);
+
   async function handleSubmit() {
     if (!user) return;
+    
+    // Close existing connection if user spam clicks
+    if (submissionWsRef.current) {
+        submissionWsRef.current.close();
+    }
+    
     try {
       setActiveTab("Result");
       setSubmitting(true);
       setSubmitError(null);
-      const res = await api.post("/submissions", {
+      setSubmissionProgress("Initializing...");
+
+      // Hit the async endpoint
+      const res = await api.post("/async-submission", {
         problemId: Number(problemId),
         language,
         code,
       });
-      const result = res.data;
-      setLastResult(result);
-      setSubmissions((prev) => [
-        {
-          verdict: result.verdict,
-          submitted_at: new Date().toISOString(),
-          language,
-          code: code,
-        },
-        ...prev,
-      ]);
+      
+      const { submissionId } = res.data;
+      setSubmissionProgress("Queued...");
 
-      if (!solved && result.verdict == "AC") setSolved(true);
+      // Establish WebSocket Connection
+      const wsUrl = `wss://algorhythm-6zhv.onrender.com/submission?submissionId=${submissionId}`;
+      const ws = new WebSocket(wsUrl);
+      submissionWsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.status === 'PROCESSING') {
+          if (data.totalCases) {
+            setSubmissionProgress(`Evaluating Test Cases... (${data.completedCases}/${data.totalCases})`);
+          } else {
+            setSubmissionProgress("Processing...");
+          }
+        } 
+        else if (data.status === 'COMPLETED' || data.status === 'ERROR') {
+          setLastResult(data.result);
+          
+          setSubmissions((prev) => [
+            {
+              id: submissionId,
+              verdict: data.result.verdict,
+              submitted_at: new Date().toISOString(),
+              language,
+              code: code,
+            },
+            ...prev,
+          ]);
+
+          if (!solved && data.result.verdict === "AC") setSolved(true);
+          
+          setSubmitting(false);
+          setSubmissionProgress("");
+          ws.close();
+        }
+      };
+
+      ws.onerror = () => {
+        setSubmitError("WebSocket connection error");
+        setSubmitting(false);
+      };
+
+      ws.onclose = () => {
+        // Only set error if it closed unexpectedly without completing
+        setSubmitting((prev) => {
+          if (prev) {
+            setSubmitError("Connection to evaluation server lost.");
+            return false;
+          }
+          return prev;
+        });
+      };
+
     } catch (err) {
       setSubmitError(err.response?.data?.error || "Submission failed");
       setTimeout(() => setSubmitError(null), 2000);
-    } finally {
       setSubmitting(false);
     }
   }
@@ -823,11 +887,19 @@ export default function SolveProblem() {
               </div>
             </div>
 
-            {/* ===== RESULT (Final Verdict) ===== */}
+            {/* ===== RESULT (Final Verdict / Live Status) ===== */}
             {activeTab === "Result" && (
               <div className="flex flex-col gap-6">
                 {submitting ? (
-                  <SubmissionAnim />
+                  <div className="flex flex-col items-center justify-center py-20 px-4 bg-slate-50 dark:bg-[#050608] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm">
+                    <RefreshCcw size={32} className="animate-spin text-orange-500 mb-4" />
+                    <div className="font-mono text-[14px] font-bold text-slate-700 dark:text-slate-300 tracking-widest uppercase">
+                      {submissionProgress}
+                    </div>
+                    <div className="mt-2 text-[10px] font-sans font-semibold text-slate-500 tracking-wide">
+                      Please wait while your solution is being evaluated
+                    </div>
+                  </div>
                 ) : (
                   <>
                     {!lastResult ? (

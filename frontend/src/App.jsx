@@ -27,6 +27,8 @@ import UserContestSubmissions from './pages/UserContestSubmissions';
 import UserProfile from './pages/UserProfile';
 import VerifyEmail from "./components/verifyEmail";
 import ResetPass from "./components/ResetPass";
+import LearnHome from "./pages/LearnHome";
+import LearnTopicModules from "./pages/LearnTopicModules";
 
 
 export default function App() {
@@ -61,6 +63,10 @@ export default function App() {
         <Route path="/blogs/new" element={<CreatePost />} />
         <Route path="/blogs/:slug" element={<BlogDetail />} />
         <Route path="/blogs/:slug/edit" element={<EditBlog />} />
+
+        {/* Learn Routes */}
+        <Route path="/learn" element={<LearnHome />} />
+        <Route path="/learn/:topic" element={ <LearnTopicModules /> } />
 
       </Routes>
     </AuthProvider>
