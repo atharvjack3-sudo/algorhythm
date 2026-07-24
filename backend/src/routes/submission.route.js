@@ -606,7 +606,7 @@ router.put("/finalize-submission", async (req, res) => {
       if (newVerdict !== "AC" && newFailedIndex !== null) {
         hiddenFailedMessage = newFailedIndex < 0
           ? `Failed on Pretest #${Math.abs(newFailedIndex)}`
-          : `Hidden testcase #${newFailedIndex}`;
+          : `Failed on Hidden testcase #${newFailedIndex}`;
       }
 
       // 8. WebSocket Notification

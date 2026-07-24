@@ -58,11 +58,6 @@ async function processSubmissionJob(job) {
       // Append state to the callback URL.
       const callbackUrl = `${process.env.BACKEND_URL}/api/finalize-submission?subId=${submissionId}&index=${index + 1}&isSample=${tc.is_sample}&secret=${process.env.JUDGE0_WEBHOOK_SECRET}`;
       // 2. Notify the frontend via WebSocket
-      sendToClient(submissionId, { 
-        type: "SUBMISSION_UPDATE", 
-        status: "PROCESSING", 
-        message: "Running your code on testcases..." 
-      });
       return {
         source_code: codeBase64,
         language_id: LANGUAGE_MAP[language],
@@ -86,6 +81,11 @@ async function processSubmissionJob(job) {
         } 
       }
     );
+    sendToClient(submissionId, { 
+        type: "SUBMISSION_UPDATE", 
+        status: "PROCESSING", 
+        message: "Running your code on testcases..." 
+      });
 
   } catch (err) {
     console.error(`Worker failed for submission ${submissionId}:`, err.message);
