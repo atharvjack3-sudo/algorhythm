@@ -918,9 +918,9 @@ export default function SolveProblem() {
 
                         <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden shadow-sm">
                           <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22]">
-                            <span className="font-mono text-[10px] font-bold tracking-[0.15em] text-slate-600 dark:text-slate-300 uppercase">
+                            {lastResult.verdict != "AC" && <span className="font-mono text-[10px] font-bold tracking-[0.15em] text-slate-600 dark:text-slate-300 uppercase">
                               Test Cases Breakdown
-                            </span>
+                            </span>}
                           </div>
                           <div className="w-full overflow-x-auto custom-scrollbar">
                             <table className="w-full border-collapse whitespace-nowrap text-left">
