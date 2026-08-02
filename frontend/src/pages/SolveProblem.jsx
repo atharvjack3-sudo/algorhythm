@@ -117,7 +117,7 @@ export default function SolveProblem() {
   );
   const [activeTab, setActiveTab] = useState("Problem");
   const [language, setLanguage] = useState(localStorage.getItem("default_language") || "cpp");
-  const [code, setCode] = useState(boilerPlate[language]);
+  const [code, setCode] = useState(localStorage.getItem(`last_local_save_${problemId}_${language}`) || boilerPlate[language]);
   const [openSubmission, setOpenSubmission] = useState(null);
 
   const [runLoading, setRunLoading] = useState(false);
@@ -285,6 +285,7 @@ export default function SolveProblem() {
 
     const listener = editor.onDidChangeModelContent(() => {
       setCode(editor.getValue());
+      localStorage.setItem(`last_local_save_${problemId}_${language}`, editor.getValue());
     });
     
     yTextRef.current = yText;
@@ -1118,15 +1119,19 @@ export default function SolveProblem() {
                         key={langItem.val}
                         type="button"
                         onClick={() => { 
+                        // localStorage.clear();
                           setLanguage(langItem.val); setLanguageOpen(false);
                           localStorage.setItem("default_language", langItem.val);
                           if (collabActive) {
                             yTextRef.current?.delete(0, yTextRef.current.length);
-                            yTextRef.current?.insert(0, boilerPlate[langItem.val]);
+                            yTextRef.current?.insert(0, localStorage.getItem(`last_local_save_${problemId}_${langItem.val}`) || boilerPlate[langItem.val]);
+                            localStorage.setItem(`last_local_save_${problemId}_${langItem.val}`, localStorage.getItem(`last_local_save_${problemId}_${langItem.val}`) || boilerPlate[langItem.val]);
                           }
                           else {
-                            editorRef.current?.setValue(boilerPlate[langItem.val]);
+                           // console.log(localStorage.getItem(`last_local_save_${problemId}_${langItem.val}`));
+                            editorRef.current?.setValue(localStorage.getItem(`last_local_save_${problemId}_${langItem.val}`) || boilerPlate[langItem.val]);
                           } 
+                          
                         }}
                         className={`w-full text-left px-3 py-1.5 text-[11px] font-sans font-semibold transition-colors cursor-pointer block ${language === langItem.val ? "text-orange-500 bg-slate-50 dark:bg-slate-900/50" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-200"}`}
                       >
@@ -1214,7 +1219,10 @@ export default function SolveProblem() {
                 onMount={handleEditorDidMount}
                 language={language}
                 defaultValue={code}
-                onChange={(value) => setCode(value ?? "")}
+                onChange={(value) => {
+                  setCode(value ?? "");
+                  localStorage.setItem(`last_local_save_${problemId}_${localStorage.getItem('default_language') || "cpp"}`, value ?? "");
+                }}
                 options={{
                   fontSize: 13,
                   fontFamily: "'JetBrains Mono', monospace",
@@ -1259,9 +1267,11 @@ export default function SolveProblem() {
                 if (collabActive) {
                   yTextRef.current?.delete(0, yTextRef.current.length);
                   yTextRef.current?.insert(0, boilerPlate[language]);
+                  localStorage.setItem(`last_local_save_${problemId}_${language}`, boilerPlate[language]);
                 } 
                 else {
                   editorRef.current?.setValue(boilerPlate[language]);
+                  localStorage.setItem(`last_local_save_${problemId}_${language}`, boilerPlate[language]);
                   }} }} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-red-500 transition-colors cursor-pointer">
                 <RefreshCcw size={10} /> <span className="hidden md:block">RESET</span>
               </button>
@@ -1329,6 +1339,7 @@ export default function SolveProblem() {
                     if (collabActive) { yTextRef.current?.delete(0, yTextRef.current.length); yTextRef.current?.insert(0, openSubmission.code); } 
                     else editorRef?.current?.setValue(openSubmission.code);
                     setLanguage(openSubmission.language);
+                    localStorage.setItem(`last_local_save_${problemId}_${openSubmission.language}`, openSubmission.code);
                     setOpenSubmission(null);
                   }}
                   className="rounded-[3px] border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 py-1.5 font-mono text-[10px] font-bold tracking-widest text-slate-600 dark:text-slate-400 uppercase transition-all hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ml-auto"
@@ -1412,6 +1423,7 @@ export default function SolveProblem() {
                         if (collabActive) { yTextRef.current?.delete(0, yTextRef.current.length); yTextRef.current?.insert(0, sub.code); } 
                         else editorRef?.current?.setValue(sub.code);
                         setLanguage(sub.language);
+                        localStorage.setItem(`last_local_save_${problemId}_${sub.language}`, sub.code);
                         setShowRestoreModal(false);
                       }}
                       className="cursor-pointer transition-colors group odd:bg-white even:bg-slate-50 dark:odd:bg-[#0d1117] dark:even:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80"
@@ -1529,6 +1541,7 @@ export default function SolveProblem() {
                         if (collabActive) { yTextRef.current?.delete(0, yTextRef.current.length); yTextRef.current?.insert(0, cs.code); } 
                         else editorRef?.current?.setValue(cs.code);
                         setLanguage(cs.language);
+                        localStorage.setItem(`last_local_save_${problemId}_${cs.language}`, cs.code);
                         setShowCloudModal(false);
                       }}
                       className="flex justify-between items-center px-4 py-3 border-b last:border-b-0 border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1117] cursor-pointer transition-colors hover:border-l-2 hover:border-l-blue-500 hover:bg-slate-50 dark:hover:bg-slate-900/50 group"
