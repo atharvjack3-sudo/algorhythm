@@ -116,7 +116,7 @@ export default function SolveProblem() {
     theme === "dark" ? "vs-dark" : "light",
   );
   const [activeTab, setActiveTab] = useState("Problem");
-  const [language, setLanguage] = useState("cpp");
+  const [language, setLanguage] = useState(localStorage.getItem("default_language") || "cpp");
   const [code, setCode] = useState(boilerPlate[language]);
   const [openSubmission, setOpenSubmission] = useState(null);
 
@@ -1119,6 +1119,7 @@ export default function SolveProblem() {
                         type="button"
                         onClick={() => { 
                           setLanguage(langItem.val); setLanguageOpen(false);
+                          localStorage.setItem("default_language", langItem.val);
                           if (collabActive) {
                             yTextRef.current?.delete(0, yTextRef.current.length);
                             yTextRef.current?.insert(0, boilerPlate[langItem.val]);
