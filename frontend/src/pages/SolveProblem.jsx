@@ -101,6 +101,13 @@ function MarkdownRenderer({ content, className = "" }) {
   );
 }
 
+const boilerPlate = {
+  "cpp" : "#include<bits/stdc++.h>\nusing namespace std;\n\nint main() {\n\t// Start Coding Here\n}",  
+  "java" : "public class Solution {\n\tpublic static void main(String args[]) {\n\t\t// Start Coding Here\n\t}\n}",
+  "python" : "# Start Coding Here",
+  "javascript" : "// Start Coding Here"
+}
+
 export default function SolveProblem() {
   const { problemId } = useParams();
   const { user, loading: authLoading } = useAuth();
@@ -110,7 +117,7 @@ export default function SolveProblem() {
   );
   const [activeTab, setActiveTab] = useState("Problem");
   const [language, setLanguage] = useState("cpp");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(boilerPlate[language]);
   const [openSubmission, setOpenSubmission] = useState(null);
 
   const [runLoading, setRunLoading] = useState(false);
@@ -1110,7 +1117,16 @@ export default function SolveProblem() {
                       <button
                         key={langItem.val}
                         type="button"
-                        onClick={() => { setLanguage(langItem.val); setLanguageOpen(false); }}
+                        onClick={() => { 
+                          setLanguage(langItem.val); setLanguageOpen(false);
+                          if (collabActive) {
+                            yTextRef.current?.delete(0, yTextRef.current.length);
+                            yTextRef.current?.insert(0, boilerPlate[langItem.val]);
+                          }
+                          else {
+                            editorRef.current?.setValue(boilerPlate[langItem.val]);
+                          } 
+                        }}
                         className={`w-full text-left px-3 py-1.5 text-[11px] font-sans font-semibold transition-colors cursor-pointer block ${language === langItem.val ? "text-orange-500 bg-slate-50 dark:bg-slate-900/50" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/30 hover:text-slate-900 dark:hover:text-slate-200"}`}
                       >
                         {langItem.label}
@@ -1238,7 +1254,14 @@ export default function SolveProblem() {
                 {copySuccess ? <CheckCheck size={10} className="text-green-500" /> : <ClipboardCopy size={10} />}
                 <span className="hidden md:block">{copySuccess ? "COPIED" : "COPY"}</span>
               </button>
-              <button onClick={() => { if(window.confirm("Reset IDE?")) { if (collabActive) yTextRef.current?.delete(0, yTextRef.current.length); else editorRef.current?.setValue(""); } }} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-red-500 transition-colors cursor-pointer">
+              <button onClick={() => { if(window.confirm("Reset IDE?")) { 
+                if (collabActive) {
+                  yTextRef.current?.delete(0, yTextRef.current.length);
+                  yTextRef.current?.insert(0, boilerPlate[language]);
+                } 
+                else {
+                  editorRef.current?.setValue(boilerPlate[language]);
+                  }} }} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-red-500 transition-colors cursor-pointer">
                 <RefreshCcw size={10} /> <span className="hidden md:block">RESET</span>
               </button>
               <button onClick={() => setShowCloudModal(true)} className="flex h-full items-center gap-1.5 px-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-500 transition-colors cursor-pointer">
