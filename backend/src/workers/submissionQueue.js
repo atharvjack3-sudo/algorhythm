@@ -65,7 +65,8 @@ async function processSubmissionJob(job) {
         expected_output: Buffer.from(expectedOutput).toString("base64"),
         cpu_time_limit: BASE_TIME_LIMIT_SEC * multipliers.time,
         memory_limit: BASE_MEMORY_LIMIT_KB * multipliers.memory,
-        callback_url: callbackUrl
+        callback_url: callbackUrl,
+        base64_encoded: true,
       };
     }));
 
