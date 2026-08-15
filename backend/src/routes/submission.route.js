@@ -510,16 +510,134 @@ router.post("/submissions", authMiddleware, async (req, res) => {
   }
 });
 
+// router.put("/finalize-submission", async (req, res) => {
+//   const { subId, index, isSample, secret } = req.query;
+//   const data = req.body;
+
+//   // 1. Security Check
+//   if (secret !== process.env.JUDGE0_WEBHOOK_SECRET) {
+//     return res.status(403).send("Forbidden");
+//   }
+
+//   // 2. Acknowledge Receipt Immediately
+//   res.status(200).send("OK");
+
+//   const runtimeMs = Math.round(parseFloat(data.time || "0") * 1000);
+//   const memoryKb = data.memory || 0;
+//   const isAccepted = data.status.id === 3;
+//   const currentVerdict = isAccepted ? "AC" : mapVerdict(data.status.description);
+
+//   let currentErrorMsg = null;
+//   if (!isAccepted && (data.compile_output || data.stderr || data.message)) {
+//     const rawError = data.compile_output || data.stderr || data.message;
+//     currentErrorMsg = Buffer.from(rawError, "base64").toString("utf-8");
+//   }
+
+//   const writeConn = await db.connect();
+//   try {
+//     await writeConn.query("BEGIN");
+
+//     // 3. Atomic Row Lock
+//     const { rows } = await writeConn.query(
+//       `SELECT s.id, s.user_id, s.problem_id, s.verdict, s.runtime_ms, s.memory_kb, s.status,
+//               p.difficulty,
+//               st.total_cases, st.completed_cases, st.failed_index
+//        FROM submissions s
+//        JOIN submission_execution_state st ON s.id = st.submission_id
+//        JOIN problems p ON s.problem_id = p.id
+//        WHERE s.id = $1 
+//        FOR UPDATE OF s, st`, 
+//       [subId]
+//     );
+
+//     if (rows.length === 0) {
+//       throw new Error(`Submission ${subId} not found.`);
+//     }
+
+//     const sub = rows[0];
+//     if (sub.status === "COMPLETED") {
+//       await writeConn.query("ROLLBACK");
+//       return; 
+//     }
+
+//     // 4. Aggregate Results
+//     let newVerdict = sub.verdict; // Starts as 'PENDING'
+//     let newFailedIndex = sub.failed_index;
+
+//     // Track the FIRST failure we encounter
+//     if (!isAccepted && sub.verdict === "PENDING") {
+//       newVerdict = currentVerdict;
+//       newFailedIndex = isSample === "true" ? -parseInt(index, 10) : parseInt(index, 10);
+//     }
+
+//     const newRuntime = Math.max(sub.runtime_ms || 0, runtimeMs);
+//     const newMemory = Math.max(sub.memory_kb || 0, memoryKb);
+//     const newCompleted = sub.completed_cases + 1;
+//     const isCompleted = newCompleted >= sub.total_cases;
+    
+//     // If we've completed all cases and still haven't failed, it's finally AC
+//     if (isCompleted && newVerdict === "PENDING") {
+//       newVerdict = "AC";
+//     }
+
+//     const newStatus = isCompleted ? "COMPLETED" : sub.status;
+
+//     // 5. Update Core Submissions Table
+//     await writeConn.query(
+//       `UPDATE submissions 
+//        SET verdict = $1, runtime_ms = $2, memory_kb = $3, status = $4
+//        WHERE id = $5`,
+//       [newVerdict, newRuntime, newMemory, newStatus, subId]
+//     );
+
+//     // 6. Update Execution State Table
+//     await writeConn.query(
+//       `UPDATE submission_execution_state
+//        SET completed_cases = $1, failed_index = $2
+//        WHERE submission_id = $3`,
+//       [newCompleted, newFailedIndex, subId]
+//     );
+
+//     // 7. Finalize Statistics IF this was the last testcase
+//     if (isCompleted) {
+//       await finalizeStatistics(writeConn, sub.user_id, sub.problem_id, sub.difficulty, newVerdict);
+
+//       let hiddenFailedMessage = null;
+//       if (newVerdict !== "AC" && newFailedIndex !== null) {
+//         hiddenFailedMessage = newFailedIndex < 0
+//           ? `Failed on Pretest #${Math.abs(newFailedIndex)}`
+//           : `Failed on Hidden testcase #${newFailedIndex}`;
+//       }
+
+//       // 8. WebSocket Notification
+//       sendToClient(subId, {
+//         type: "SUBMISSION_RESULT",
+//         verdict: newVerdict,
+//         hidden_failed: hiddenFailedMessage,
+//         error: currentErrorMsg || null, 
+//       });
+
+//       setTimeout(() => {
+//         disconnectClient(subId);
+//       }, 500);
+//     }
+
+//     await writeConn.query("COMMIT");
+//   } catch (err) {
+//     await writeConn.query("ROLLBACK");
+//     console.error(`Webhook error for submission ${subId}:`, err.message);
+//   } finally {
+//     writeConn.release();
+//   }
+// });
+// shifted the submission finalization logic entirely to db to save network round trip times.
 router.put("/finalize-submission", async (req, res) => {
   const { subId, index, isSample, secret } = req.query;
   const data = req.body;
 
-  // 1. Security Check
   if (secret !== process.env.JUDGE0_WEBHOOK_SECRET) {
     return res.status(403).send("Forbidden");
   }
-
-  // 2. Acknowledge Receipt Immediately
   res.status(200).send("OK");
 
   const runtimeMs = Math.round(parseFloat(data.time || "0") * 1000);
@@ -533,101 +651,45 @@ router.put("/finalize-submission", async (req, res) => {
     currentErrorMsg = Buffer.from(rawError, "base64").toString("utf-8");
   }
 
-  const writeConn = await db.connect();
+  // POTD Data
+  const currentPotd = potdData?.get?.();
+  const potdId = currentPotd?.id || null;
+  const potdProblemId = currentPotd?.problem_id || null;
+
   try {
-    await writeConn.query("BEGIN");
-
-    // 3. Atomic Row Lock
-    const { rows } = await writeConn.query(
-      `SELECT s.id, s.user_id, s.problem_id, s.verdict, s.runtime_ms, s.memory_kb, s.status,
-              p.difficulty,
-              st.total_cases, st.completed_cases, st.failed_index
-       FROM submissions s
-       JOIN submission_execution_state st ON s.id = st.submission_id
-       JOIN problems p ON s.problem_id = p.id
-       WHERE s.id = $1 
-       FOR UPDATE OF s, st`, 
-      [subId]
+    const { rows } = await db.query(
+      `SELECT * FROM finalize_submission_webhook($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        parseInt(subId, 10),
+        parseInt(index, 10),
+        isSample === "true",
+        runtimeMs,
+        memoryKb,
+        isAccepted,
+        currentVerdict,
+        potdId,
+        potdProblemId
+      ]
     );
 
-    if (rows.length === 0) {
-      throw new Error(`Submission ${subId} not found.`);
-    }
+    const result = rows[0];
 
-    const sub = rows[0];
-    if (sub.status === "COMPLETED") {
-      await writeConn.query("ROLLBACK");
-      return; 
-    }
-
-    // 4. Aggregate Results
-    let newVerdict = sub.verdict; // Starts as 'PENDING'
-    let newFailedIndex = sub.failed_index;
-
-    // Track the FIRST failure we encounter
-    if (!isAccepted && sub.verdict === "PENDING") {
-      newVerdict = currentVerdict;
-      newFailedIndex = isSample === "true" ? -parseInt(index, 10) : parseInt(index, 10);
-    }
-
-    const newRuntime = Math.max(sub.runtime_ms || 0, runtimeMs);
-    const newMemory = Math.max(sub.memory_kb || 0, memoryKb);
-    const newCompleted = sub.completed_cases + 1;
-    const isCompleted = newCompleted >= sub.total_cases;
-    
-    // If we've completed all cases and still haven't failed, it's finally AC
-    if (isCompleted && newVerdict === "PENDING") {
-      newVerdict = "AC";
-    }
-
-    const newStatus = isCompleted ? "COMPLETED" : sub.status;
-
-    // 5. Update Core Submissions Table
-    await writeConn.query(
-      `UPDATE submissions 
-       SET verdict = $1, runtime_ms = $2, memory_kb = $3, status = $4
-       WHERE id = $5`,
-      [newVerdict, newRuntime, newMemory, newStatus, subId]
-    );
-
-    // 6. Update Execution State Table
-    await writeConn.query(
-      `UPDATE submission_execution_state
-       SET completed_cases = $1, failed_index = $2
-       WHERE submission_id = $3`,
-      [newCompleted, newFailedIndex, subId]
-    );
-
-    // 7. Finalize Statistics IF this was the last testcase
-    if (isCompleted) {
-      await finalizeStatistics(writeConn, sub.user_id, sub.problem_id, sub.difficulty, newVerdict);
-
-      let hiddenFailedMessage = null;
-      if (newVerdict !== "AC" && newFailedIndex !== null) {
-        hiddenFailedMessage = newFailedIndex < 0
-          ? `Failed on Pretest #${Math.abs(newFailedIndex)}`
-          : `Failed on Hidden testcase #${newFailedIndex}`;
-      }
-
-      // 8. WebSocket Notification
+    // Notify Client if All Testcases are Completed
+    if (result && result.is_completed) {
       sendToClient(subId, {
         type: "SUBMISSION_RESULT",
-        verdict: newVerdict,
-        hidden_failed: hiddenFailedMessage,
-        error: currentErrorMsg || null, 
+        verdict: result.final_verdict,
+        hidden_failed: result.hidden_failed_message,
+        error: currentErrorMsg || null,
       });
 
+      // WebSocket conn cleanup
       setTimeout(() => {
         disconnectClient(subId);
       }, 500);
     }
-
-    await writeConn.query("COMMIT");
   } catch (err) {
-    await writeConn.query("ROLLBACK");
     console.error(`Webhook error for submission ${subId}:`, err.message);
-  } finally {
-    writeConn.release();
   }
 });
 
