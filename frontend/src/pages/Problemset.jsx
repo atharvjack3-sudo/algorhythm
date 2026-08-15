@@ -425,7 +425,7 @@ export default function ProblemSet() {
               let buttonClasses =
                 "w-full aspect-square flex items-center justify-center font-sans text-[11px] rounded-[3px] transition-all border relative ";
 
-               if (isToday) {
+              if (isToday) {
                 buttonClasses +=
                   "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 border-orange-500/40 font-bold cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-500/20";
               } else if (potd) {
@@ -478,9 +478,18 @@ export default function ProblemSet() {
   return (
     <div className="min-h-[calc(100vh-56px)] relative w-full bg-slate-100 dark:bg-[#050608] text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300">
       {theme === "light" ? (
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.300/40%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.300/40%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_15%_0%,rgba(249,115,22,0.06),transparent),radial-gradient(ellipse_60%_40%_at_100%_20%,rgba(59,130,246,0.05),transparent)] pointer-events-none z-0"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.300/40%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.300/40%)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_40%,transparent_100%)] pointer-events-none z-0"></div>
+        </>
       ) : (
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.slate.800/40%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800/40%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_10%_-10%,rgba(249,115,22,0.10),transparent_60%),radial-gradient(ellipse_50%_35%_at_100%_10%,rgba(59,130,246,0.08),transparent_60%),radial-gradient(ellipse_55%_45%_at_85%_100%,rgba(16,185,129,0.05),transparent_60%)] pointer-events-none z-0"></div>
+
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d12] via-transparent to-[#020304]/80 pointer-events-none z-0"></div>
+
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.slate.800/40%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800/40%)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_75%_60%_at_50%_0%,black_35%,transparent_100%)] pointer-events-none z-0"></div>
+        </>
       )}
 
       <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
@@ -558,7 +567,7 @@ export default function ProblemSet() {
           )}
 
           {/* Problem Table */}
-          <div className="w-full bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-[#14171a] rounded-md shadow-sm overflow-hidden flex flex-col flex-1">
+          <div className="w-full bg-white dark:bg-gradient-to-b dark:from-[#0d1117] dark:to-[#0a0d11] border border-slate-200 dark:border-[#14171a] rounded-md shadow-sm dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset] overflow-hidden flex flex-col flex-1">
             <div className="w-full overflow-x-auto block custom-scrollbar">
               <table className="w-full text-left border-collapse whitespace-nowrap">
                 <thead>

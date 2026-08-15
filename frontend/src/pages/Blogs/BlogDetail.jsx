@@ -28,7 +28,7 @@ export default function BlogDetail() {
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-colors duration-200">
+      <div className="min-h-screen bg-slate-100 dark:bg-[#0a0a0f] flex items-center justify-center transition-colors duration-200">
         <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse uppercase">
           LOADING BLOG...
         </span>
@@ -60,25 +60,24 @@ export default function BlogDetail() {
         .cf-markdown pre code { background: transparent; padding: 0; }
         .cf-markdown ul, .cf-markdown ol { padding-left: 1.5rem; margin-bottom: 1rem; }
         .cf-markdown li { margin-bottom: 0.25rem; }
-        .cf-markdown h1, .cf-markdown h2, .cf-markdown h3 { font-family: 'DM Sans', sans-serif; font-weight: 700; tracking: -0.02em; margin-top: 2rem; margin-bottom: 1rem; }
+        .cf-markdown h1, .cf-markdown h2, .cf-markdown h3 { font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.02em; margin-top: 2rem; margin-bottom: 1rem; }
         
-        :root { --code-bg: #f1f5f9; --pre-bg: #f8fafc; --border-color: #e2e8f0; }
-        .dark { --code-bg: rgba(30, 41, 59, 0.5); --pre-bg: #0f172a; --border-color: #1e293b; }
+        :root { --code-bg: #f1f5f9; --pre-bg: #f8fafc; --border-color: #cbd5e1; }
+        .dark { --code-bg: rgba(30, 41, 59, 0.5); --pre-bg: #0a0a0f; --border-color: rgba(30, 41, 59, 0.7); }
       `}</style>
 
-      <div className="relative min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-gray-950 text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300 overflow-hidden">
+      {/* Removed grid overlay, applied deep dark background and slate-100 for light mode */}
+      <div className="relative min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-[#0a0a0f] text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300 overflow-hidden">
         
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.gray.400/20%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.gray.400/20%)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.900/50%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.900/50%)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none z-0"></div>
-
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col-reverse lg:flex-row gap-6 lg:gap-8">
           
           <main className="flex-1 min-w-0 flex flex-col gap-6">
             
             {/* Article Content */}
-            <article className="bg-white dark:bg-[#0d1117] rounded-[3px] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden">
-              <div className="px-6 py-5 md:px-10 md:py-8 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <article className="bg-white dark:bg-[#12141c] rounded-md border border-slate-300 dark:border-slate-800/70 shadow-sm flex flex-col overflow-hidden">
+              <div className="px-6 py-5 md:px-10 md:py-8 border-b border-slate-300 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-800/30">
                 <div className="flex items-center gap-2 mb-4">
-                  <FileText size={14} className="text-blue-500" />
+                  <FileText size={14} className="text-orange-500" />
                   <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                     Blog
                   </span>
@@ -94,8 +93,8 @@ export default function BlogDetail() {
             </article>
 
             {/* Comments Section */}
-            <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
-              <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-3">
+            <div className="bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 rounded-md shadow-sm flex flex-col overflow-hidden">
+              <div className="px-6 py-5 border-b border-slate-300 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-3">
                 <MessageSquare size={16} className="text-orange-500" />
                 <h2 className="font-sans text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                   Discussion
@@ -114,24 +113,26 @@ export default function BlogDetail() {
 
           <aside className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-6">
             
+            {/* Back Button */}
             <Link 
               to="/blogs" 
-              className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-500 rounded-[3px] transition-colors shadow-sm font-mono text-[11px] font-bold uppercase tracking-widest group"
+              className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 hover:border-orange-500 dark:hover:border-orange-500/50 text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 rounded-md transition-colors shadow-sm font-mono text-[11px] font-bold uppercase tracking-widest group"
             >
               <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
               BACK TO BLOGS
             </Link>
 
-            <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            {/* Engagement Card */}
+            <div className="bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 rounded-md shadow-sm flex flex-col overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-300 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                 <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                   Engagement
                 </span>
               </div>
               <div className="p-5 flex flex-col gap-5">
                 
-                <div className="flex flex-col gap-3 pb-5 border-b border-slate-100 dark:border-slate-800/60">
+                <div className="flex flex-col gap-3 pb-5 border-b border-slate-200 dark:border-slate-800/60">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-slate-600 dark:text-slate-400">Total Likes</span>
                     <span className="font-mono text-[15px] font-bold text-slate-900 dark:text-white">
@@ -141,10 +142,10 @@ export default function BlogDetail() {
                   
                   <button 
                     onClick={toggleLike}
-                    className={`w-full flex items-center justify-center gap-2 py-2 rounded-[3px] font-mono text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
+                    className={`w-full flex items-center justify-center gap-2 py-2 rounded-md font-mono text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
                       liked 
                         ? "bg-red-500 text-white border border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" 
-                        : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:text-red-500"
+                        : "bg-slate-100 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:border-red-500 hover:text-red-500"
                     }`}
                   >
                     <Heart size={14} className={`${liked ? 'fill-current' : ''}`} strokeWidth={2.5} />
@@ -164,7 +165,8 @@ export default function BlogDetail() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <Eye size={14} className="text-blue-500" />
+                    {/* Updated Eye icon color to match the purple view stats from BlogCard */}
+                    <Eye size={14} className="text-purple-500" />
                     <span className="font-mono text-[11px] font-semibold uppercase tracking-widest">Views</span>
                   </div>
                   <span className="font-sans text-[13px] font-bold text-slate-900 dark:text-white">
@@ -174,8 +176,9 @@ export default function BlogDetail() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-sm flex flex-col overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-2">
+            {/* Author Details Card */}
+            <div className="bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 rounded-md shadow-sm flex flex-col overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-300 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-2">
                 <User size={14} className="text-orange-500" />
                 <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                   Author Details
@@ -187,11 +190,11 @@ export default function BlogDetail() {
                   onClick={() => navigate(`/profile/${blog.author}`)}
                   className="flex items-center gap-3 w-fit group cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-[3px] bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center font-sans font-bold text-[15px] uppercase group-hover:border-blue-400 dark:group-hover:border-blue-500 group-hover:text-blue-500 transition-colors">
+                  <div className="w-10 h-10 rounded-[3px] bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center font-sans font-bold text-[15px] uppercase group-hover:border-orange-400 dark:group-hover:border-orange-500 group-hover:text-orange-500 transition-colors">
                     {blog.author?.charAt(0)}
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-sans font-bold text-[15px] text-slate-900 dark:text-white leading-none mb-1.5 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">
+                    <span className="font-sans font-bold text-[15px] text-slate-900 dark:text-white leading-none mb-1.5 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                       {blog.author}
                     </span>
                     <span className="font-mono text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
@@ -200,7 +203,7 @@ export default function BlogDetail() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60 flex flex-col gap-2">
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-800/60 flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <Calendar size={12} />
                     <span className="font-mono text-[10px] font-semibold uppercase tracking-widest">Published On</span>
