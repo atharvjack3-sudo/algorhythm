@@ -154,7 +154,10 @@ export async function refresh(req, res) {
 export async function logout(req, res) {
   const token = req.cookies.refreshToken;
   res.clearCookie("refreshToken", {
-    path: "/api/auth/refresh",
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+    path: "/api/auth/refresh", 
   });
   if (token) {
     await db.query(
