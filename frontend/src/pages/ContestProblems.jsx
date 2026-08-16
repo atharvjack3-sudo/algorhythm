@@ -55,7 +55,7 @@ const LiveTimer = ({ targetDateStr, onZero }) => {
   }, [targetDateStr, onZero]);
 
   return (
-    <span className="font-mono tabular-nums font-bold tracking-[0.1em] text-red-500">
+    <span className="font-mono tabular-nums font-bold tracking-[0.1em] text-orange-500 dark:text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.4)]">
       {timeLeft}
     </span>
   );
@@ -102,7 +102,6 @@ export default function ContestProblems() {
         setProblems(res.data.problems);
         setLeaderboard(res.data.leaderboard);
         setWriters(res.data.writers);
-        console.log(res.data.writers);
         setIsEnded(res.data.status === "ended");
       } catch (err) {
         if (err.name === "CanceledError") return;
@@ -124,9 +123,9 @@ export default function ContestProblems() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 dark:bg-[#0a0a0f] flex items-center justify-center transition-colors">
         <span className="font-mono text-xs text-slate-500 dark:text-slate-400 tracking-[0.15em] animate-pulse">
-          Loading Contest Dashboard...
+          LOADING CONTEST DASHBOARD...
         </span>
       </div>
     );
@@ -142,15 +141,15 @@ export default function ContestProblems() {
         .animate-blink { animation: blink 1s infinite; }
       `}</style>
 
-      <div className="min-h-screen w-full bg-slate-100 dark:bg-gray-950 text-slate-800 dark:text-slate-200 pb-12">
+      <div className="min-h-screen w-full bg-slate-100 dark:bg-[#0a0a0f] text-slate-800 dark:text-slate-200 pb-12 transition-colors">
         <div className="max-w-6xl mx-auto py-10 px-6 flex flex-col md:flex-row gap-8">
           
           <div className="flex-1 flex flex-col gap-10">
           
-            <div className="border-b border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+            <div className="border-b border-slate-300 dark:border-slate-800/70 pb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4 transition-colors">
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2.5 mb-1">
-                  <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                  <span className="inline-block w-[3px] h-[14px] rounded-[2px] bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
                   <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
                     Problemset
                   </span>
@@ -189,17 +188,18 @@ export default function ContestProblems() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate("/contests")}
-                  className="font-mono text-[11px] font-semibold tracking-[0.06em] rounded transition-all cursor-pointer bg-transparent text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 px-3.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"
+                  className="font-mono text-[11px] font-semibold tracking-[0.06em] rounded-[3px] transition-all cursor-pointer bg-transparent text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-200 hover:text-slate-800 dark:hover:bg-slate-800/50 dark:hover:text-slate-200 flex items-center gap-2 uppercase"
                 >
-                  ← Back
+                  ← Back to Contests
                 </button>
               </div>
             </div>
 
             {/* Ended Banner */}
             {isEnded && (
-              <div className="bg-red-50/50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-md p-4 flex flex-col gap-1.5 shadow-sm">
+              <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-[3px] p-4 flex flex-col gap-1.5 shadow-sm transition-colors">
                 <span className="font-mono text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]" />
                   Contest Concluded
                 </span>
                 <span className="font-sans font-semibold tracking-wide text-xs text-slate-600 dark:text-slate-400">
@@ -213,26 +213,26 @@ export default function ContestProblems() {
             {problems.length > 0 && (
               <section>
                 <div className="flex items-center gap-2.5 mb-3.5">
-                  <span className="inline-block w-[3px] h-[14px] rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                  <span className="inline-block w-[3px] h-[14px] rounded-[2px] bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
                   <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
                     Problems
                   </span>
                 </div>
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+                <div className="bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 rounded-[3px] overflow-hidden shadow-sm dark:shadow-none transition-colors">
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse whitespace-nowrap">
-                      <thead>
-                        <tr className="border-b border-slate-200 dark:border-slate-800">
-                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12">
+                      <thead className="bg-slate-50 dark:bg-slate-800/30">
+                        <tr className="border-b border-slate-300 dark:border-slate-800/70">
+                          <th className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12">
                             #
                           </th>
-                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-left">
+                          <th className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-left">
                             Name
                           </th>
-                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
+                          <th className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
                             Difficulty
                           </th>
-                          <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
+                          <th className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center">
                             Solved
                           </th>
                         </tr>
@@ -248,19 +248,19 @@ export default function ContestProblems() {
                           );
 
                           let rowBg =
-                            "border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/50 group";
+                            "border-b border-slate-300 dark:border-slate-800/70 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 group last:border-b-0";
                           if (myStat?.solved)
                             rowBg =
-                              "bg-green-50/60 dark:bg-green-900/20 hover:bg-green-100/60 dark:hover:bg-green-900/40 border-b border-green-100 dark:border-green-900/50 transition-colors group";
+                              "bg-green-50/60 dark:bg-emerald-500/10 hover:bg-green-100/60 dark:hover:bg-emerald-500/20 border-b border-green-200 dark:border-emerald-500/30 transition-colors group last:border-b-0";
                           else if (myStat?.wrong_attempts > 0)
                             rowBg =
-                              "bg-red-50/60 dark:bg-red-900/20 hover:bg-red-100/60 dark:hover:bg-red-900/40 border-b border-red-100 dark:border-red-900/50 transition-colors group";
+                              "bg-red-50/60 dark:bg-red-500/10 hover:bg-red-100/60 dark:hover:bg-red-500/20 border-b border-red-200 dark:border-red-500/30 transition-colors group last:border-b-0";
 
                           return (
                             <tr key={p.problem_id} className={rowBg}>
                               <td className="px-4 py-3 text-center">
                                 <span
-                                  className="font-mono text-[13px] font-bold text-blue-600 dark:text-blue-400 cursor-pointer transition-colors hover:opacity-75"
+                                  className="font-mono text-[13px] font-bold text-orange-600 dark:text-orange-500 cursor-pointer transition-colors hover:opacity-75"
                                   onClick={() =>
                                     navigate(
                                       `/contests/${contestId}/solve/${p.problem_id}`,
@@ -272,7 +272,7 @@ export default function ContestProblems() {
                               </td>
                               <td className="px-4 py-3">
                                 <span
-                                  className="font-sans text-[13px] font-semibold text-slate-800 dark:text-slate-200 cursor-pointer transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                                  className="font-sans text-[13px] font-semibold text-slate-800 dark:text-slate-200 cursor-pointer transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-400"
                                   onClick={() =>
                                     navigate(
                                       `/contests/${contestId}/solve/${p.problem_id}`,
@@ -283,18 +283,18 @@ export default function ContestProblems() {
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-center">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-[3px] font-mono text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-[3px] font-mono text-[11px] font-medium bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 uppercase tracking-widest">
                                   {p.difficulty}
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-center font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                                <div className="inline-flex items-center gap-1.5">
+                                <div className="inline-flex items-center gap-1.5 font-bold tracking-widest">
                                   <svg
-                                    className="w-3 h-3"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
+                                    className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500"
+                                    fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                   >
-                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                   </svg>
                                   {p.solved_count || 0}
                                 </div>
@@ -313,49 +313,49 @@ export default function ContestProblems() {
             <section>
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-3.5 gap-2">
                 <div className="flex items-center gap-2.5">
-                  <span className="inline-block w-[3px] h-[14px] rounded-sm bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                  <span className="inline-block w-[3px] h-[14px] rounded-[2px] bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
                   <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-slate-500 dark:text-slate-400 uppercase">
                     {isEnded ? "Tentative Final Standings" : "Live Standings"}
                   </span>
                 </div>
                 {isEnded && (
-                  <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                  <div className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                     Final standings will be published{" "}
                     <Link
                       to={`/contests/${contestId}`}
-                      className="dark:text-orange-500 text-orange-600 hover:underline"
+                      className="dark:text-orange-500 text-orange-600 hover:underline font-bold"
                     >
-                      here.
+                      HERE
                     </Link>
                   </div>
                 )}
               </div>
 
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+              <div className="bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 rounded-[3px] overflow-hidden shadow-sm dark:shadow-none transition-colors">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse whitespace-nowrap min-w-[600px]">
-                    <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-800">
-                        <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12">
+                    <thead className="bg-slate-50 dark:bg-slate-800/30">
+                      <tr className="border-b border-slate-300 dark:border-slate-800/70">
+                        <th className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12">
                           #
                         </th>
-                        <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-left min-w-[150px]">
+                        <th className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-left min-w-[150px]">
                           Who
                         </th>
                         <th
-                          className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12"
+                          className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-12"
                           title="Solved Count"
                         >
                           =
                         </th>
-                        <th className="px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-20">
+                        <th className="px-4 py-3 font-mono text-[10px] font-semibold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase text-center w-20">
                           Penalty
                         </th>
 
                         {problems.map((p) => (
                           <th
                             key={p.problem_id}
-                            className="px-4 py-2.5 font-mono text-[11px] font-bold tracking-[0.1em] text-blue-600 dark:text-blue-400 uppercase text-center w-16 cursor-pointer hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+                            className="px-4 py-3 font-mono text-[11px] font-bold tracking-[0.1em] text-orange-600 dark:text-orange-500 uppercase text-center w-16 cursor-pointer hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
                             onClick={() =>
                               navigate(
                                 `/contests/${contestId}/solve/${p.problem_id}`,
@@ -373,7 +373,7 @@ export default function ContestProblems() {
                         <tr>
                           <td
                             colSpan={4 + problems.length}
-                            className="px-4 py-8 text-center text-slate-500 dark:text-slate-400 font-mono text-xs tracking-[0.06em]"
+                            className="px-4 py-8 text-center text-slate-500 dark:text-slate-400 font-mono text-xs tracking-[0.06em] uppercase"
                           >
                             No recorded submissions yet.
                           </td>
@@ -382,23 +382,23 @@ export default function ContestProblems() {
                         leaderboard.map((row, idx) => {
                           const isCurrentUser = row.user_id === user?.id;
                           const rowClass = isCurrentUser
-                            ? "bg-blue-50/60 dark:bg-blue-900/20 hover:bg-blue-100/60 dark:hover:bg-blue-900/40 border-b border-blue-100 dark:border-blue-900/50 transition-colors"
-                            : "border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/50";
+                            ? "bg-orange-50/60 dark:bg-orange-500/10 hover:bg-orange-100/60 dark:hover:bg-orange-500/20 border-b border-orange-200 dark:border-orange-500/30 transition-colors last:border-b-0"
+                            : "border-b border-slate-300 dark:border-slate-800/70 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 last:border-b-0";
 
                           return (
                             <tr key={row.user_id} className={rowClass}>
-                              <td className="px-4 py-3 text-center font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                              <td className="px-4 py-3 text-center font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                 {idx + 1}
                               </td>
                               <td className="px-4 py-3 text-left">
                                 <Link
                                   to={`/contests/${contestId}/${row.user_id}/submissions`}
-                                  className={`font-sans text-[13px] font-semibold ${isCurrentUser ? "text-blue-600 dark:text-blue-400" : "text-slate-800 dark:text-slate-200"} hover:underline`}
+                                  className={`font-sans text-[13px] font-semibold ${isCurrentUser ? "text-orange-600 dark:text-orange-400" : "text-slate-800 dark:text-slate-200"} hover:underline`}
                                 >
                                   {row.username}
                                 </Link>
                               </td>
-                              <td className="px-4 py-3 text-center font-mono text-[11px] font-bold text-green-600 dark:text-green-500">
+                              <td className="px-4 py-3 text-center font-mono text-[11px] font-bold text-emerald-600 dark:text-emerald-500">
                                 {row.solved_count}
                               </td>
                               <td className="px-4 py-3 text-center font-mono text-[11px] text-slate-600 dark:text-slate-400">
@@ -430,13 +430,13 @@ export default function ContestProblems() {
                                       key={p.problem_id}
                                       className="px-4 py-2 text-center align-middle"
                                     >
-                                      <div className="font-mono font-bold text-green-600 dark:text-green-500 text-[11px]">
+                                      <div className="font-mono font-bold text-emerald-600 dark:text-emerald-500 text-[11px]">
                                         +
                                         {stat.wrong_attempts > 0
                                           ? stat.wrong_attempts
                                           : ""}
                                       </div>
-                                      <div className="font-mono text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                      <div className="font-mono text-[9px] font-semibold text-slate-500 dark:text-slate-500 mt-0.5 tracking-widest">
                                         {formatCFTime(
                                           stat.first_ac_time_minutes,
                                         )}
@@ -470,26 +470,28 @@ export default function ContestProblems() {
           {/* --- SIDEBAR COLUMN (RIGHT) --- */}
           <div className="w-full md:w-[280px] shrink-0 flex flex-col gap-5">
             {/* CONTEST STATUS CARD */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
-              <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800">
-                <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">
+            <div className="bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 rounded-[3px] overflow-hidden shadow-sm dark:shadow-none transition-colors">
+              <div className="px-4 py-3 border-b border-slate-300 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">
                   Contest Status
                 </span>
               </div>
               <div className="p-4 text-center flex flex-col items-center justify-center min-h-[120px]">
                 {isEnded ? (
                   <div className="flex flex-col items-center gap-2">
-                    <span className="font-mono text-[11px] font-bold tracking-widest text-red-500 uppercase">
+                    <span className="font-mono text-[11px] font-bold tracking-widest text-red-500 uppercase flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]" />
                       FINISHED
                     </span>
-                    <div className="font-sans text-[12px] text-slate-500 dark:text-slate-400 mt-1 tracking-wider">
+                    <div className="font-sans font-semibold text-[12px] text-slate-500 dark:text-slate-400 mt-1 tracking-wide">
                       Tentative Final standings displayed
                     </div>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-3">
-                    <span className="font-mono text-[11px] font-bold tracking-widest text-green-500 uppercase flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-blink shadow-[0_0_6px_#22c55e]" />
+                    <span className="font-mono text-[11px] font-bold tracking-widest text-emerald-500 uppercase flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-blink shadow-[0_0_6px_#10b981]" />
                       RUNNING
                     </span>
                     {contest?.end_time && (
@@ -500,7 +502,7 @@ export default function ContestProblems() {
                         />
                       </div>
                     )}
-                    <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">
+                    <div className="font-mono text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
                       Good luck, have fun!
                     </div>
                   </div>
@@ -509,13 +511,13 @@ export default function ContestProblems() {
             </div>
 
             {/* RULES BOX */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
-              <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800">
-                <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">
+            <div className="bg-white dark:bg-[#12141c] border border-slate-300 dark:border-slate-800/70 rounded-[3px] overflow-hidden shadow-sm dark:shadow-none transition-colors">
+              <div className="px-4 py-3 border-b border-slate-300 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-2">
+                <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">
                   Rules & Info
                 </span>
               </div>
-              <div className="p-4 flex flex-col gap-2.5">
+              <div className="p-5 flex flex-col gap-4">
                 {[
                   [
                     "Navigation",
@@ -532,12 +534,12 @@ export default function ContestProblems() {
                 ].map(([title, body]) => (
                   <div
                     key={title}
-                    className="border-l-2 border-slate-300 dark:border-slate-700 pl-2.5"
+                    className="border-l-2 border-orange-400 dark:border-orange-500/50 pl-3"
                   >
-                    <div className="font-mono text-[10px] font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-[0.08em] mb-1">
+                    <div className="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-[0.1em] mb-1">
                       {title}
                     </div>
-                    <div className="font-sans text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    <div className="font-sans text-[12px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
                       {body}
                     </div>
                   </div>
