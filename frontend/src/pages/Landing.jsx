@@ -40,6 +40,147 @@ const Reveal = ({ children, delay = 0, className = "" }) => {
   );
 };
 
+const GraphNetworkCanvas = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    let particles = [];
+    const mouse = { x: -1000, y: -1000 };
+
+    const palette = [
+      { r: 34, g: 197, b: 94 },   
+      { r: 148, g: 163, b: 184 }, 
+      { r: 239, g: 68, b: 68 }    
+    ];
+
+    const resize = () => {
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+      initParticles();
+    };
+
+    const initParticles = () => {
+      particles = [];
+      const numParticles = Math.min(Math.floor(canvas.width / 20), 80);
+      for (let i = 0; i < numParticles; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          radius: Math.random() * 2.0 + 1.5, 
+          colorPhase: Math.random() * palette.length, 
+          colorSpeed: 0.0002 + Math.random() * 0.0004 
+        });
+      }
+    };
+
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    };
+
+    window.addEventListener('resize', resize);
+    canvas.parentElement.addEventListener('mousemove', handleMouseMove);
+    canvas.parentElement.addEventListener('mouseleave', handleMouseLeave);
+    
+    resize();
+
+    const draw = (time) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const orangeColor = '249, 115, 22'; 
+
+      particles.forEach((p, index) => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 120) {
+          p.x -= dx * 0.015;
+          p.y -= dy * 0.015;
+        }
+
+        const cycle = (time * p.colorSpeed + p.colorPhase) % palette.length;
+        const idx1 = Math.floor(cycle);
+        const idx2 = (idx1 + 1) % palette.length;
+        const ratio = cycle - idx1;
+        
+        const r = Math.round(palette[idx1].r * (1 - ratio) + palette[idx2].r * ratio);
+        const g = Math.round(palette[idx1].g * (1 - ratio) + palette[idx2].g * ratio);
+        const b = Math.round(palette[idx1].b * (1 - ratio) + palette[idx2].b * ratio);
+        const nodeColor = `${r}, ${g}, ${b}`;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${nodeColor}, 0.3)`; 
+        ctx.fill();
+
+        for (let j = index + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx2 = p.x - p2.x;
+          const dy2 = p.y - p2.y;
+          const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+          if (dist2 < 150) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            const opacity = (1 - dist2 / 150) * 0.15;
+            ctx.strokeStyle = `rgba(${nodeColor}, ${opacity})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+        
+        if (distance < 150) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          const opacity = (1 - distance / 150) * 0.25;
+          ctx.strokeStyle = `rgba(${orangeColor}, ${opacity})`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    animationFrameId = requestAnimationFrame(draw);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      if (canvas.parentElement) {
+        canvas.parentElement.removeEventListener('mousemove', handleMouseMove);
+        canvas.parentElement.removeEventListener('mouseleave', handleMouseLeave);
+      }
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none z-0"
+    />
+  );
+};
+
 export default function AlgorhythmLanding() {
   const [activeSolutionId, setActiveSolutionId] = useState(2);
   const navigate = useNavigate();
@@ -489,8 +630,10 @@ export default function AlgorhythmLanding() {
 
       <div className="max-w-[1100px] mx-auto px-6">
         {/* HERO */}
-        <div className="py-[120px] pb-20 text-center relative">
-          <Reveal delay={100}>
+        <div className="py-[120px] pb-20 text-center relative overflow-hidden">
+          <GraphNetworkCanvas />
+          
+          <Reveal delay={100} className="relative z-10">
             <h1 className="select-none text-[clamp(48px,8vw,88px)] font-medium leading-[1.04] tracking-[-0.03em] mb-6">
               Think in algorithms.
               <br />
