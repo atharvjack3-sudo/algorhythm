@@ -654,7 +654,7 @@ export default function AlgorhythmLanding() {
               onClick={() => navigate("/auth")}
               className="bg-orange-500 select-none text-white border-none px-8 py-3.5 rounded-full text-[15px] font-medium cursor-pointer transition-all hover:opacity-90 hover:-translate-y-[1px]"
             >
-              Start Coding Free
+              Start Coding
             </button>
             <button
               onClick={() => navigate("/problemset")}
