@@ -153,18 +153,15 @@ export async function refresh(req, res) {
 ========================= */
 export async function logout(req, res) {
   const token = req.cookies.refreshToken;
-
+  res.clearCookie("refreshToken", {
+    path: "/api/auth/refresh",
+  });
   if (token) {
     await db.query(
       `DELETE FROM refresh_tokens WHERE token = $1`,
       [token]
     );
   }
-
-  res.clearCookie("refreshToken", {
-    path: "/api/auth/refresh",
-  });
-
   return res.sendStatus(204);
 }
 

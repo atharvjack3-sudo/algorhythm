@@ -196,6 +196,8 @@ export function AuthProvider({ children }) {
     try {
       await api.post("/auth/logout");
     } finally {
+      localStorage.clear();
+      sessionStorage.clear();
       updateAuth(null, null);
     }
   };

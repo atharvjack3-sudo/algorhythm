@@ -43,7 +43,6 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname.startsWith(path);
 
-  if (loading) return null;
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -72,15 +71,15 @@ export default function Navbar() {
 
         :root {
           --nb-bg: #ffffff;
-          --nb-border: #e2e8f0;
+          --nb-border: #cbd5e1; /* Strengthened light mode border */
           --nb-text-muted: #64748b;
           --nb-text-hover: #0f172a;
-          --nb-accent: #ea580c;
+          --nb-accent: #f97316; /* Algorhythm orange */
           --nb-btn-hover-bg: #f8fafc;
           --nb-btn-hover-border: #e2e8f0;
           --nb-avatar-text: #ffffff;
           --nb-dropdown-bg: #ffffff;
-          --nb-dropdown-border: #e2e8f0;
+          --nb-dropdown-border: #cbd5e1;
           --nb-dd-header-bg: #f8fafc;
           --nb-dd-header-border: #f1f5f9;
           --nb-dd-name: #0f172a;
@@ -98,38 +97,38 @@ export default function Navbar() {
           --nb-logout-hover-bg: rgba(239,68,68,0.06);
           --nb-logout-hover-border: rgba(239,68,68,0.15);
           --nb-logout-hover-color: #ef4444;
-          --nb-shadow: 0 16px 40px rgba(0,0,0,0.1);
+          --nb-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
         .dark {
-          --nb-bg: #050608;
-          --nb-border: #1F1F1F;
-          --nb-text-muted: #475569;
+          --nb-bg: #12141c; /* Elevated dark card color to stand out from #0a0a0f */
+          --nb-border: rgba(30, 41, 59, 0.7);
+          --nb-text-muted: #64748b;
           --nb-text-hover: #e2e8f0;
           --nb-accent: #f97316;
-          --nb-btn-hover-bg: #0d1117;
-          --nb-btn-hover-border: #1e293b;
+          --nb-btn-hover-bg: #1e2230;
+          --nb-btn-hover-border: #334155;
           --nb-avatar-text: #ffffff;
-          --nb-dropdown-bg: #0d1117;
-          --nb-dropdown-border: #1e293b;
+          --nb-dropdown-bg: #12141c;
+          --nb-dropdown-border: rgba(30, 41, 59, 0.7);
           --nb-dd-header-bg: #161b22;
           --nb-dd-header-border: #1e293b;
-          --nb-dd-name: #c8d6e5;
-          --nb-theme-track: #050608;
+          --nb-dd-name: #e2e8f0;
+          --nb-theme-track: #0a0a0f;
           --nb-theme-track-border: #1e293b;
-          --nb-theme-btn-text: #475569;
-          --nb-theme-btn-active-bg: #161b22;
+          --nb-theme-btn-text: #64748b;
+          --nb-theme-btn-active-bg: #1e2230;
           --nb-theme-btn-active-border: #334155;
-          --nb-dd-link-text: #64748b;
-          --nb-dd-link-hover-bg: #050608;
-          --nb-dd-link-hover-border: #1e293b;
-          --nb-dd-link-icon: #475569;
+          --nb-dd-link-text: #94a3b8;
+          --nb-dd-link-hover-bg: #1e2230;
+          --nb-dd-link-hover-border: #334155;
+          --nb-dd-link-icon: #64748b;
           --nb-mobile-label: #1e293b;
           --nb-logo-filter: brightness(0) invert(1);
-          --nb-logout-hover-bg: rgba(239,68,68,0.06);
-          --nb-logout-hover-border: rgba(239,68,68,0.15);
-          --nb-logout-hover-color: #ef4444;
-          --nb-shadow: 0 16px 40px rgba(0,0,0,0.5);
+          --nb-logout-hover-bg: rgba(239,68,68,0.1);
+          --nb-logout-hover-border: rgba(239,68,68,0.2);
+          --nb-logout-hover-color: #f87171;
+          --nb-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
 
         .nb-root {
@@ -137,7 +136,7 @@ export default function Navbar() {
           top: 0;
           z-index: 100;
           width: 100%;
-          height: 52px;
+          height: 56px;
           background: var(--nb-bg);
           border-bottom: 1px solid var(--nb-border);
           display: flex;
@@ -168,7 +167,7 @@ export default function Navbar() {
           opacity: 1;
           transition: opacity .15s;
         }
-        .nb-logo:hover { opacity: 0.7; }
+        .nb-logo:hover { opacity: 0.8; }
         .nb-logo img { height: 28px; width: auto; filter: var(--nb-logo-filter); transition: filter 0.2s; }
 
         /* Center nav */
@@ -186,9 +185,9 @@ export default function Navbar() {
           height: 100%;
           display: flex;
           align-items: center;
-          padding: 0 14px;
+          padding: 0 16px;
           font-family: 'DM Sans', sans-serif;
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 600;
           letter-spacing: 0.01em;
           color: var(--nb-text-muted);
@@ -215,8 +214,10 @@ export default function Navbar() {
         .nb-right {
           display: flex;
           align-items: center;
+          justify-content: flex-end;
           gap: 12px;
           flex-shrink: 0;
+          min-width: 90px;
         }
 
         /* Avatar button */
@@ -237,14 +238,14 @@ export default function Navbar() {
           border-color: var(--nb-btn-hover-border);
         }
         .nb-avatar {
-          width: 26px;
-          height: 26px;
+          width: 28px;
+          height: 28px;
           border-radius: 3px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-family: 'DM Sans', sans-serif;
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 700;
           color: var(--nb-avatar-text);
           flex-shrink: 0;
@@ -271,7 +272,7 @@ export default function Navbar() {
         /* Dropdown */
         .nb-dropdown {
           position: absolute;
-          top: calc(100% + 6px);
+          top: calc(100% + 8px);
           right: 0;
           width: 264px;
           background: var(--nb-dropdown-bg);
@@ -311,9 +312,9 @@ export default function Navbar() {
         .nb-dd-avatar.standard { background: #64748b; }
         
         .nb-dd-name {
-          font-family: 'JetBrains Mono', monospace; /* Heading exception */
-          text-transform: letter-spacing: 0.05em;
-          font-size: 13px; font-weight: 700; color: var(--nb-dd-name);
+          font-family: 'JetBrains Mono', monospace;
+          letter-spacing: 0.05em;
+          font-size: 12px; font-weight: 700; color: var(--nb-dd-name);
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .nb-dd-tier {
@@ -381,7 +382,7 @@ export default function Navbar() {
           text-decoration: none;
           font-family: 'DM Sans', sans-serif;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: 0.02em;
           color: var(--nb-dd-link-text);
           transition: background .12s, color .12s, border-color .12s;
@@ -413,7 +414,7 @@ export default function Navbar() {
           text-transform: uppercase;
         }
 
-        /* Mobile nav (in dropdown) */
+        /* Mobile nav */
         .nb-mobile-links {
           padding: 6px;
           border-top: 1px solid var(--nb-dd-header-border);
@@ -422,7 +423,7 @@ export default function Navbar() {
         }
         .nb-mobile-label {
           padding: 4px 10px 6px;
-          font-family: 'JetBrains Mono', monospace; /* Heading exception */
+          font-family: 'JetBrains Mono', monospace;
           font-size: 10px; font-weight: 700;
           color: var(--nb-mobile-label);
           letter-spacing: 0.1em;
@@ -457,7 +458,7 @@ export default function Navbar() {
           border: 1px solid transparent;
           border-radius: 3px;
           font-family: 'DM Sans', sans-serif;
-          font-size: 12px; font-weight: 700;
+          font-size: 13px; font-weight: 600;
           letter-spacing: 0.02em;
           color: var(--nb-text-muted);
           cursor: pointer;
@@ -472,20 +473,25 @@ export default function Navbar() {
 
         /* Sign in button */
         .nb-signin {
-          font-family: 'DM Sans', sans-serif;
-          font-size: 11px; font-weight: 500;
-          letter-spacing: 0.02em;
-          padding: 6px 15px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px; font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          padding: 8px 20px;
           background: var(--nb-accent);
-          color: black;
+          color: white;
           border: none;
           border-radius: 3px;
           cursor: pointer;
           text-decoration: none;
-          transition: opacity .15s;
-          display: inline-block;
+          transition: opacity .15s, transform .15s;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
         }
-        .nb-signin:hover { opacity: 0.8; }
+        .nb-signin:hover { opacity: 0.9; transform: translateY(-1px); }
+        .nb-signin:active { transform: translateY(0); }
 
         @media (max-width: 768px) {
           .nb-links { display: none; }
@@ -514,13 +520,21 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right */}
+          {/* Right Section */}
           <div
             className="nb-right"
             ref={dropdownRef}
             style={{ position: "relative" }}
           >
-            {user ? (
+            {loading ? (
+              /* Loading Spinner */
+              <div className="flex items-center justify-center pr-2">
+                <div className="relative w-5 h-5 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-[2px] border-slate-200 dark:border-slate-800"></div>
+                  <div className="absolute inset-0 rounded-full border-[2px] border-orange-500 border-t-transparent animate-[spin_0.8s_linear_infinite]"></div>
+                </div>
+              </div>
+            ) : user ? (
               <>
                 <button
                   className={`nb-avatar-btn${open ? " open" : ""}`}
@@ -626,7 +640,7 @@ export default function Navbar() {
                     ))}
                   </div>
 
-                  {/* Logout */}
+                  {/* Logout & Stopwatch */}
                   <div className="nb-dd-footer">
                     <button
                       className="nb-logout"
@@ -639,7 +653,7 @@ export default function Navbar() {
                       Log out
                     </button>
                     
-                    <div className="w-full flex h-8 mt-2 items-center justify-between rounded-[3px] bg-slate-100 dark:bg-slate-900/50 px-3 border border-slate-200 dark:border-slate-800">
+                    <div className="w-full flex h-8 mt-2 items-center justify-between rounded-[3px] bg-slate-50 dark:bg-slate-900/50 px-3 border border-slate-200 dark:border-slate-800/70">
                       <div className="flex items-center gap-2">
                         <History className="text-slate-500" size={13} />
                         <span className="font-sans font-bold text-[12px] tabular-nums tracking-widest text-slate-600 dark:text-slate-400">
