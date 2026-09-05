@@ -121,7 +121,7 @@ export default function CreateDiscussionModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 flex items-center justify-center backdrop-blur-sm p-4 transition-colors">
-      <div className="w-full max-w-7xl h-[90vh] bg-white dark:bg-[#0d1117] rounded-[3px] shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="w-full max-w-8xl h-[90vh] bg-white dark:bg-[#0d1117] rounded-[3px] shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800 transition-colors">
         {/* Header */}
         <div className="flex justify-between items-center px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] transition-colors flex-shrink-0">
           <div className="flex items-center gap-2">
