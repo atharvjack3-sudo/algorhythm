@@ -649,7 +649,7 @@ export default function SolveProblem() {
             
             {!showProblemTopics && (
               <button
-                className="px-2 py-0.5 rounded-[3px] bg-slate-200/50 dark:bg-slate-800/50 font-sans font-semibold tracking-wide text-[10px] text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 cursor-pointer mt-1"
+                className="px-2 py-0.5 rounded-[3px] bg-slate-200/50 dark:bg-slate-800/50 font-sans font-semibold tracking-wide text-[10px] text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 cursor-pointer mt-4"
                 onClick={() => setShowProblemTopics(true)}
               >
                 Click to Show Topics
