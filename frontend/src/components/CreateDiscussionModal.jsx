@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   X,
   Code,
@@ -8,7 +8,14 @@ import {
   ChevronLeft,
   Terminal,
   Eye,
-  Edit3
+  Italic, 
+  Heading, 
+  Quote, 
+  List, 
+  ListOrdered, 
+  Link, 
+  Image, 
+  Strikethrough
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -32,6 +39,33 @@ export default function CreateDiscussionModal({
     () => typeof window !== "undefined" && window.innerWidth >= 768,
   );
 
+  const textareaRef = useRef(null);
+
+  const insertMarkdown = (before, after = "") => {
+  const textarea = textareaRef.current;
+  if (!textarea) {
+    // Fallback if ref isn't attached
+    setBody((prev) => prev + before + after);
+    return;
+  }
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const selectedText = text.substring(start, end);
+
+  // Construct the new string
+  const newText = text.substring(0, start) + before + selectedText + after + text.substring(end);
+  setBody(newText);
+
+  // Move the cursor to the correct position after rendering
+  setTimeout(() => {
+    textarea.focus();
+    const newCursorPos = start + before.length + selectedText.length;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+  }, 0);
+};
+
   if (!open) return null;
 
   const isValid = title.trim().length > 0 && body.trim().length > 0;
@@ -41,7 +75,7 @@ export default function CreateDiscussionModal({
   };
 
   const previewContent = body.trim() ? (
-    <div className="prose prose-slate dark:prose-invert max-w-none font-sans text-[14px] leading-relaxed prose-headings:font-sans prose-headings:tracking-tight prose-a:text-orange-600 dark:prose-a:text-orange-400 [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[13px] [&_:not(pre)>code]:bg-slate-100 dark:[&_:not(pre)>code]:bg-slate-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px] prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
+    <div className="prose prose-code:before:hidden prose-code:after:hidden prose-slate dark:prose-invert max-w-none font-sans text-[14px] leading-relaxed prose-headings:font-sans prose-headings:tracking-tight prose-a:text-orange-600 dark:prose-a:text-orange-400 [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[13px] [&_:not(pre)>code]:bg-slate-200 dark:[&_:not(pre)>code]:bg-slate-800 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded-[3px] prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
@@ -85,7 +119,7 @@ export default function CreateDiscussionModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] bg-slate-900/80 dark:bg-black/80 flex items-center justify-center backdrop-blur-sm p-4 transition-colors">
-      <div className="w-full max-w-5xl h-[90vh] bg-white dark:bg-[#0d1117] rounded-[3px] shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="w-full max-w-7xl h-[90vh] bg-white dark:bg-[#0d1117] rounded-[3px] shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800 transition-colors">
         
         {/* Header */}
         <div className="flex justify-between items-center px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] transition-colors flex-shrink-0">
@@ -94,18 +128,12 @@ export default function CreateDiscussionModal({
               <Terminal size={14} className="text-orange-500" /> Create Discussion Thread
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="font-sans text-[11px] font-bold  text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none p-1 disabled:opacity-50 tracking-wider flex items-center gap-1"
-          >
-            <X size={14} /> Close
-          </button>
+
         </div>
 
         {/* Title Input Area */}
         <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0d1117] transition-colors flex-shrink-0">
-          <label className="block font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wide  mb-1.5">
+          <label className="block font-sans text-[12px] font-semibold text-slate-500 dark:text-slate-400  mb-1.5">
             Discussion Title
           </label>
           <input
@@ -124,29 +152,99 @@ export default function CreateDiscussionModal({
             {/* Editor Workspace */}
             <div className={`flex flex-col bg-slate-50 dark:bg-[#0a0c10] transition-all duration-300 ${showPreview ? "w-1/2" : "w-full"}`}>
               <div className="flex justify-between items-center px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-[#161b22]/50 transition-colors flex-shrink-0">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setBody(body + "**bold**")}
-                    disabled={isSubmitting}
-                    className="font-sans text-[11px] font-bold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
-                  >
-                    <Bold className="w-3 h-3 text-orange-500" /> Bold
-                  </button>
-                  <button
-                    onClick={insertCodeBlock}
-                    disabled={isSubmitting}
-                    className="font-sans text-[11px] font-bold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
-                  >
-                    <Code className="w-3 h-3 text-blue-500" /> Code Block
-                  </button>
-                  <button
-                    onClick={() => setBody(body + " $x = 2$ ")}
-                    disabled={isSubmitting}
-                    className="font-sans text-[11px] font-bold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
-                  >
-                    $ Math
-                  </button>
-                </div>
+                <div className="flex flex-wrap gap-2">
+  {/* TEXT FORMATTING */}
+  <button
+    onClick={() => insertMarkdown("**", "**")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Bold className="w-3 h-3 text-orange-500" /> Bold
+  </button>
+  <button
+    onClick={() => insertMarkdown("*", "*")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Italic className="w-3 h-3 text-pink-500" /> Italic
+  </button>
+  <button
+    onClick={() => insertMarkdown("~~", "~~")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Strikethrough className="w-3 h-3 text-red-400" /> Strike
+  </button>
+
+  {/* STRUCTURE */}
+  <button
+    onClick={() => insertMarkdown("### ", "")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Heading className="w-3 h-3 text-purple-500" /> Heading
+  </button>
+  <button
+    onClick={() => insertMarkdown("> ", "")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Quote className="w-3 h-3 text-indigo-500" /> Quote
+  </button>
+  <button
+    onClick={() => insertMarkdown("- ", "")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <List className="w-3 h-3 text-cyan-500" /> List
+  </button>
+  <button
+    onClick={() => insertMarkdown("1. ", "")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <ListOrdered className="w-3 h-3 text-sky-500" /> Numbered
+  </button>
+
+  {/* MEDIA & CODE */}
+  <button
+    onClick={() => insertMarkdown("[", "](url)")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Link className="w-3 h-3 text-blue-400" /> Link
+  </button>
+  <button
+    onClick={() => insertMarkdown("![alt text](", ")")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Image className="w-3 h-3 text-yellow-500" /> Image
+  </button>
+  <button
+    onClick={() => insertMarkdown("`", "`")} // If you want block code, use ("\n```\n", "\n```\n")
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+  >
+    <Code className="w-3 h-3 text-blue-500" /> Code
+  </button>
+
+  {/* MATH */}
+  <button
+    onClick={() => insertMarkdown("$", "$")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+  >
+    <span className="text-green-400">$</span> Math
+  </button>
+  <button
+    onClick={() => insertMarkdown("\n$$\n", "\n$$\n")}
+    disabled={isSubmitting}
+    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+  >
+    <span className="text-red-400">$$</span> Block
+  </button>
+</div>
 
                 <button
                   onClick={() => setShowPreview(!showPreview)}
@@ -155,7 +253,7 @@ export default function CreateDiscussionModal({
                 >
                   {showPreview ? (
                     <>
-                      Hide Pane <ChevronRight className="w-3 h-3" />
+                      Hide <ChevronRight className="w-3 h-3" />
                     </>
                   ) : (
                     <>
@@ -167,6 +265,7 @@ export default function CreateDiscussionModal({
 
               <textarea
                 value={body}
+                ref={textareaRef}
                 onChange={(e) => setBody(e.target.value)}
                 disabled={isSubmitting}
                 className="flex-1 w-full p-5 resize-none outline-none font-sans tracking-wide text-[13px] leading-relaxed bg-transparent text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 custom-scrollbar disabled:opacity-50"
@@ -176,7 +275,7 @@ export default function CreateDiscussionModal({
 
             {/* Split Preview */}
             <div className={`flex-col bg-white dark:bg-[#0d1117] transition-colors ${showPreview ? "flex w-1/2" : "hidden"}`}>
-              <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22]/30 flex-shrink-0 flex items-center gap-1.5">
+              <div className="px-4 py-[14.5px] border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22]/30 flex-shrink-0 flex items-center gap-1.5">
                 <Eye size={12} className="text-orange-500" />
                 <span className="font-sans text-[11px] font-bold text-slate-500 dark:text-slate-400 tracking-wider ">
                   Render Preview
@@ -195,26 +294,40 @@ export default function CreateDiscussionModal({
                 <>
                   <div className="flex gap-2 flex-shrink-0">
                     <button
-                      onClick={() => setBody(body + "**bold**")}
-                      disabled={isSubmitting}
-                      className="font-sans text-[10px] font-bold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117]"
-                    >
-                      <Bold className="w-3 h-3 text-orange-500" /> Bold
-                    </button>
-                    <button
-                      onClick={insertCodeBlock}
-                      disabled={isSubmitting}
-                      className="font-sans text-[10px] font-bold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117]"
-                    >
-                      <Code className="w-3 h-3 text-blue-500" /> Code
-                    </button>
-                    <button
-                      onClick={() => setBody(body + " $x = 2$ ")}
-                      disabled={isSubmitting}
-                      className="font-sans text-[10px] font-bold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] font-mono text-emerald-500"
-                    >
-                      $ Math
-                    </button>
+                    onClick={() => setBody(body + "*Italics*")}
+                    disabled={isSubmitting}
+                    className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Italic className="w-3 h-3 text-pink-500" /> Italic
+                  </button>
+                  <button
+                    onClick={() => setBody(body + "**bold**")}
+                    disabled={isSubmitting}
+                    className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Bold className="w-3 h-3 text-orange-500" /> Bold
+                  </button>
+                  <button
+                    onClick={insertCodeBlock}
+                    disabled={isSubmitting}
+                    className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Code className="w-3 h-3 text-blue-500" /> Code
+                  </button>
+                  <button
+                    onClick={() => setBody(body + " $x = 2$ ")}
+                    disabled={isSubmitting}
+                    className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+                  >
+                    <span className="text-green-400">$</span> Math
+                  </button>
+                  <button
+                    onClick={() => setBody(body + " $$\nx = 2\n$$ ")}
+                    disabled={isSubmitting}
+                    className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+                  >
+                    <span className="text-red-400">$$</span> Block
+                  </button>
                   </div>
                   <button
                     onClick={() => setShowPreview(true)}
@@ -261,9 +374,19 @@ export default function CreateDiscussionModal({
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-5 py-2 text-[12px] cursor-pointer font-sans font-bold  tracking-wider text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors disabled:opacity-50"
+            className="py-2 text-[12px] cursor-pointer font-sans font-bold  tracking-wider text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors disabled:opacity-50"
           >
-            Cancel
+            Minimize
+          </button>
+          <button
+            onClick={() => {
+              setBody("");
+              onClose();
+            }}
+            disabled={isSubmitting}
+            className="px-1 py-2 text-[12px] cursor-pointer font-sans font-bold  tracking-wider text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors disabled:opacity-50"
+          >
+            Discard
           </button>
 
           <button
