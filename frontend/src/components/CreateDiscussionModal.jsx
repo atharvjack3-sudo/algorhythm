@@ -159,92 +159,117 @@ export default function CreateDiscussionModal({
                   <button
                     onClick={() => insertMarkdown("**", "**")}
                     disabled={isSubmitting}
+                    title="Bold"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Bold className="w-3 h-3 text-orange-500" /> Bold
+                    <Bold className="w-3 h-3 text-orange-500" />
                   </button>
                   <button
                     onClick={() => insertMarkdown("*", "*")}
                     disabled={isSubmitting}
+                    title="Italic"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Italic className="w-3 h-3 text-pink-500" /> Italic
+                    <Italic className="w-3 h-3 text-pink-500" />
                   </button>
                   <button
                     onClick={() => insertMarkdown("~~", "~~")}
                     disabled={isSubmitting}
+                    title="Strikethrough"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Strikethrough className="w-3 h-3 text-red-400" /> Strike
+                    <Strikethrough className="w-3 h-3 text-red-400" />
                   </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
 
                   {/* STRUCTURE */}
                   <button
                     onClick={() => insertMarkdown("### ", "")}
                     disabled={isSubmitting}
+                    title="Heading"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Heading className="w-3 h-3 text-purple-500" /> Heading
+                    <Heading className="w-3 h-3 text-purple-500" /> 
                   </button>
                   <button
                     onClick={() => insertMarkdown("> ", "")}
                     disabled={isSubmitting}
+                    title="Quote"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Quote className="w-3 h-3 text-indigo-500" /> Quote
+                    <Quote className="w-3 h-3 text-indigo-500" /> 
                   </button>
                   <button
                     onClick={() => insertMarkdown("- ", "")}
                     disabled={isSubmitting}
+                    title="Unordered List"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <List className="w-3 h-3 text-cyan-500" /> List
+                    <List className="w-3 h-3 text-cyan-500" /> 
                   </button>
+                  
                   <button
                     onClick={() => insertMarkdown("1. ", "")}
                     disabled={isSubmitting}
+                    title="Numbered List"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <ListOrdered className="w-3 h-3 text-sky-500" /> Numbered
+                    <ListOrdered className="w-3 h-3 text-sky-500" /> 
                   </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
 
                   {/* MEDIA & CODE */}
                   <button
                     onClick={() => insertMarkdown("[", "](url)")}
                     disabled={isSubmitting}
+                    title="Hyperlink"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Link className="w-3 h-3 text-blue-400" /> Link
+                    <Link className="w-3 h-3 text-blue-400" /> 
                   </button>
                   <button
                     onClick={() => insertMarkdown("![alt text](", ")")}
                     disabled={isSubmitting}
+                    title="Image / GIF"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Image className="w-3 h-3 text-yellow-500" /> Image
+                    <Image className="w-3 h-3 text-yellow-500" />
+                  </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
+                  <button
+                    onClick={() => insertMarkdown("\n```cpp\n", "\n```")}
+                    disabled={isSubmitting}
+                    title="Block of Code"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Code className="w-3 h-3 text-blue-500" />
                   </button>
                   <button
-                    onClick={() => insertMarkdown("`", "`")} // If you want block code, use ("\n```\n", "\n```\n")
+                    onClick={() => insertMarkdown("`", "`")}
                     disabled={isSubmitting}
+                    title="Inline Code"
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
                   >
-                    <Code className="w-3 h-3 text-blue-500" /> Code
+                    <Terminal className="w-3 h-3 text-cyan-500" />
                   </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
 
                   {/* MATH */}
                   <button
                     onClick={() => insertMarkdown("$", "$")}
                     disabled={isSubmitting}
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+                    title="Inline Math"
                   >
-                    <span className="text-green-400">$</span> Math
+                    <span className="text-green-400">$</span> 
                   </button>
                   <button
                     onClick={() => insertMarkdown("\n$$\n", "\n$$\n")}
                     disabled={isSubmitting}
                     className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+                    title="Block Math"
                   >
-                    <span className="text-red-400">$$</span> Block
+                    <span className="text-red-400">$$</span> 
                   </button>
                 </div>
 
@@ -255,7 +280,7 @@ export default function CreateDiscussionModal({
                 >
                   {showPreview ? (
                     <>
-                      Hide <ChevronRight className="w-3 h-3" />
+                       <ChevronRight className="w-3 h-3" />
                     </>
                   ) : (
                     <>
@@ -298,40 +323,120 @@ export default function CreateDiscussionModal({
                 <>
                   <div className="flex gap-2 flex-shrink-0">
                     <button
-                      onClick={() => setBody(body + "*Italics*")}
-                      disabled={isSubmitting}
-                      className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
-                    >
-                      <Italic className="w-3 h-3 text-pink-500" /> Italic
-                    </button>
-                    <button
-                      onClick={() => setBody(body + "**bold**")}
-                      disabled={isSubmitting}
-                      className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
-                    >
-                      <Bold className="w-3 h-3 text-orange-500" /> Bold
-                    </button>
-                    <button
-                      onClick={insertCodeBlock}
-                      disabled={isSubmitting}
-                      className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
-                    >
-                      <Code className="w-3 h-3 text-blue-500" /> Code
-                    </button>
-                    <button
-                      onClick={() => setBody(body + " $x = 2$ ")}
-                      disabled={isSubmitting}
-                      className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
-                    >
-                      <span className="text-green-400">$</span> Math
-                    </button>
-                    <button
-                      onClick={() => setBody(body + " $$\nx = 2\n$$ ")}
-                      disabled={isSubmitting}
-                      className="font-sans text-[11px] font-semibold  tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
-                    >
-                      <span className="text-red-400">$$</span> Block
-                    </button>
+                    onClick={() => insertMarkdown("**", "**")}
+                    disabled={isSubmitting}
+                    title="Bold"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Bold className="w-3 h-3 text-orange-500" />
+                  </button>
+                  <button
+                    onClick={() => insertMarkdown("*", "*")}
+                    disabled={isSubmitting}
+                    title="Italic"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Italic className="w-3 h-3 text-pink-500" />
+                  </button>
+                  <button
+                    onClick={() => insertMarkdown("~~", "~~")}
+                    disabled={isSubmitting}
+                    title="Strikethrough"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Strikethrough className="w-3 h-3 text-red-400" />
+                  </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
+
+                  {/* STRUCTURE */}
+                  <button
+                    onClick={() => insertMarkdown("### ", "")}
+                    disabled={isSubmitting}
+                    title="Heading"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Heading className="w-3 h-3 text-purple-500" /> 
+                  </button>
+                  <button
+                    onClick={() => insertMarkdown("> ", "")}
+                    disabled={isSubmitting}
+                    title="Quote"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Quote className="w-3 h-3 text-indigo-500" /> 
+                  </button>
+                  <button
+                    onClick={() => insertMarkdown("- ", "")}
+                    disabled={isSubmitting}
+                    title="Unordered List"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <List className="w-3 h-3 text-cyan-500" /> 
+                  </button>
+                  
+                  <button
+                    onClick={() => insertMarkdown("1. ", "")}
+                    disabled={isSubmitting}
+                    title="Numbered List"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <ListOrdered className="w-3 h-3 text-sky-500" /> 
+                  </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
+
+                  {/* MEDIA & CODE */}
+                  <button
+                    onClick={() => insertMarkdown("[", "](url)")}
+                    disabled={isSubmitting}
+                    title="Hyperlink"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Link className="w-3 h-3 text-blue-400" /> 
+                  </button>
+                  <button
+                    onClick={() => insertMarkdown("![alt text](", ")")}
+                    disabled={isSubmitting}
+                    title="Image / GIF"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Image className="w-3 h-3 text-yellow-500" />
+                  </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
+                  <button
+                    onClick={() => insertMarkdown("\n```cpp\n", "\n```")}
+                    disabled={isSubmitting}
+                    title="Block of Code"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Code className="w-3 h-3 text-blue-500" />
+                  </button>
+                  <button
+                    onClick={() => insertMarkdown("`", "`")}
+                    disabled={isSubmitting}
+                    title="Inline Code"
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer"
+                  >
+                    <Terminal className="w-3 h-3 text-cyan-500" />
+                  </button>
+                  <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-1 translate-y-1"></div>
+
+                  {/* MATH */}
+                  <button
+                    onClick={() => insertMarkdown("$", "$")}
+                    disabled={isSubmitting}
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+                    title="Inline Math"
+                  >
+                    <span className="text-green-400">$</span> 
+                  </button>
+                  <button
+                    onClick={() => insertMarkdown("\n$$\n", "\n$$\n")}
+                    disabled={isSubmitting}
+                    className="font-sans text-[11px] font-semibold tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0d1117] cursor-pointer text-emerald-600 dark:text-emerald-500 font-mono"
+                    title="Block Math"
+                  >
+                    <span className="text-red-400">$$</span> 
+                  </button>
                   </div>
                   <button
                     onClick={() => setShowPreview(true)}
