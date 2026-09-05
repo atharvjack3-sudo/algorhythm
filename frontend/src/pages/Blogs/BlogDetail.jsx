@@ -66,14 +66,12 @@ export default function BlogDetail() {
         .dark { --code-bg: rgba(30, 41, 59, 0.5); --pre-bg: #0a0a0f; --border-color: rgba(30, 41, 59, 0.7); }
       `}</style>
 
-      {/* Removed grid overlay, applied deep dark background and slate-100 for light mode */}
       <div className="relative min-h-[calc(100vh-56px)] w-full bg-slate-100 dark:bg-[#0a0a0f] text-slate-800 dark:text-slate-200 py-8 px-4 sm:px-6 font-sans transition-colors duration-300 overflow-hidden">
         
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col-reverse lg:flex-row gap-6 lg:gap-8">
           
           <main className="flex-1 min-w-0 flex flex-col gap-6">
             
-            {/* Article Content */}
             <article className="bg-white dark:bg-[#12141c] rounded-md border border-slate-300 dark:border-slate-800/70 shadow-sm flex flex-col overflow-hidden">
               <div className="px-6 py-5 md:px-10 md:py-8 border-b border-slate-300 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-800/30">
                 <div className="flex items-center gap-2 mb-4">
